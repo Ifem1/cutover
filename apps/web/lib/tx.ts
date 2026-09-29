@@ -6,14 +6,14 @@ export const readClient=createClient({chain:studionet});
 
 export async function waitForFinality(hash:`0x${string}`,onPhase:(p:TxPhase)=>void){
   onPhase("submitted");
-  const decided:any=await readClient.waitForDecision({hash,fullTransaction:true});
+  const decided=await readClient.waitForDecision({hash,fullTransaction:true});
   onPhase("accepted");
   if(!isSuccessful(decided)){
     onPhase("execution_failure");
     throw new Error(`GenLayer decision did not execute successfully: ${decided.statusName} / ${decided.txExecutionResultName}`);
   }
   onPhase("finalizing");
-  const finalized:any=await readClient.waitForFinalization({hash,fullTransaction:true});
+  const finalized=await readClient.waitForFinalization({hash,fullTransaction:true});
   onPhase("finalized");
   if(!isSuccessful(finalized)){
     onPhase("execution_failure");
