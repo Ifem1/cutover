@@ -121,10 +121,19 @@ jobs:
 
   package:
     name: Package handoff ZIP
-    needs: [repository-integrity, contract, contract-mutation, web, frontend-mutation, gate]
+    needs: [repository-integrity, contract, contract-mutation, web, frontend-mutation, gate, generated-artifacts]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cutover-generated-files
+          path: generated
+      - name: Install generated deliverables into handoff tree
+        run: |
+          cp generated/package-lock.json package-lock.json
+          mkdir -p packages/gate/dist
+          cp generated/packages/gate/dist/index.js packages/gate/dist/index.js
       - name: Create source handoff
         run: |
           zip -r cutover-chatgpt-pro-handoff.zip . \
