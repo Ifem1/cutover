@@ -28,6 +28,7 @@ jobs:
       - run: python scripts/check_contract_surface.py
       - run: python scripts/repository_integrity.py
       - run: node scripts/check-network.mjs
+      - run: node scripts/live/proof_runner.mjs proof/live-plan.example.json --offline-dry-run
 
   contract:
     name: Contract lint + Direct Mode
@@ -62,8 +63,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: Install
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        run: npm ci
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:web
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm ci
       - run: npm run mutation:web
 
   gate:
@@ -87,38 +87,29 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm ci
       - run: npm run test:gate
       - run: npm run typecheck -w @cutover/gate
       - run: npm run build -w @cutover/gate
-      - name: Check committed action bundle when present
+      - name: Verify committed action bundle
         run: |
-          if [ -f packages/gate/dist/index.js ] && ! git diff --quiet -- packages/gate/dist/index.js; then
-            echo "packages/gate/dist/index.js is stale; rebuild and commit it" >&2
-            git diff -- packages/gate/dist/index.js
-            exit 1
-          fi
+          test -s packages/gate/dist/index.js
+          git diff --exit-code -- packages/gate/dist/index.js
 
   generated-artifacts:
-    name: Generate lockfile + action bundle
+    name: Verify lockfile + action bundle
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
-      - run: npm install
+      - run: npm ci
       - run: npm run build -w @cutover/gate
-      - name: Commit reproducible generated deliverables when stale
+      - name: Verify generated deliverables are committed
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json packages/gate/dist/index.js
-          if ! git diff --cached --quiet; then
-            git commit -m "build: commit reproducible generated artifacts"
-            git push origin HEAD:main
-          fi
+          test -s package-lock.json
+          test -s packages/gate/dist/index.js
+          git diff --exit-code -- package-lock.json packages/gate/dist/index.js
       - name: Stage generated deliverables
         run: |
           mkdir -p generated/packages/gate/dist
