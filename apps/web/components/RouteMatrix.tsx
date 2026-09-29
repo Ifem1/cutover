@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 export type Row={id:string;href:string;route:string;destination:string;rules:number;frozen:boolean;status:string;attempts:number;decisive:string};
 function symbol(status:string){if(status==="READY")return "✓";if(status==="BLOCKED")return "×";if(status==="INCONCLUSIVE")return "?";return "·";}
