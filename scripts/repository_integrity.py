@@ -43,7 +43,7 @@ contract=Path("contracts/cutover.py").read_text()
 assert "def derive_candidate(self,migration_id:int)" in contract
 assert "def authorize(self,migration_id:int)" in contract
 assert "now_ts" not in contract
-assert 'from datetime import datetime' in contract
+assert 'from datetime import datetime, timezone' in contract
 assert 'baseline_snapshot' in contract and 'FROZEN_BASELINE:' in contract
 assert 'CUTOVER observation stage' in contract and 'CUTOVER comparison stage' in contract
 
