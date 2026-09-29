@@ -134,6 +134,16 @@ jobs:
           cp generated/package-lock.json package-lock.json
           mkdir -p packages/gate/dist
           cp generated/packages/gate/dist/index.js packages/gate/dist/index.js
+      - uses: actions/download-artifact@v4
+        with:
+          name: cutover-generated-files
+          path: generated
+      - name: Overlay generated deliverables
+        run: |
+          cp generated/package-lock.json package-lock.json
+          mkdir -p packages/gate/dist
+          cp generated/packages/gate/dist/index.js packages/gate/dist/index.js
+          rm -rf generated
       - name: Create source handoff
         run: |
           zip -r cutover-chatgpt-pro-handoff.zip . \
