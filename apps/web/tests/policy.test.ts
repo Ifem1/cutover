@@ -34,4 +34,7 @@ describe("action policy",()=>{
     expect(p.cancel).toBe(false);
   });
   it("assessment requires a candidate generation",()=>expect(actionPolicy({...base,state:"CANDIDATE",candidateGeneration:0}).assess).toBe(false));
+  it("READY cannot be silently re-assessed",()=>expect(actionPolicy(base).assess).toBe(false));
+  it("READY may be re-derived without reopening assessment",()=>expect(actionPolicy(base).derive).toBe(true));
+  it("terminal states cannot be derived",()=>expect(actionPolicy({...base,state:"AUTHORIZED"}).derive).toBe(false));
 });
