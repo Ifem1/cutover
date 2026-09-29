@@ -3,7 +3,7 @@
 from genlayer import *
 import json
 from hashlib import sha256
-import time
+from datetime import datetime
 
 MAX_ROUTES=24
 MAX_RULES=12
@@ -24,7 +24,7 @@ OBSERVATION_FIELDS={"title","canonical_url","headings","visible_text","important
 def _dumps(v): return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False)
 def _loads(v,default=None): return json.loads(v) if v else (default if default is not None else {})
 def _digest(v): return sha256(_dumps(v).encode()).hexdigest()
-def _now(): return int(time.time())
+def _now(): return int(datetime.now().timestamp())
 def _bounded(s,n,label):
     if not isinstance(s,str) or len(s)>n: raise gl.vm.UserError(label+" invalid")
     return s
