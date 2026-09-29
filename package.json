@@ -1,0 +1,15 @@
+{
+  "name":"cutover","private":true,"version":"0.1.0",
+  "workspaces":["apps/web","apps/fixtures","packages/gate"],
+  "scripts":{
+    "dev":"npm -w @cutover/web run dev",
+    "build":"npm -w @cutover/web run build && npm -w @cutover/fixtures run build && npm -w @cutover/gate run build",
+    "lint":"npm -w @cutover/web run lint",
+    "typecheck":"npm -w @cutover/web run typecheck && npm -w @cutover/gate run typecheck",
+    "test:web":"npm -w @cutover/web run test",
+    "test:gate":"npm -w @cutover/gate run test",
+    "mutation:web":"node mutations/frontend/run.mjs",
+    "genlayer":"genlayer"
+  },
+  "devDependencies":{"genlayer":"0.39.1"}
+}
