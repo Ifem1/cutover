@@ -172,6 +172,6 @@ export function ActionConsole({migrationId,migration}:{migrationId?:string,migra
       <span className="status">{phase?phase.replaceAll("_"," ").toUpperCase():"IDLE"}</span>
     </div>
     <p role="status" aria-live="polite">{message}</p>
-    {confirmed&&<details><summary>Post-finalization contract re-read</summary><pre className="mono" style={{whiteSpace:"pre-wrap"}}>{JSON.stringify(confirmed,null,2)}</pre></details>}
+    {confirmed!==null&&<details><summary>Post-finalization contract re-read</summary><pre className="mono" style={{whiteSpace:"pre-wrap"}}>{JSON.stringify(confirmed,null,2)}</pre></details>}
   </section>
 }
