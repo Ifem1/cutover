@@ -22,7 +22,6 @@ export async function waitForFinality(hash:TransactionHash,onPhase:(phase:TxPhas
   const decided=await readClient.waitForTransactionReceipt({
     hash,
     status:TransactionStatus.ACCEPTED,
-    fullTransaction:true,
   });
 
   if(decided.statusName!==TransactionStatus.ACCEPTED&&decided.statusName!==TransactionStatus.FINALIZED){
@@ -38,7 +37,6 @@ export async function waitForFinality(hash:TransactionHash,onPhase:(phase:TxPhas
     : await readClient.waitForTransactionReceipt({
         hash,
         status:TransactionStatus.FINALIZED,
-        fullTransaction:true,
       });
 
   onPhase("finalized");
