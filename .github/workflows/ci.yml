@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cutover-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   repository-integrity:
     name: Repository integrity
