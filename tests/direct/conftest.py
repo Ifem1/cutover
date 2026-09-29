@@ -1,5 +1,31 @@
-"""Shared Direct Mode helpers; gltest provides direct_vm/direct_deploy fixtures."""
+"""Shared Direct Mode helpers pinned to the stable GenVM bundle."""
+from pathlib import Path
+import pytest
+
+from gltest.direct.loader import deploy_contract
+
+DIRECT_SDK_VERSION = "v0.2.16"
+
+
+@pytest.fixture
+def direct_deploy(direct_vm):
+    """Deploy with an exact stable GenVM bundle instead of following /latest.
+
+    genlayer-test 0.29.2 expects the historical genvm-universal.tar.xz layout.
+    GenVM v0.2.16 is the stable release immediately preceding the official
+    boilerplate's March 11 runner-hash pin and still provides that layout.
+    """
+    def _deploy(contract_path, *args, sdk_version=DIRECT_SDK_VERSION, **kwargs):
+        path = Path(contract_path)
+        if not path.is_absolute():
+            path = path.resolve()
+        return deploy_contract(path, direct_vm, *args, sdk_version=sdk_version, **kwargs)
+
+    return _deploy
+
+
 def to_hex(addr_bytes):
-    if hasattr(addr_bytes,"as_hex"): return addr_bytes.as_hex
+    if hasattr(addr_bytes,"as_hex"):
+        return addr_bytes.as_hex
     from genlayer.py.types import Address
     return Address(addr_bytes).as_hex
