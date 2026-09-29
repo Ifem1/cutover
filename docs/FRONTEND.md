@@ -1,9 +1,19 @@
 # Frontend
 
-The Next.js App Router UI uses a warm release-control visual system: warm white canvas, deep ink, orange operational accent, hot-pink emphasis and yellow attention. Status is always written as text rather than color alone. Responsive tables scroll safely; focus visibility and reduced-motion behaviour are defined globally.
+The Next.js App Router UI is the CUTOVER release-control surface: warm neutral canvas, deep ink, orange operational accent, hot-pink emphasis, yellow attention, route matrices and baseline→candidate relationships rather than a generic crypto/admin dashboard. Status is conveyed in text/shape as well as colour; focus and reduced-motion rules live in the global stylesheet.
 
-Reads use a wallet-free `genlayer-js` Studionet client. Writes use an injected EIP-1193 provider only. The repository contains no private key generation, wallet snap, backend signer or fake-chain fallback.
+Reads use a wallet-free stable `genlayer-js` Studionet client. Writes use an injected EIP-1193 provider only. There is no private-key generation, wallet snap, backend signer or fake-chain fallback.
 
-Until a canonical contract address exists, chain pages show **Contract not configured yet**. Production data must never silently fall back to fixture/demo data.
+Until `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS` contains a valid address, chain-backed pages show **Contract not configured yet** rather than fabricated migrations.
 
-Transaction logic distinguishes submitted, accepted, finalizing, finalized and execution result.
+## Contract parity and actions
+
+`contracts/surface.json` is the tracked public method schema. `scripts/check_contract_surface.py` AST-checks it against the Python contract, while `apps/web/lib/surface.ts` and Vitest verify every required write name and exact argument count. In particular, `derive_candidate` and `authorize` accept only `migration_id`; review time is contract-derived.
+
+`ActionConsole` makes every public write reachable with explicit connect/disconnect controls, a chain-61999 guard, exact-arity checking and finalized post-state re-read. Higher-level pages additionally explain unavailable actions through the state policy.
+
+## Transaction semantics
+
+The UI reports `awaiting_signature → submitted → accepted → finalizing → finalized → execution_success|execution_failure`. `accepted` is never treated as completion. A failed decision stops before finalization; a finalized execution failure remains a failure.
+
+Responsive matrices use bounded scrolling/wrapping for long URLs, hashes, candidate refs and route names. Real browser-wallet, refresh/recovery and device QA remain live-phase work rather than fabricated evidence.
