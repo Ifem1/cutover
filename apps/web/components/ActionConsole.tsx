@@ -1,7 +1,7 @@
 "use client";
 import {useMemo,useState} from "react";
 import {NETWORK,isConfigured} from "@/lib/config";
-import {readCutover,writeCutover} from "@/lib/contract";
+import {readCutover,writeCutover,type Eip1193Provider} from "@/lib/contract";
 import {WRITE_EXAMPLES,WRITE_METHODS,writeArityIsValid} from "@/lib/surface";
 import {waitForFinality,TxPhase} from "@/lib/tx";
 
@@ -23,7 +23,7 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
   const [args,setArgs]=useState(initial);
   const [phase,setPhase]=useState<TxPhase|null>(null);
   const [message,setMessage]=useState("Wallet disconnected.");
-  const [confirmed,setConfirmed]=useState<any>(null);
+  const [confirmed,setConfirmed]=useState<unknown>(null);
 
   function select(name:string){
     setMethod(name);
@@ -62,7 +62,7 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
     if(!writeArityIsValid(method,parsed)){setMessage("Argument count does not match the tracked CUTOVER contract schema.");return}
     try{
       setConfirmed(null);setPhase("awaiting_signature");setMessage("Awaiting wallet signature…");
-      const hash:any=await writeCutover(account,window.ethereum,method,parsed);
+      const hash=await writeCutover(account,window.ethereum,method,parsed);
       setMessage(`Submitted ${String(hash)}`);
       await waitForFinality(hash,(p)=>{setPhase(p);setMessage(p.replaceAll("_"," "))});
       const mid=method==="create_migration"?null:(parsed[0] as number|undefined);
