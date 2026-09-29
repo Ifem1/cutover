@@ -1,7 +1,18 @@
+import ast
+import json
 from pathlib import Path
+
 src=Path("contracts/cutover.py").read_text()
-writes=["create_migration","add_route","freeze_route","seal_baseline","set_candidate","assess_route","derive_candidate","open_challenge","reassess_challenge","authorize","cancel_migration"]
-views=["get_config","get_stats","list_migrations","migrations_of","get_migration","get_route","get_route_assessment","get_challenge","get_authorization","get_events"]
-missing=[x for x in writes+views if ("def "+x+"(") not in src]
-if missing: raise SystemExit("Missing contract surface: "+", ".join(missing))
-print("Contract surface OK:",len(writes),"writes,",len(views),"views")
+tree=ast.parse(src)
+surface=json.loads(Path("contracts/surface.json").read_text())
+contract=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=="Cutover")
+methods={n.name:[a.arg for a in n.args.args if a.arg!="self"] for n in contract.body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))}
+
+bad=[]
+for group in ("writes","views"):
+    for name,args in surface[group].items():
+        if name not in methods: bad.append(f"{name}:missing")
+        elif methods[name]!=args: bad.append(f"{name}: expected {args}, got {methods[name]}")
+if bad:
+    raise SystemExit("Contract surface mismatch:\n" + "\n".join(bad))
+print("Contract surface OK:",len(surface["writes"]),"writes,",len(surface["views"]),"views")
