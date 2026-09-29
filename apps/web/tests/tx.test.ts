@@ -1,7 +1,7 @@
 import {beforeEach,describe,expect,it,vi} from "vitest";
 import {ExecutionResult,TransactionStatus} from "genlayer-js/types";
 
-const waitForTransactionReceipt=vi.fn();
+const {waitForTransactionReceipt}=vi.hoisted(()=>({waitForTransactionReceipt:vi.fn()}));
 vi.mock("genlayer-js",()=>({
   createClient:()=>({waitForTransactionReceipt}),
 }));
