@@ -8,7 +8,7 @@ const policyPath=path.join(root,"apps/web/lib/policy.ts");
 const original=fs.readFileSync(policyPath,"utf8");
 const mutants={
   authorize_while_challenged:["authorize:x.state===\"READY\"&&!x.challengeOpen","authorize:x.state===\"READY\"&&true"],
-  ready_means_authorized:["authorize:x.state===\"READY\"","authorize:true"],
+  ready_means_authorized:["authorize:x.state===\"READY\"&&!x.challengeOpen&&x.assessedGeneration===x.candidateGeneration&&x.now>=x.reviewDeadline&&!x.authorized&&x.networkOk","authorize:true"],
   ignore_candidate_generation:["&&x.assessedGeneration===x.candidateGeneration","&&true"],
   authorize_before_deadline:["&&x.now>=x.reviewDeadline","&&true"],
   allow_wrong_network:["&&!x.authorized&&x.networkOk","&&!x.authorized&&true"],
