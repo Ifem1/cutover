@@ -3,16 +3,45 @@ import {studionet} from "genlayer-js/chains";
 import {TransactionHashVariant} from "genlayer-js/types";
 import {CONTRACT_ADDRESS,isConfigured} from "./config";
 
-export async function readCutover(functionName:string,args:unknown[]=[]){
+export type Eip1193Provider={
+  request:(args:{method:string;params?:unknown[]})=>Promise<unknown>;
+};
+
+type ContractWrite={
+  address:`0x${string}`;
+  functionName:string;
+  args:unknown[];
+  value:bigint;
+};
+type FeeEstimate={distribution:unknown;feeValue:unknown};
+type ReadClient={readContract:(request:Record<string,unknown>)=>Promise<unknown>};
+type WriteClient={
+  connect:(network:string)=>Promise<unknown>;
+  estimateTransactionFeesForWrite:(request:ContractWrite)=>Promise<FeeEstimate>;
+  writeContract:(request:ContractWrite&{fees:FeeEstimate})=>Promise<`0x${string}`>;
+};
+
+export async function readCutover(functionName:string,args:unknown[]=[]):Promise<unknown>{
   if(!isConfigured()) throw new Error("CUTOVER contract not configured");
-  const c:any=createClient({chain:studionet});
-  return c.readContract({address:CONTRACT_ADDRESS as `0x${string}`,functionName,args,transactionHashVariant:TransactionHashVariant.LATEST_FINAL});
+  const client=createClient({chain:studionet}) as unknown as ReadClient;
+  return client.readContract({
+    address:CONTRACT_ADDRESS as `0x${string}`,
+    functionName,
+    args,
+    transactionHashVariant:TransactionHashVariant.LATEST_FINAL,
+  });
 }
-export async function writeCutover(account:`0x${string}`,provider:any,functionName:string,args:unknown[]=[]){
+
+export async function writeCutover(
+  account:`0x${string}`,
+  provider:Eip1193Provider,
+  functionName:string,
+  args:unknown[]=[],
+):Promise<`0x${string}`>{
   if(!isConfigured()) throw new Error("CUTOVER contract not configured");
-  const c:any=createClient({chain:studionet,account,provider});
-  await c.connect("studionet");
-  const write={address:CONTRACT_ADDRESS as `0x${string}`,functionName,args,value:0n};
-  const estimate=await c.estimateTransactionFeesForWrite(write);
-  return c.writeContract({...write,fees:{distribution:estimate.distribution,feeValue:estimate.feeValue}});
+  const client=createClient({chain:studionet,account,provider} as never) as unknown as WriteClient;
+  await client.connect("studionet");
+  const write:ContractWrite={address:CONTRACT_ADDRESS as `0x${string}`,functionName,args,value:0n};
+  const fees=await client.estimateTransactionFeesForWrite(write);
+  return client.writeContract({...write,fees});
 }
