@@ -44,7 +44,7 @@ jobs:
         run: pytest tests/direct -v
 
   contract-mutation:
-    name: Contract mutation sweep
+    name: Actual CUTOVER contract mutation sweep
     needs: contract
     runs-on: ubuntu-latest
     steps:
@@ -125,15 +125,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: cutover-generated-files
-          path: generated
-      - name: Install generated deliverables into handoff tree
-        run: |
-          cp generated/package-lock.json package-lock.json
-          mkdir -p packages/gate/dist
-          cp generated/packages/gate/dist/index.js packages/gate/dist/index.js
       - uses: actions/download-artifact@v4
         with:
           name: cutover-generated-files
