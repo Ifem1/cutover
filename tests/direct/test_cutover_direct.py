@@ -152,7 +152,7 @@ def test_frozen_baseline_is_immutable(direct_vm,direct_deploy):
 def test_candidate_manifest_binds_ref_and_generation(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); m1=_set_candidate(direct_vm,c,mid,"release-a"); state=c.get_migration(mid)
     assert state["candidate_ref"]=="release-a" and state["candidate_manifest_digest"]==_digest(m1) and state["candidate_generation"]==1
-    m2=_manifest("release-b"); _mock_manifest(direct_vm,m2); assert c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(m2))==2
+    direct_vm.clear_mocks(); m2=_manifest("release-b"); _mock_manifest(direct_vm,m2); assert c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(m2))==2
 
 def test_candidate_ref_is_not_owner_argument(direct_deploy):
     c=direct_deploy(CONTRACT); assert c.get_config()["candidate_manifest_schema"]=="cutover.candidate.v1"
@@ -186,7 +186,7 @@ def test_candidate_content_digest_mismatch_is_inconclusive(direct_vm,direct_depl
     assert c.assess_route(mid,"pricing")=="INCONCLUSIVE"; a=c.get_route_assessment(mid,1,"pricing"); assert a["content_match"] is False
 
 def test_candidate_manifest_mutation_after_registration_is_inconclusive(direct_vm,direct_deploy):
-    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); changed=_manifest("release-a",CANDIDATE_BODY+"changed"); _mock_assessment(direct_vm,changed)
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); changed=_manifest("release-a",CANDIDATE_BODY+"changed"); direct_vm.clear_mocks(); _mock_assessment(direct_vm,changed)
     assert c.assess_route(mid,"pricing")=="INCONCLUSIVE"; assert c.get_route_assessment(mid,1,"pricing")["manifest_match"] is False
 
 def test_candidate_canonical_cross_origin_is_inconclusive(direct_vm,direct_deploy):
@@ -207,7 +207,7 @@ def test_definite_failure_blocks_candidate(direct_vm,direct_deploy,status):
 def test_blocked_cannot_be_retried_into_ready_same_generation(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man,("MATERIAL_CHANGE","PRESERVED")); assert c.assess_route(mid,"pricing")=="BLOCKED"
     direct_vm.clear_mocks(); _mock_assessment(direct_vm,man,("PRESERVED","PRESERVED"))
-    with direct_vm.expect_revert("assessment not allowed"): c.assess_route(mid,"pricing")
+    with direct_vm.expect_revert("assessment locked"): c.assess_route(mid,"pricing")
 
 def test_ready_assessment_is_locked_from_ordinary_resampling(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man); assert c.assess_route(mid,"pricing")=="READY"
