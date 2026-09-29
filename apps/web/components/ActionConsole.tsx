@@ -2,24 +2,11 @@
 import {useMemo,useState} from "react";
 import {NETWORK,isConfigured} from "@/lib/config";
 import {readCutover,writeCutover} from "@/lib/contract";
+import {WRITE_EXAMPLES,WRITE_METHODS,writeArityIsValid} from "@/lib/surface";
 import {waitForFinality,TxPhase} from "@/lib/tx";
 
 type EthereumProvider={request:(args:{method:string;params?:unknown[]})=>Promise<any>};
 declare global { interface Window { ethereum?: EthereumProvider } }
-
-const WRITES=[
-  ["create_migration",'["Site migration","https://old.example.com",3600]'],
-  ["add_route",'[1,"pricing","https://old.example.com/pricing","/pricing","[]"]'],
-  ["freeze_route",'[1,"pricing","https://proof.example/baseline.json","{}","sha256"]'],
-  ["seal_baseline","[1]"],
-  ["set_candidate",'[1,"https://candidate.example.com","git-commit-or-deployment-ref"]'],
-  ["assess_route",'[1,"pricing"]'],
-  ["derive_candidate","[1,0]"],
-  ["open_challenge",'[1,"pricing","https://proof.example/challenge","bounded challenge evidence"]'],
-  ["reassess_challenge","[1]"],
-  ["authorize","[1,0]"],
-  ["cancel_migration","[1]"],
-] as const;
 
 function chainHex(){return "0x"+NETWORK.chainId.toString(16)}
 
@@ -27,8 +14,9 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
   const [account,setAccount]=useState<`0x${string}`|null>(null);
   const [networkOk,setNetworkOk]=useState(false);
   const [method,setMethod]=useState<string>(migrationId?"set_candidate":"create_migration");
+  const example=(name:string)=>JSON.stringify(WRITE_EXAMPLES[name]??[],null,2);
   const initial=useMemo(()=>{
-    const found=WRITES.find(([name])=>name===method)?.[1]||"[]";
+    const found=example(method);
     if(!migrationId) return found;
     try{const a=JSON.parse(found); if(typeof a[0]==="number") a[0]=Number(migrationId); return JSON.stringify(a,null,2)}catch{return found}
   },[method,migrationId]);
@@ -39,7 +27,7 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
 
   function select(name:string){
     setMethod(name);
-    const found=WRITES.find(([n])=>n===name)?.[1]||"[]";
+    const found=example(name);
     try{const a=JSON.parse(found); if(migrationId&&typeof a[0]==="number") a[0]=Number(migrationId); setArgs(JSON.stringify(a,null,2))}catch{setArgs(found)}
     setPhase(null); setConfirmed(null);
   }
@@ -71,6 +59,7 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
     if(!networkOk){setMessage("Wrong network: CUTOVER writes require Studionet 61999.");return}
     let parsed:unknown[];
     try{parsed=JSON.parse(args);if(!Array.isArray(parsed))throw new Error()}catch{setMessage("Arguments must be a JSON array.");return}
+    if(!writeArityIsValid(method,parsed)){setMessage("Argument count does not match the tracked CUTOVER contract schema.");return}
     try{
       setConfirmed(null);setPhase("awaiting_signature");setMessage("Awaiting wallet signature…");
       const hash:any=await writeCutover(account,window.ethereum,method,parsed);
@@ -93,7 +82,7 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
       {!account?<button className="button" onClick={connect}>Connect wallet</button>:<><span className="mono">{account.slice(0,8)}…{account.slice(-6)}</span><button className="button" onClick={disconnect}>Disconnect</button></>}
       {account&&!networkOk&&<button className="button hot" onClick={switchNetwork}>Switch to 61999</button>}
     </div>
-    <label>Action<br/><select aria-label="Contract action" value={method} onChange={e=>select(e.target.value)} style={{width:"100%",padding:10,marginTop:6}}>{WRITES.map(([n])=><option key={n}>{n}</option>)}</select></label>
+    <label>Action<br/><select aria-label="Contract action" value={method} onChange={e=>select(e.target.value)} style={{width:"100%",padding:10,marginTop:6}}>{WRITE_METHODS.map(n=><option key={n}>{n}</option>)}</select></label>
     <br/><br/>
     <label>Arguments (JSON array)<br/><textarea aria-label="Write arguments" value={args} onChange={e=>setArgs(e.target.value)} rows={8} className="mono" style={{width:"100%",padding:10,marginTop:6}}/></label>
     <div style={{display:"flex",gap:10,alignItems:"center",marginTop:12,flexWrap:"wrap"}}>
