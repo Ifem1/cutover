@@ -2,7 +2,7 @@ from pathlib import Path
 import json,re,sys
 root=Path('.')
 forbidden_runtime=['61997','studio-dev.genlayer.com','studioDevnet']
-runtime_allow={'README.md','docs/TOOLCHAIN.md','docs/SECURITY.md','scripts/repository_integrity.py','scripts/check-network.mjs'}
+runtime_allow={'README.md','docs/TOOLCHAIN.md','docs/SECURITY.md','scripts/live/README.md','scripts/repository_integrity.py','scripts/check-network.mjs'}
 viol=[]
 for p in root.rglob('*'):
     if not p.is_file() or any(x in p.parts for x in ('node_modules','.git','.next')): continue
