@@ -1,5 +1,5 @@
 "use client";
-import React,{createContext,useContext,useEffect,useMemo,useState} from "react";
+import React,{createContext,useContext,useEffect,useState} from "react";
 import {NETWORK} from "@/lib/config";
 import type {Eip1193Provider} from "@/lib/contract";
 
@@ -62,7 +62,7 @@ export function WalletSessionProvider({children}:{children:React.ReactNode}){
     return()=>{provider.removeListener?.("accountsChanged",accounts);provider.removeListener?.("chainChanged",chain);};
   },[provider]);
 
-  const value=useMemo(()=>({account,networkOk,message,provider,connect,switchNetwork,disconnect}),[account,networkOk,message,provider]);
+  const value={account,networkOk,message,provider,connect,switchNetwork,disconnect};
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 
