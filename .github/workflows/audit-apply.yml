@@ -22,9 +22,9 @@ jobs:
         run: |
           set -euo pipefail
           test -f scripts/.cutover-audit-payload.part-00
-          test -f scripts/.cutover-audit-payload.part-01
+          test -f scripts/.cutover-audit-payload.part-11
           count=$(find scripts -maxdepth 1 -name '.cutover-audit-payload.part-*' | wc -l)
-          test "$count" -eq 2
+          test "$count" -eq 12
       - name: Apply coherent audited tree
         shell: bash
         run: |
