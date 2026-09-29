@@ -1,0 +1,1 @@
+import {describe,it,expect} from "vitest"; import {NETWORK} from "../lib/config"; describe("network",()=>{it("pins Studionet 61999",()=>{expect(NETWORK.name).toBe("studionet");expect(NETWORK.chainId).toBe(61999);expect(NETWORK.rpc).toBe("https://studio.genlayer.com/api")})});
