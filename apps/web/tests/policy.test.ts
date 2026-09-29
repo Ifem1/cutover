@@ -1,40 +1,22 @@
 import {describe,it,expect} from "vitest";
 import {actionPolicy} from "../lib/policy";
-
-const base={
-  state:"READY" as const,
-  isOwner:true,
-  baselineSealed:true,
-  candidateGeneration:2,
-  assessedGeneration:2,
-  challengeOpen:false,
-  challengeUsedGeneration:1,
-  reviewDeadline:100,
-  now:101,
-  authorized:false,
-  networkOk:true,
-};
-
-describe("action policy",()=>{
-  it("allows authorize only after deadline",()=>expect(actionPolicy(base).authorize).toBe(true));
-  it("blocks authorize before deadline",()=>expect(actionPolicy({...base,now:99}).authorize).toBe(false));
-  it("blocks authorize during challenge",()=>expect(actionPolicy({...base,challengeOpen:true}).authorize).toBe(false));
-  it("blocks stale generation",()=>expect(actionPolicy({...base,assessedGeneration:1}).authorize).toBe(false));
-  it("blocks wrong network",()=>expect(actionPolicy({...base,networkOk:false}).authorize).toBe(false));
-  it("does not treat READY as authorized",()=>expect(base.authorized).toBe(false));
-  it("does not authorize a non-READY state",()=>expect(actionPolicy({...base,state:"BLOCKED"}).authorize).toBe(false));
-  it("challenge exists only inside the review window",()=>expect(actionPolicy({...base,now:99}).challenge).toBe(true));
-  it("blocks challenge at deadline",()=>expect(actionPolicy({...base,now:100}).challenge).toBe(false));
-  it("blocks second challenge for a generation",()=>expect(actionPolicy({...base,now:99,challengeUsedGeneration:2}).challenge).toBe(false));
-  it("blocks challenge while another is open",()=>expect(actionPolicy({...base,now:99,challengeOpen:true}).challenge).toBe(false));
-  it("owner-only actions reject non-owner",()=>{
-    const p=actionPolicy({...base,state:"DRAFT",isOwner:false,baselineSealed:false});
-    expect(p.addRoute).toBe(false);
-    expect(p.sealBaseline).toBe(false);
-    expect(p.cancel).toBe(false);
-  });
-  it("assessment requires a candidate generation",()=>expect(actionPolicy({...base,state:"CANDIDATE",candidateGeneration:0}).assess).toBe(false));
-  it("READY cannot be silently re-assessed",()=>expect(actionPolicy(base).assess).toBe(false));
-  it("READY may be re-derived without reopening assessment",()=>expect(actionPolicy(base).derive).toBe(true));
-  it("terminal states cannot be derived",()=>expect(actionPolicy({...base,state:"AUTHORIZED"}).derive).toBe(false));
+const base={state:"READY" as const,isOwner:false,routeCount:2,allRoutesFrozen:true,candidateGeneration:2,assessedGeneration:2,challengeOpen:false,challengeCount:0,reviewDeadline:100,now:101,authorized:false,networkOk:true};
+describe("state-aware action policy",()=>{
+ it("allows authorization only after deadline",()=>expect(actionPolicy(base).authorize).toBe(true));
+ it("blocks authorization before deadline",()=>expect(actionPolicy({...base,now:99}).authorize).toBe(false));
+ it("blocks authorization with challenge",()=>expect(actionPolicy({...base,challengeOpen:true}).authorize).toBe(false));
+ it("blocks stale assessment generation",()=>expect(actionPolicy({...base,assessedGeneration:1}).authorize).toBe(false));
+ it("blocks writes on wrong network",()=>expect(actionPolicy({...base,networkOk:false}).authorize).toBe(false));
+ it("owner cannot self-challenge",()=>expect(actionPolicy({...base,isOwner:true,now:99}).challenge).toBe(false));
+ it("non-owner can challenge during review",()=>expect(actionPolicy({...base,now:99}).challenge).toBe(true));
+ it("challenge closes at deadline",()=>expect(actionPolicy({...base,now:100}).challenge).toBe(false));
+ it("challenge cap blocks additional challenges",()=>expect(actionPolicy({...base,now:99,challengeCount:3}).challenge).toBe(false));
+ it("open challenge blocks new challenge",()=>expect(actionPolicy({...base,now:99,challengeOpen:true}).challenge).toBe(false));
+ it("draft owner can add route",()=>expect(actionPolicy({...base,state:"DRAFT",isOwner:true,routeCount:0,allRoutesFrozen:false}).addRoute).toBe(true));
+ it("seal requires at least one route",()=>expect(actionPolicy({...base,state:"DRAFT",isOwner:true,routeCount:0,allRoutesFrozen:true}).sealBaseline).toBe(false));
+ it("seal requires every route frozen",()=>expect(actionPolicy({...base,state:"DRAFT",isOwner:true,routeCount:2,allRoutesFrozen:false}).sealBaseline).toBe(false));
+ it("seal enables only after route freeze completeness",()=>expect(actionPolicy({...base,state:"DRAFT",isOwner:true,routeCount:2,allRoutesFrozen:true}).sealBaseline).toBe(true));
+ it("non-owner cannot register candidate",()=>expect(actionPolicy({...base,state:"BASELINED",isOwner:false}).setCandidate).toBe(false));
+ it("challenge reassessment requires CHALLENGED",()=>expect(actionPolicy({...base,state:"CHALLENGED",challengeOpen:true}).reassess).toBe(true));
+ it("terminal states cannot derive or cancel",()=>{const p=actionPolicy({...base,state:"AUTHORIZED",authorized:true,isOwner:true});expect(p.derive).toBe(false);expect(p.cancel).toBe(false)});
 });

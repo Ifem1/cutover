@@ -1,72 +1,9 @@
 import {NotConfigured} from "@/components/NotConfigured";
 import {NETWORK,isConfigured} from "@/lib/config";
 import {readCutover} from "@/lib/contract";
-
 export const dynamic="force-dynamic";
-
-type MigrationRecord={
-  state:string;
-  candidate_generation:number;
-  candidate_ref:string;
-  assessed_generation:number;
-};
-type AuthorizationRecord={
-  candidate_generation?:number;
-  candidate_ref?:string;
-  authorization_digest?:string;
-};
-
-export default async function Page({searchParams}:{searchParams:Promise<{migrationId?:string;expectedRef?:string}>}){
-  const params=await searchParams;
-  const migrationId=Number(params.migrationId||"");
-  const expectedRef=(params.expectedRef||"").trim();
-
-  let verification:React.ReactNode=null;
-  if(isConfigured()&&Number.isInteger(migrationId)&&migrationId>0){
-    try{
-      const [migration,authorization]=await Promise.all([
-        readCutover("get_migration",[migrationId]) as Promise<MigrationRecord>,
-        readCutover("get_authorization",[migrationId]) as Promise<AuthorizationRecord>,
-      ]);
-      const exactAuthorized=
-        migration.state==="AUTHORIZED"&&
-        authorization.candidate_generation===migration.candidate_generation&&
-        authorization.candidate_ref===migration.candidate_ref;
-      const expectedMatches=expectedRef?authorization.candidate_ref===expectedRef:null;
-      verification=<div className="panel section">
-        <h2>Finalized authorization check</h2>
-        <p><b>Migration state:</b> <span className="status">{migration.state}</span></p>
-        <p><b>Current generation:</b> {migration.candidate_generation}</p>
-        <p><b>Assessed generation:</b> {migration.assessed_generation}</p>
-        <p><b>Current candidate ref:</b> <span className="mono">{migration.candidate_ref||"None"}</span></p>
-        <p><b>Authorized generation:</b> {authorization.candidate_generation??"None"}</p>
-        <p><b>Authorized ref:</b> <span className="mono">{authorization.candidate_ref||"None"}</span></p>
-        <p><b>Authorization digest:</b> <span className="mono">{authorization.authorization_digest||"None"}</span></p>
-        <p><b>Exact current authorization:</b> {exactAuthorized?"PASS":"FAIL"}</p>
-        {expectedRef&&<p><b>Expected ref match:</b> {expectedMatches?"PASS":"FAIL"}</p>}
-      </div>;
-    }catch(error){
-      verification=<div className="notice section">Verification read failed: {error instanceof Error?error.message:String(error)}</div>;
-    }
-  }
-
-  return <main className="wrap section">
-    <div className="eyebrow">Independent verification</div>
-    <h1>Verify a release authorization</h1>
-    <div className="panel">
-      <b>Network</b><p>{NETWORK.name} · chain {NETWORK.chainId}</p>
-      <b>RPC</b><p className="mono">{NETWORK.rpc}</p>
-      <b>Explorer</b><p className="mono">{NETWORK.explorer}</p>
-    </div>
-
-    {!isConfigured()?<div className="section"><NotConfigured/></div>:<form method="get" action="/verify" className="panel section">
-      <h2>Read finalized contract state</h2>
-      <label>Migration ID<br/><input name="migrationId" defaultValue={params.migrationId||""} inputMode="numeric" required style={{width:"100%",padding:12,marginTop:6}}/></label>
-      <br/><br/>
-      <label>Expected candidate ref (optional)<br/><input name="expectedRef" defaultValue={expectedRef} placeholder="git SHA or immutable deployment ref" style={{width:"100%",padding:12,marginTop:6}}/></label>
-      <p><button className="button hot" type="submit">Verify</button></p>
-    </form>}
-
-    {verification}
-  </main>;
-}
+type Migration={state:string;candidate_generation:number;candidate_ref:string;candidate_manifest_digest:string;assessed_generation:number};
+type Authorization={candidate_generation?:number;candidate_ref?:string;candidate_manifest_digest?:string;evidence_root?:string;authorization_digest?:string};
+const digest=(v?:string)=>Boolean(v&&/^[a-f0-9]{64}$/i.test(v));
+export default async function Page({searchParams}:{searchParams:Promise<{migrationId?:string;expectedRef?:string}>}){const p=await searchParams;const mid=Number(p.migrationId||"");const expected=(p.expectedRef||"").trim();let result:React.ReactNode=null;if(isConfigured()&&Number.isInteger(mid)&&mid>0){try{const [m,a]=await Promise.all([readCutover("get_migration",[mid]) as Promise<Migration>,readCutover("get_authorization",[mid]) as Promise<Authorization>]);const pass=m.state==="AUTHORIZED"&&a.candidate_generation===m.candidate_generation&&m.assessed_generation===m.candidate_generation&&a.candidate_ref===m.candidate_ref&&a.candidate_manifest_digest===m.candidate_manifest_digest&&digest(a.evidence_root)&&digest(a.authorization_digest)&&(!expected||a.candidate_ref===expected);result=<section className="authorizationCard section"><div className="eyebrow">Finalized verification</div><h2>{pass?"PASS — exact evidence set is authorized":"FAIL — authorization does not match current evidence"}</h2><p><b>State:</b> {m.state}</p><p><b>Candidate ref:</b> <code>{m.candidate_ref}</code></p><p><b>Manifest:</b> <code>{m.candidate_manifest_digest}</code></p><p><b>Evidence root:</b> <code>{a.evidence_root||"missing"}</code></p><p><b>Authorization digest:</b> <code>{a.authorization_digest||"missing"}</code></p>{expected&&<p><b>Expected ref:</b> <code>{expected}</code> — {a.candidate_ref===expected?"MATCH":"MISMATCH"}</p>}</section>}catch(error){result=<div className="notice">{error instanceof Error?error.message:String(error)}</div>}}
+return <main className="wrap section"><div className="eyebrow">Independent verification</div><h1>Verify authorization provenance.</h1><p className="lead">Reads finalized Studionet state only. A release ref match is necessary but no longer sufficient: the candidate manifest and evidence root must also be bound.</p><div className="panel"><b>Network</b><p>{NETWORK.name} · chain {NETWORK.chainId}</p><code>{NETWORK.rpc}</code></div>{!isConfigured()?<NotConfigured/>:<form className="panel section" method="get"><label>Migration ID<input name="migrationId" inputMode="numeric" required defaultValue={p.migrationId||""}/></label><label>Expected release ref (optional)<input name="expectedRef" defaultValue={expected}/></label><button className="button hot" type="submit">Verify finalized authorization</button></form>}{result}</main>}

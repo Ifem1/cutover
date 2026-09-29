@@ -1,0 +1,62 @@
+"use client";
+import React,{FormEvent,useMemo,useState} from "react";
+import {CONTRACT_ADDRESS,NETWORK} from "@/lib/config";
+import {actionPolicy,type MigrationState} from "@/lib/policy";
+import {assessmentCanRun,manifestUrlForOrigin,sha256CanonicalJson} from "@/lib/workflow";
+import {useContractSubmit,TxFeedback} from "./ContractSubmit";
+import {useWallet,WalletBar} from "./WalletSession";
+import {ActionConsole} from "./ActionConsole";
+
+type Rule={id:string;question:string;allowed_changes:string};
+export type WorkbenchRoute={route_id:string;baseline_url:string;candidate_path:string;baseline_frozen:boolean;rules:Rule[];assessment?:{route_result?:string;attempt?:number}};
+export type WorkbenchMigration={id:number;owner:string;state:MigrationState;candidate_generation:number;assessed_generation:number;review_deadline:number;challenge_open:boolean;challenge_count:number;candidate_origin:string;candidate_ref:string;candidate_manifest_url:string;candidate_manifest_digest:string};
+
+function PanelTitle({n,title,copy}:{n:string;title:string;copy:string}){return <div className="workflowTitle"><span className="stepNo">{n}</span><div><h3>{title}</h3><p className="muted">{copy}</p></div></div>}
+
+export function MigrationWorkbench({migration,routes}:{migration:WorkbenchMigration;routes:WorkbenchRoute[]}){
+  const wallet=useWallet(); const tx=useContractSubmit(); const [now]=useState(()=>Math.floor(Date.now()/1000));
+  const isOwner=Boolean(wallet.account)&&wallet.account?.toLowerCase()===migration.owner.toLowerCase();
+  const allFrozen=routes.length>0&&routes.every(r=>r.baseline_frozen);
+  const policy=actionPolicy({state:migration.state,isOwner,routeCount:routes.length,allRoutesFrozen:allFrozen,candidateGeneration:migration.candidate_generation,assessedGeneration:migration.assessed_generation,challengeOpen:migration.challenge_open,challengeCount:migration.challenge_count,reviewDeadline:migration.review_deadline,now,authorized:migration.state==="AUTHORIZED",networkOk:wallet.networkOk});
+  async function run(method:string,args:unknown[]){await tx.submit(method,args,migration.id);}
+  return <section className="section"><WalletBar/><div className="workflowGrid">
+    <RouteBuilder migration={migration} enabled={policy.addRoute} onRun={run}/>
+    <FreezeBuilder migration={migration} routes={routes} enabled={policy.freezeRoute} onRun={run}/>
+    <ActionCard n="03" title="Seal baseline" copy="Sealing is enabled only when at least one route exists and every route has an authenticated frozen snapshot." enabled={policy.sealBaseline} label="Seal frozen baseline" onClick={()=>run("seal_baseline",[migration.id])}/>
+    <CandidateBuilder migration={migration} enabled={policy.setCandidate} onRun={run}/>
+    <AssessmentPanel migration={migration} routes={routes} onRun={run}/>
+    <ActionCard n="06" title="Derive candidate" copy="Deterministically aggregate current route assessments: BLOCKED outranks uncertainty; only all READY becomes READY." enabled={policy.derive} label="Derive migration state" onClick={()=>run("derive_candidate",[migration.id])}/>
+    <ChallengeBuilder migration={migration} routes={routes} enabled={policy.challenge} onRun={run}/>
+    <ActionCard n="08" title="Reassess challenge" copy="A verified challenge gets one explicit challenge attempt. Resolution then requires a fresh deterministic derivation." enabled={policy.reassess} label="Reassess verified challenge" onClick={()=>run("reassess_challenge",[migration.id])}/>
+    <ActionCard n="09" title="Authorize" copy="Authorization is available only after the review deadline, with current-generation assessments and no unresolved challenge." enabled={policy.authorize} label="Authorize exact evidence set" onClick={()=>run("authorize",[migration.id])}/>
+    <ActionCard n="10" title="Cancel" copy="Only the migration owner can cancel, and AUTHORIZED/CANCELLED states are terminal." enabled={policy.cancel} label="Cancel migration" onClick={()=>run("cancel_migration",[migration.id])}/>
+  </div><TxFeedback phase={tx.phase} message={tx.message} confirmed={tx.confirmed}/><div className="contractNav"><span>Contract</span><a href={NETWORK.explorer} target="_blank" rel="noreferrer">Open Studionet explorer ↗</a><code>{CONTRACT_ADDRESS||"not configured"}</code></div><ActionConsole migrationId={String(migration.id)}/></section>;
+}
+
+function RouteBuilder({migration,enabled,onRun}:{migration:WorkbenchMigration;enabled:boolean;onRun:(m:string,a:unknown[])=>Promise<void>}){
+  const [id,setId]=useState("");const [baseline,setBaseline]=useState("");const [path,setPath]=useState("/");const [rules,setRules]=useState<Rule[]>([{id:"requirement-1",question:"",allowed_changes:""}]);
+  const valid=enabled&&id&&baseline&&path.startsWith("/")&&!path.startsWith("//")&&rules.length>0&&rules.every(r=>r.id&&r.question);
+  async function submit(e:FormEvent){e.preventDefault();await onRun("add_route",[migration.id,id,baseline,path,JSON.stringify(rules)]);}
+  return <form className="panel workflowCard" onSubmit={submit}><PanelTitle n="01" title="Route & rule builder" copy="Map one baseline URL to one same-deployment candidate path and state the exact semantic obligations to preserve."/><label>Route ID<input aria-label="Route ID" value={id} onChange={e=>setId(e.target.value)} maxLength={80}/></label><label>Baseline URL<input aria-label="Baseline URL" type="url" value={baseline} onChange={e=>setBaseline(e.target.value)}/></label><label>Candidate path<input aria-label="Candidate path" value={path} onChange={e=>setPath(e.target.value)} placeholder="/pricing"/></label><fieldset><legend>Rules</legend>{rules.map((r,i)=><div className="ruleEditor" key={i}><input aria-label={`Rule ${i+1} ID`} value={r.id} onChange={e=>setRules(v=>v.map((x,j)=>j===i?{...x,id:e.target.value}:x))}/><textarea aria-label={`Rule ${i+1} question`} placeholder="What must remain true?" value={r.question} onChange={e=>setRules(v=>v.map((x,j)=>j===i?{...x,question:e.target.value}:x))}/><textarea aria-label={`Rule ${i+1} allowed changes`} placeholder="What changes are acceptable?" value={r.allowed_changes} onChange={e=>setRules(v=>v.map((x,j)=>j===i?{...x,allowed_changes:e.target.value}:x))}/>{rules.length>1&&<button type="button" className="textButton" onClick={()=>setRules(v=>v.filter((_,j)=>j!==i))}>Remove rule</button>}</div>)}<button type="button" className="button ghost" disabled={rules.length>=12} onClick={()=>setRules(v=>[...v,{id:`requirement-${v.length+1}`,question:"",allowed_changes:""}])}>Add rule</button></fieldset><button className="button hot" disabled={!valid}>Add route</button></form>;
+}
+
+function FreezeBuilder({migration,routes,enabled,onRun}:{migration:WorkbenchMigration;routes:WorkbenchRoute[];enabled:boolean;onRun:(m:string,a:unknown[])=>Promise<void>}){
+  const candidates=routes.filter(r=>!r.baseline_frozen);const [route,setRoute]=useState(candidates[0]?.route_id||"");const [url,setUrl]=useState("");const [json,setJson]=useState("");const [digest,setDigest]=useState("");const [error,setError]=useState("");
+  async function calculate(){try{setDigest(await sha256CanonicalJson(json));setError("");}catch{setError("Snapshot JSON is invalid.");}}
+  async function submit(e:FormEvent){e.preventDefault();await onRun("freeze_route",[migration.id,route,url,json,digest]);}
+  return <form className="panel workflowCard" onSubmit={submit}><PanelTitle n="02" title="Prepare & freeze baseline" copy="The snapshot artifact itself is fetched and canonical-digest checked; its public source is independently probed before freeze."/><label>Route<select aria-label="Freeze route" value={route} onChange={e=>setRoute(e.target.value)}>{candidates.map(r=><option key={r.route_id}>{r.route_id}</option>)}</select></label><label>Snapshot artifact URL<input aria-label="Snapshot artifact URL" type="url" value={url} onChange={e=>setUrl(e.target.value)}/></label><label>Bounded snapshot JSON<textarea aria-label="Snapshot JSON" rows={9} value={json} onChange={e=>setJson(e.target.value)}/></label><div className="digestRow"><button type="button" className="button ghost" onClick={()=>void calculate()}>Calculate canonical SHA-256</button><code>{digest||"digest not calculated"}</code></div>{error&&<p className="fieldError">{error}</p>}<button className="button hot" disabled={!enabled||!route||!url||!/^[a-f0-9]{64}$/i.test(digest)}>Authenticate & freeze route</button></form>;
+}
+
+function CandidateBuilder({migration,enabled,onRun}:{migration:WorkbenchMigration;enabled:boolean;onRun:(m:string,a:unknown[])=>Promise<void>}){
+  const [origin,setOrigin]=useState(migration.candidate_origin||"");const auto=useMemo(()=>origin?manifestUrlForOrigin(origin):"",[origin]);const [manifestUrl,setManifestUrl]=useState(migration.candidate_manifest_url||"");const [digest,setDigest]=useState(migration.candidate_manifest_digest||"");
+  const url=manifestUrl||auto;
+  return <form className="panel workflowCard" onSubmit={e=>{e.preventDefault();void onRun("set_candidate",[migration.id,origin,url,digest]);}}><PanelTitle n="04" title="Register candidate manifest" copy="CUTOVER derives the release ref from the candidate’s same-origin /.well-known/cutover.json and binds every route to an exact response-body SHA-256."/><label>Candidate origin<input aria-label="Candidate origin" type="url" value={origin} onChange={e=>{setOrigin(e.target.value);setManifestUrl("");}}/></label><label>Manifest URL<input aria-label="Candidate manifest URL" type="url" value={url} onChange={e=>setManifestUrl(e.target.value)}/></label><label>Expected canonical manifest SHA-256<input aria-label="Candidate manifest digest" className="mono" value={digest} onChange={e=>setDigest(e.target.value.trim())}/></label>{migration.candidate_ref&&<p className="boundValue"><b>Current verified release ref</b><code>{migration.candidate_ref}</code></p>}<button className="button hot" disabled={!enabled||!origin||url!==manifestUrlForOrigin(origin)||!/^[a-f0-9]{64}$/i.test(digest)}>Verify & bind new generation</button></form>;
+}
+
+function AssessmentPanel({migration,routes,onRun}:{migration:WorkbenchMigration;routes:WorkbenchRoute[];onRun:(m:string,a:unknown[])=>Promise<void>}){
+ return <section className="panel workflowCard"><PanelTitle n="05" title="Assess routes" copy="Ordinary attempts are immutable. READY/BLOCKED results lock; only INCONCLUSIVE may retry, at most three ordinary attempts."/><div className="assessmentList">{routes.map(r=>{const result=r.assessment?.route_result;const attempts=r.assessment?.attempt||0;const enabled=assessmentCanRun(migration.state,result,attempts);return <div key={r.route_id} className="assessmentItem"><div><b>{r.route_id}</b><small>{result||"NOT ASSESSED"} · {attempts}/3 ordinary attempts</small></div><button type="button" className="button" disabled={!enabled} onClick={()=>void onRun("assess_route",[migration.id,r.route_id])}>{attempts?"Retry inconclusive":"Assess route"}</button></div>})}</div></section>;
+}
+
+function ChallengeBuilder({migration,routes,enabled,onRun}:{migration:WorkbenchMigration;routes:WorkbenchRoute[];enabled:boolean;onRun:(m:string,a:unknown[])=>Promise<void>}){const [route,setRoute]=useState(routes[0]?.route_id||"");const [url,setUrl]=useState("");return <form className="panel workflowCard" onSubmit={e=>{e.preventDefault();void onRun("open_challenge",[migration.id,route,url]);}}><PanelTitle n="07" title="Submit challenge" copy="Owners cannot self-challenge. Evidence must be a retrievable bounded HTTP(S) artefact and is independently fetched before a challenge slot is consumed."/><label>Route<select aria-label="Challenge route" value={route} onChange={e=>setRoute(e.target.value)}>{routes.map(r=><option key={r.route_id}>{r.route_id}</option>)}</select></label><label>Evidence URL<input aria-label="Challenge evidence URL" type="url" value={url} onChange={e=>setUrl(e.target.value)}/></label><button className="button hot" disabled={!enabled||!route||!url}>Verify evidence & open challenge</button></form>}
+
+function ActionCard({n,title,copy,enabled,label,onClick}:{n:string;title:string;copy:string;enabled:boolean;label:string;onClick:()=>Promise<void>}){return <section className="panel workflowCard"><PanelTitle n={n} title={title} copy={copy}/><button type="button" className="button hot" disabled={!enabled} onClick={()=>void onClick()}>{label}</button></section>}

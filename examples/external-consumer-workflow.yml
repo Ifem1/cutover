@@ -1,0 +1,18 @@
+name: Deploy only after CUTOVER authorization
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cutover-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify finalized CUTOVER authorization
+        uses: Ifem1/cutover/packages/gate@v1-audited
+        with:
+          contract-address: ${{ vars.CUTOVER_CONTRACT_ADDRESS }}
+          migration-id: ${{ vars.CUTOVER_MIGRATION_ID }}
+          expected-candidate-ref: ${{ github.sha }}
+          chain-id: '61999'
+      - name: Deployment placeholder
+        run: echo "CUTOVER gate passed; invoke your deployment step here."

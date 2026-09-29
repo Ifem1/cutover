@@ -1,86 +1,29 @@
 {
   "writes": {
-    "create_migration": [
-      "title",
-      "baseline_origin",
-      "review_window_seconds"
-    ],
-    "add_route": [
-      "migration_id",
-      "route_id",
-      "baseline_url",
-      "candidate_path",
-      "rules_json"
-    ],
-    "freeze_route": [
-      "migration_id",
-      "route_id",
-      "snapshot_url",
-      "snapshot_json",
-      "expected_sha256"
-    ],
-    "seal_baseline": [
-      "migration_id"
-    ],
-    "set_candidate": [
-      "migration_id",
-      "candidate_origin",
-      "candidate_ref"
-    ],
-    "assess_route": [
-      "migration_id",
-      "route_id"
-    ],
-    "derive_candidate": [
-      "migration_id"
-    ],
-    "open_challenge": [
-      "migration_id",
-      "route_id",
-      "evidence_url",
-      "evidence_text"
-    ],
-    "reassess_challenge": [
-      "migration_id"
-    ],
-    "authorize": [
-      "migration_id"
-    ],
-    "cancel_migration": [
-      "migration_id"
-    ]
+    "create_migration": ["title", "baseline_origin", "review_window_seconds"],
+    "add_route": ["migration_id", "route_id", "baseline_url", "candidate_path", "rules_json"],
+    "freeze_route": ["migration_id", "route_id", "snapshot_url", "snapshot_json", "expected_sha256"],
+    "seal_baseline": ["migration_id"],
+    "set_candidate": ["migration_id", "candidate_origin", "manifest_url", "expected_manifest_sha256"],
+    "assess_route": ["migration_id", "route_id"],
+    "derive_candidate": ["migration_id"],
+    "open_challenge": ["migration_id", "route_id", "evidence_url"],
+    "reassess_challenge": ["migration_id"],
+    "authorize": ["migration_id"],
+    "cancel_migration": ["migration_id"]
   },
   "views": {
     "get_config": [],
     "get_stats": [],
-    "list_migrations": [
-      "offset",
-      "limit"
-    ],
-    "migrations_of": [
-      "address"
-    ],
-    "get_migration": [
-      "migration_id"
-    ],
-    "get_route": [
-      "migration_id",
-      "route_id"
-    ],
-    "get_route_assessment": [
-      "migration_id",
-      "generation",
-      "route_id"
-    ],
-    "get_challenge": [
-      "migration_id"
-    ],
-    "get_authorization": [
-      "migration_id"
-    ],
-    "get_events": [
-      "offset",
-      "limit"
-    ]
+    "list_migrations": ["offset", "limit"],
+    "migrations_of": ["address", "offset", "limit"],
+    "get_migration": ["migration_id"],
+    "get_route": ["migration_id", "route_id"],
+    "get_route_assessment": ["migration_id", "generation", "route_id"],
+    "get_assessment_attempts": ["migration_id", "generation", "route_id", "offset", "limit"],
+    "get_challenge": ["migration_id"],
+    "get_challenges": ["migration_id", "generation", "offset", "limit"],
+    "get_authorization": ["migration_id"],
+    "get_events": ["offset", "limit"]
   }
 }

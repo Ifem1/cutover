@@ -1,0 +1,10 @@
+{
+  "schema_version":"cutover.live-plan.v1",
+  "chain_id":61999,
+  "rpc":"https://studio.genlayer.com/api",
+  "contract_address":null,
+  "steps":[
+    {"name":"create migration","kind":"write","method":"create_migration","args":["CUTOVER live proof","https://BASELINE_DEPLOYMENT.example",300]},
+    {"name":"read migration","kind":"call","method":"get_migration","args":[1]}
+  ]
+}
