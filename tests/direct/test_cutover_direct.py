@@ -131,7 +131,9 @@ def test_snapshot_artifact_content_is_authenticated(direct_vm,direct_deploy):
 
 def test_snapshot_artifact_unavailable_fails_closed(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=c.create_migration("x",BASE_ORIGIN,300); _create_route(c,mid); s=_snapshot()
+    direct_vm.mock_web(r".*fixture\.local/pricing.*",{"status":200,"body":BASELINE_BODY})
     direct_vm.mock_web(r".*proof\.local/baseline-pricing\.json.*",{"status":503,"body":json.dumps(s)})
+    direct_vm.mock_llm(r".*Authenticate a CUTOVER baseline snapshot.*",json.dumps({"faithful":True,"reason":"would pass if HTTP status were ignored"}))
     with direct_vm.expect_revert("baseline authentication failed"): c.freeze_route(mid,"pricing",SNAPSHOT_URL,json.dumps(s),_digest(s))
 
 def test_baseline_source_unavailable_fails_closed(direct_vm,direct_deploy):
@@ -198,6 +200,7 @@ def test_ready_assessment_uses_bound_manifest_and_probe(direct_vm,direct_deploy)
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man)
     assert c.assess_route(mid,"pricing")=="READY"; a=c.get_route_assessment(mid,1,"pricing")
     assert a["candidate_ref"]=="release-a" and a["candidate_manifest_digest"]==_digest(man) and a["candidate_probe_digest"] and a["leader_explanations_consensus_bound"] is False
+    assert c.derive_candidate(mid)=="READY"
 
 @pytest.mark.parametrize("status",["MATERIAL_CHANGE","MISSING","BROKEN"])
 def test_definite_failure_blocks_candidate(direct_vm,direct_deploy,status):
