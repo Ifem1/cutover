@@ -5,7 +5,7 @@ import {readCutover,writeCutover,type Eip1193Provider} from "@/lib/contract";
 import {WRITE_EXAMPLES,WRITE_METHODS,writeArityIsValid} from "@/lib/surface";
 import {waitForFinality,TxPhase} from "@/lib/tx";
 
-type EthereumProvider={request:(args:{method:string;params?:unknown[]})=>Promise<any>};
+type EthereumProvider=Eip1193Provider;
 declare global { interface Window { ethereum?: EthereumProvider } }
 
 function chainHex(){return "0x"+NETWORK.chainId.toString(16)}
@@ -34,8 +34,8 @@ export function ActionConsole({migrationId}:{migrationId?:string}){
 
   async function connect(){
     if(!window.ethereum){setMessage("No injected EIP-1193 wallet found.");return}
-    const accounts=await window.ethereum.request({method:"eth_requestAccounts"});
-    const addr=accounts?.[0] as `0x${string}`|undefined;
+    const result=await window.ethereum.request({method:"eth_requestAccounts"});
+    const addr=Array.isArray(result)&&typeof result[0]==="string"?result[0] as `0x${string}`:undefined;
     if(!addr){setMessage("Wallet returned no account.");return}
     const cid=String(await window.ethereum.request({method:"eth_chainId"})).toLowerCase();
     const ok=cid===chainHex().toLowerCase();
