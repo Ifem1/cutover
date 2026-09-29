@@ -1,0 +1,15 @@
+name: CUTOVER deployment gate
+description: Read-only gate that requires an exact authorized CUTOVER candidate ref
+inputs:
+  contract-address:
+    required: true
+  migration-id:
+    required: true
+  expected-candidate-ref:
+    required: true
+  chain-id:
+    required: false
+    default: '61999'
+runs:
+  using: node20
+  main: dist/index.js
