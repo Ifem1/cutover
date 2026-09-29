@@ -159,6 +159,10 @@ class Cutover(gl.Contract):
         if gen<=0: raise Exception("candidate missing")
         candidate_url=m["candidate_origin"]+(r["candidate_path"] if r["candidate_path"].startswith("/") else "/"+r["candidate_path"])
         baseline_digest=r["baseline_digest"]
+        challenge=_loads(self.challenges.get(str(migration_id)),{})
+        challenge_context=""
+        if challenge and not challenge.get("resolved") and challenge.get("generation")==gen and challenge.get("route_id")==route_id:
+            challenge_context="\\nCHALLENGE_EVIDENCE:"+_defuse(_dumps({"evidence_url":challenge.get("evidence_url",""),"evidence_text":challenge.get("evidence_text","")}))
         def leader_fn():
             try: observed=gl.nondet.web.render(candidate_url,mode="text")
             except Exception: return {"generation":gen,"route_id":route_id,"candidate_ref":m["candidate_ref"],"evidence_available":False,"findings":[],"route_result":"INCONCLUSIVE"}
@@ -216,8 +220,9 @@ class Cutover(gl.Contract):
         m=self._migration(migration_id)
         if m["state"]!="CHALLENGED" or not m["challenge_open"]: raise Exception("no challenge open")
         c=_loads(self.challenges.get(str(migration_id))); rid=c["route_id"]
-        m["challenge_open"]=False; m["state"]="CANDIDATE"; self._save_migration(m)
+        m["state"]="CANDIDATE"; self._save_migration(m)
         result=self.assess_route(migration_id,rid)
+        m=self._migration(migration_id); m["challenge_open"]=False; self._save_migration(m)
         c["resolved"]=True; c["route_result"]=result; self.challenges[str(migration_id)]=_dumps(c)
         self._emit("CHALLENGE_RESOLVED",str(migration_id),{"route_id":rid,"result":result}); return result
 
