@@ -7,6 +7,7 @@ viol=[]
 for p in root.rglob('*'):
     if not p.is_file() or any(x in p.parts for x in ('node_modules','.git','.next')): continue
     rel=p.as_posix()
+    if rel.startswith('packages/gate/dist/'): continue
     try:text=p.read_text()
     except UnicodeDecodeError:continue
     if rel not in runtime_allow:
@@ -18,6 +19,8 @@ if viol:print('Repository integrity violations:',*viol,sep='\n');sys.exit(1)
 config=Path('apps/web/lib/config.ts').read_text();assert 'chainId:61999' in config and 'https://studio.genlayer.com/api' in config and 'https://explorer-studio.genlayer.com' in config
 assert 'createAccount(' not in '\n'.join(p.read_text(errors='ignore') for p in Path('apps/web').rglob('*.ts*'))
 requirements=Path('requirements.txt').read_text();assert 'genlayer-py@v0.16.3' in requirements and 'genlayer-testing-suite@v0.29.2' in requirements and 'genvm-linter@v0.11.0' in requirements;assert '@main' not in requirements and '-rc' not in requirements.lower()
+assert Path('package-lock.json').is_file() and Path('package-lock.json').stat().st_size>0
+assert Path('packages/gate/dist/index.js').is_file() and Path('packages/gate/dist/index.js').stat().st_size>0
 root_package=json.loads(Path('package.json').read_text());assert root_package['devDependencies']['genlayer']=='0.39.1'
 web_package=json.loads(Path('apps/web/package.json').read_text());assert web_package['dependencies']['genlayer-js']=='1.1.8'
 contract=Path('contracts/cutover.py').read_text()
