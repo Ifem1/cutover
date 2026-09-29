@@ -1,7 +1,10 @@
 import React from "react";
 import {render,screen} from "@testing-library/react";
 import {describe,it,expect,vi} from "vitest";
-vi.mock("next/link",()=>({default:({href,children,...rest}:any)=><a href={href} {...rest}>{children}</a>}));
+
+type LinkProps=React.AnchorHTMLAttributes<HTMLAnchorElement>&{href:string;children:React.ReactNode};
+vi.mock("next/link",()=>({default:({href,children,...rest}:LinkProps)=><a href={href} {...rest}>{children}</a>}));
+
 import {RouteMatrix} from "../components/RouteMatrix";
 const rows=[{id:"pricing",href:"/migrations/1/routes/pricing",route:"https://old.example/pricing",destination:"https://new.example/pricing",rules:2,frozen:true,status:"BLOCKED",attempts:1,decisive:"pricing: MATERIAL_CHANGE"}];
 describe("route preservation matrix",()=>{
