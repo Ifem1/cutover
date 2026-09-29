@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
+import React,{useEffect,useMemo,useState} from "react";
 import {useRouter} from "next/navigation";
 import {NETWORK,isConfigured} from "@/lib/config";
 import {readCutover,writeCutover,type Eip1193Provider} from "@/lib/contract";
