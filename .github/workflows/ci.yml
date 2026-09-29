@@ -1,0 +1,136 @@
+name: CUTOVER CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-integrity:
+    name: Repository integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: python -m compileall -q contracts tests scripts
+      - run: python scripts/check_contract_surface.py
+      - run: python scripts/repository_integrity.py
+      - run: node scripts/check-network.mjs
+
+  contract:
+    name: Contract lint + Direct Mode
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - name: GenVM lint
+        run: genvm-lint check contracts/cutover.py
+      - name: Direct Mode
+        run: pytest tests/direct -v
+
+  contract-mutation:
+    name: Contract mutation sweep
+    needs: contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: python scripts/contract_mutation.py
+
+  web:
+    name: Web lint + types + tests + builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: "npm", cache-dependency-path: "package-lock.json" }
+      - name: Install
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:web
+      - run: npm run build -w @cutover/web
+      - run: npm run build -w @cutover/fixtures
+
+  frontend-mutation:
+    name: Frontend mutation sweep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run mutation:web
+
+  gate:
+    name: CUTOVER GitHub gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run test:gate
+      - run: npm run typecheck -w @cutover/gate
+      - run: npm run build -w @cutover/gate
+      - name: Check committed action bundle when present
+        run: |
+          if [ -f packages/gate/dist/index.js ] && ! git diff --quiet -- packages/gate/dist/index.js; then
+            echo "packages/gate/dist/index.js is stale; rebuild and commit it" >&2
+            git diff -- packages/gate/dist/index.js
+            exit 1
+          fi
+
+  generated-artifacts:
+    name: Generate lockfile + action bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: npm install
+      - run: npm run build -w @cutover/gate
+      - name: Stage generated deliverables
+        run: |
+          mkdir -p generated/packages/gate/dist
+          cp package-lock.json generated/package-lock.json
+          cp packages/gate/dist/index.js generated/packages/gate/dist/index.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cutover-generated-files
+          path: generated
+          if-no-files-found: error
+
+  package:
+    name: Package handoff ZIP
+    needs: [repository-integrity, contract, contract-mutation, web, frontend-mutation, gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source handoff
+        run: |
+          zip -r cutover-chatgpt-pro-handoff.zip . \
+            -x '.git/*' 'node_modules/*' '*/node_modules/*' '.next/*' '*/.next/*' \
+               '__pycache__/*' '*/__pycache__/*' '*.pyc' '.pytest_cache/*' '*/.pytest_cache/*' \
+               'coverage/*' '*/coverage/*' 'artifacts/live/*' '.env' '*.pem' '*.key'
+          unzip -l cutover-chatgpt-pro-handoff.zip | tee handoff-contents.txt
+          ! grep -E '(^|/)(node_modules|\.next|\.git)/|\.env$|\.pem$|\.key$' handoff-contents.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cutover-chatgpt-pro-handoff
+          path: cutover-chatgpt-pro-handoff.zip
+          if-no-files-found: error

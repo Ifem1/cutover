@@ -1,0 +1,22 @@
+name: Production release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require exact CUTOVER authorization
+        uses: Ifem1/cutover/packages/gate@main
+        with:
+          contract_address: ${{ vars.CUTOVER_CONTRACT_ADDRESS }}
+          migration_id: ${{ vars.CUTOVER_MIGRATION_ID }}
+          expected_candidate_ref: ${{ github.sha }}
+
+  deploy:
+    needs: cutover
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Replace with the real production deployment job."
