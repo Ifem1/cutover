@@ -3,7 +3,7 @@
 from genlayer import *
 import json
 from hashlib import sha256
-from datetime import datetime
+from datetime import datetime, timezone
 
 MAX_ROUTES=24
 MAX_RULES=12
@@ -24,7 +24,7 @@ OBSERVATION_FIELDS={"title","canonical_url","headings","visible_text","important
 def _dumps(v): return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False)
 def _loads(v,default=None): return json.loads(v) if v else (default if default is not None else {})
 def _digest(v): return sha256(_dumps(v).encode()).hexdigest()
-def _now(): return int(datetime.now().timestamp())
+def _now(): return int(datetime.now(timezone.utc).timestamp())
 def _bounded(s,n,label):
     if not isinstance(s,str) or len(s)>n: raise gl.vm.UserError(label+" invalid")
     return s
@@ -249,7 +249,7 @@ class Cutover(gl.Contract):
             out=gl.nondet.exec_prompt(compare_prompt,response_format="json")
             if not isinstance(out,dict) or set(out)!={"findings"} or not _findings_valid(out.get("findings"),r["rules"]):
                 return {"generation":gen,"route_id":route_id,"candidate_ref":m["candidate_ref"],"baseline_digest":r["baseline_digest"],
-                        "evidence_availe":True,"observation":observation,"findings":[],"route_result":"INCONCLUSIVE"}
+                        "evidence_available":True,"observation":observation,"findings":[],"route_result":"INCONCLUSIVE"}
             findings=out["findings"]
             return {"generation":gen,"route_id":route_id,"candidate_ref":m["candidate_ref"],"baseline_digest":r["baseline_digest"],
                     "evidence_available":True,"observation":observation,"findings":findings,"route_result":self._derive_route(findings)}
