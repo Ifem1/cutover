@@ -1,0 +1,141 @@
+{
+  "schema_version": "cutover.proof-matrix.v1",
+  "network": {
+    "name": "studionet",
+    "chain_id": 61999
+  },
+  "invariants": [
+    {
+      "id": "baseline-digest",
+      "invariant": "Frozen baseline digest mismatch fails closed",
+      "boundary": "deterministic + consensus",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_snapshot_digest_mismatch_fails_before_consensus",
+      "mutant": "source/identity guards; no equivalent digest mutant retained",
+      "frontend_test": "apps/web/tests/surface.test.ts",
+      "live_case": 1,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "material-change",
+      "invariant": "MATERIAL_CHANGE, MISSING, or BROKEN blocks even with uncertainty",
+      "boundary": "deterministic",
+      "contract_test": "tests/unit/test_core_logic.py::test_definite_failure_blocks_even_with_uncertainty",
+      "mutant": "material_change_passes",
+      "frontend_test": "route matrix rendering covered by web build/tests",
+      "live_case": 3,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "unavailable",
+      "invariant": "Unavailable required evidence cannot become READY",
+      "boundary": "consensus + deterministic",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_baseline_source_unavailable_fails_closed",
+      "mutant": "source_failure_passes",
+      "frontend_test": "no fake-data fallback / configured-state UI",
+      "live_case": 7,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "complete-routes",
+      "invariant": "Every required current-generation route must be assessed",
+      "boundary": "deterministic",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_missing_current_generation_assessment_cannot_ready",
+      "mutant": "missing_route_assessment_passes",
+      "frontend_test": "apps/web/tests/policy.test.ts",
+      "live_case": 1,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "candidate-generation",
+      "invariant": "Changing candidate identity invalidates prior assessment/authorization state",
+      "boundary": "deterministic",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_missing_current_generation_assessment_cannot_ready",
+      "mutant": "ignore_generation",
+      "frontend_test": "apps/web/tests/policy.test.ts::blocks stale generation",
+      "live_case": 13,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "challenge",
+      "invariant": "A current challenge blocks authorization and only one challenge is allowed per generation",
+      "boundary": "deterministic + consensus reassessment",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_challenge_is_bounded_and_blocks_authorization",
+      "mutant": "ignore_challenge; second_challenge_allowed",
+      "frontend_test": "apps/web/tests/policy.test.ts",
+      "live_case": 10,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "review-window",
+      "invariant": "Review deadline uses contract transaction time; callers cannot supply time",
+      "boundary": "deterministic runtime context",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_authorization_uses_transaction_time_and_exact_candidate_ref",
+      "mutant": "ignore_deadline; late_challenge_allowed",
+      "frontend_test": "apps/web/tests/surface.test.ts::authorization and derivation take no caller timestamp",
+      "live_case": 11,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "candidate-ref",
+      "invariant": "Authorization and GitHub gate bind the exact candidate reference",
+      "boundary": "deterministic + read-only integration",
+      "contract_test": "tests/unit/test_core_logic.py::test_authorize_ref_mismatch",
+      "mutant": "ignore_ref",
+      "frontend_test": "packages/gate/tests/check.test.ts",
+      "live_case": 12,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "prompt-injection",
+      "invariant": "Untrusted page text cannot close the evidence fence or redefine output taxonomy",
+      "boundary": "consensus input hardening + strict parsing",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_prompt_injection_text_has_no_authority",
+      "mutant": "bounded by parser/fence tests; equivalent text-only mutants excluded",
+      "frontend_test": "n/a",
+      "live_case": 8,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "validator-disagreement",
+      "invariant": "Independent validator findings that change route consequence reject leader result",
+      "boundary": "consensus",
+      "contract_test": "tests/direct/test_cutover_direct.py::test_validator_disagreement_is_detected",
+      "mutant": "n/a - exercised with Direct Mode validator replay",
+      "frontend_test": "n/a",
+      "live_case": 9,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    },
+    {
+      "id": "tx-finality",
+      "invariant": "UI never equates ACCEPTED/decision with FINALIZED execution success",
+      "boundary": "client lifecycle",
+      "contract_test": "n/a",
+      "mutant": "frontend policy mutation suite + transaction unit tests",
+      "frontend_test": "apps/web/tests/tx.test.ts",
+      "live_case": 1,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED; LIVE FINALITY NOT YET RUN"
+    },
+    {
+      "id": "network",
+      "invariant": "Runtime paths are pinned to stable Studionet chain 61999 and reject wrong-network writes",
+      "boundary": "configuration + UI",
+      "contract_test": "get_config + repository integrity",
+      "mutant": "frontend wrong-network mutant",
+      "frontend_test": "apps/web/tests/config.test.ts; apps/web/tests/policy.test.ts",
+      "live_case": 1,
+      "live_transaction": "NOT YET RUN",
+      "status": "OFFLINE COVERED"
+    }
+  ]
+}
