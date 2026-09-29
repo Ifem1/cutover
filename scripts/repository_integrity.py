@@ -29,7 +29,8 @@ assert 'https://explorer-studio.genlayer.com' in config
 assert 'createAccount(' not in "\n".join(p.read_text(errors="ignore") for p in Path("apps/web").rglob("*.ts*"))
 
 requirements=Path("requirements.txt").read_text()
-assert "genlayer-py@v0.16.3" in requirements\nassert "genlayer-testing-suite@v0.29.2" in requirements
+assert "genlayer-py@v0.16.3" in requirements
+assert "genlayer-testing-suite@v0.29.2" in requirements
 assert "genvm-linter@v0.11.0" in requirements
 assert "@main" not in requirements and "-rc" not in requirements.lower()
 
