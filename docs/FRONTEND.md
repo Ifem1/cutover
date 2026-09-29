@@ -10,7 +10,7 @@ Until `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS` contains a valid address, chain-bac
 
 `contracts/surface.json` is the tracked public method schema. `scripts/check_contract_surface.py` AST-checks it against the Python contract, while `apps/web/lib/surface.ts` and Vitest verify every required write name and exact argument count. In particular, `derive_candidate` and `authorize` accept only `migration_id`; review time is contract-derived.
 
-`ActionConsole` makes every public write reachable with explicit connect/disconnect controls, a chain-61999 guard, exact-arity checking and finalized post-state re-read. Higher-level pages additionally explain unavailable actions through the state policy.
+`ActionConsole` makes every public write reachable with explicit connect/disconnect controls, a chain-61999 guard, exact-arity checking, state/account-aware enablement and finalized post-state re-read. The migration register, control room, route evidence and verifier all read finalized contract state; they do not substitute demo objects once a contract address is configured.
 
 ## Transaction semantics
 
