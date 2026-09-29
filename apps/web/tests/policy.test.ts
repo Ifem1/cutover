@@ -7,7 +7,7 @@ describe("action policy",()=>{
   it("blocks authorize during challenge",()=>expect(actionPolicy({...base,challengeOpen:true}).authorize).toBe(false));
   it("blocks stale generation",()=>expect(actionPolicy({...base,assessedGeneration:1}).authorize).toBe(false));
   it("blocks wrong network",()=>expect(actionPolicy({...base,networkOk:false}).authorize).toBe(false));
-  it("does not treat READY as authorized",()=>expect(base.authorized).toBe(false));
+  it("does not treat READY as authorized",()=>expect(base.authorized).toBe(false));\n  it("does not authorize a non-READY state",()=>expect(actionPolicy({...base,state:"BLOCKED"}).authorize).toBe(false));
   it("challenge exists only inside the review window",()=>expect(actionPolicy({...base,now:99}).challenge).toBe(true));
   it("blocks challenge at deadline",()=>expect(actionPolicy({...base,now:100}).challenge).toBe(false));
   it("blocks second challenge for a generation",()=>expect(actionPolicy({...base,now:99,challengeUsedGeneration:2}).challenge).toBe(false));
