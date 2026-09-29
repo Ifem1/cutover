@@ -1,0 +1,85 @@
+{
+  "schema_version": "cutover.live-proof.v1",
+  "network": "studionet",
+  "chain_id": 61999,
+  "cases": [
+    {
+      "id": 1,
+      "name": "perfect migration",
+      "fixture": "preserved",
+      "expected": "READY -> AUTHORIZED"
+    },
+    {
+      "id": 2,
+      "name": "cosmetic redesign",
+      "fixture": "cosmetic",
+      "expected": "READY"
+    },
+    {
+      "id": 3,
+      "name": "silent pricing change",
+      "fixture": "pricing-change",
+      "expected": "BLOCKED"
+    },
+    {
+      "id": 4,
+      "name": "unrelated destination",
+      "fixture": "wrong-destination",
+      "expected": "BLOCKED"
+    },
+    {
+      "id": 5,
+      "name": "missing legal statement",
+      "fixture": "missing-legal",
+      "expected": "BLOCKED"
+    },
+    {
+      "id": 6,
+      "name": "broken form journey",
+      "fixture": "broken-form",
+      "expected": "BLOCKED"
+    },
+    {
+      "id": 7,
+      "name": "source unavailable",
+      "fixture": "unavailable",
+      "expected": "INCONCLUSIVE"
+    },
+    {
+      "id": 8,
+      "name": "prompt injection",
+      "fixture": "prompt-injection",
+      "expected": "does not gain authority"
+    },
+    {
+      "id": 9,
+      "name": "validator disagreement",
+      "fixture": "preserved with validator divergence",
+      "expected": "no incorrect READY write"
+    },
+    {
+      "id": 10,
+      "name": "challenge reassessment",
+      "fixture": "pricing-change challenge evidence",
+      "expected": "fresh independent route assessment"
+    },
+    {
+      "id": 11,
+      "name": "review window",
+      "fixture": "preserved",
+      "expected": "exact candidate AUTHORIZED only after deadline"
+    },
+    {
+      "id": 12,
+      "name": "GitHub gate exact ref",
+      "fixture": "authorized candidate",
+      "expected": "gate passes"
+    },
+    {
+      "id": 13,
+      "name": "GitHub gate wrong ref",
+      "fixture": "authorized candidate",
+      "expected": "gate fails"
+    }
+  ]
+}
