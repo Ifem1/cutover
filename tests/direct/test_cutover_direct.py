@@ -172,6 +172,20 @@ def test_cancel_is_owner_only_and_terminal(direct_vm,direct_deploy,direct_alice,
     direct_vm.sender=direct_alice; c.cancel_migration(mid)
     with direct_vm.expect_revert("migration is terminal"): c.cancel_migration(mid)
 
+
+def test_ready_candidate_requires_challenge_for_fresh_assessment(direct_vm,direct_deploy):
+    direct_vm.warp("2026-09-29T12:00:00Z")
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); c.set_candidate(mid,"https://candidate.local","sha-a")
+    _assessment_mocks(direct_vm); c.assess_route(mid,"pricing"); c.derive_candidate(mid)
+    with direct_vm.expect_revert("assessment not allowed"):
+        c.assess_route(mid,"pricing")
+
+def test_cancelled_candidate_cannot_be_rederived(direct_vm,direct_deploy):
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); c.set_candidate(mid,"https://candidate.local","sha-a")
+    c.cancel_migration(mid)
+    with direct_vm.expect_revert("derivation not allowed"):
+        c.derive_candidate(mid)
+
 def test_views_are_bounded(direct_deploy):
     c=direct_deploy(CONTRACT)
     for i in range(3): c.create_migration(f"m{i}","https://fixture.local",3600)
