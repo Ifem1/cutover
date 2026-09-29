@@ -206,7 +206,7 @@ class Cutover(gl.Contract):
     @gl.public.write
     def assess_route(self,migration_id:int,route_id:str)->str:
         m=self._migration(migration_id)
-        if m["state"] not in ("CANDIDATE","BLOCKED","INCONCLUSIVE","READY"): raise gl.vm.UserError("assessment not allowed")
+        if m["state"] not in ("CANDIDATE","BLOCKED","INCONCLUSIVE"): raise gl.vm.UserError("assessment not allowed")
         r=self._route(str(migration_id),route_id); gen=m["candidate_generation"]
         if gen<=0: raise gl.vm.UserError("candidate missing")
         if not r["baseline_frozen"] or not r["baseline_snapshot"]: raise gl.vm.UserError("baseline unavailable")
@@ -275,6 +275,7 @@ class Cutover(gl.Contract):
     @gl.public.write
     def derive_candidate(self,migration_id:int)->str:
         m=self._migration(migration_id)
+        if m["state"] not in ("CANDIDATE","BLOCKED","INCONCLUSIVE","READY"): raise gl.vm.UserError("derivation not allowed")
         if m["candidate_generation"]<=0: raise gl.vm.UserError("candidate missing")
         results=[]
         for rid in m["route_ids"]:
