@@ -1,6 +1,14 @@
 import React from "react";
 import {render,screen} from "@testing-library/react";
-import {describe,expect,it} from "vitest";
+import {describe,expect,it,vi} from "vitest";
+
+vi.mock("next/navigation",()=>({
+  useRouter:()=>({refresh:vi.fn()}),
+}));
+vi.mock("@/lib/tx",()=>({
+  waitForFinality:vi.fn(),
+}));
+
 import {ActionConsole} from "../components/ActionConsole";
 
 describe("ActionConsole accessibility and safe defaults",()=>{
@@ -10,6 +18,7 @@ describe("ActionConsole accessibility and safe defaults",()=>{
     expect(screen.getByLabelText(/contract action/i)).toBeTruthy();
     expect(screen.getByLabelText(/write arguments/i)).toBeTruthy();
   });
+
   it("does not enable writes without a connected injected wallet",()=>{
     render(<ActionConsole migrationId="7"/>);
     expect(screen.getByRole("button",{name:/submit write/i})).toHaveProperty("disabled",true);
