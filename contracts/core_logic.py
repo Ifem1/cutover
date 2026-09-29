@@ -10,6 +10,7 @@ MAX_RULES_PER_ROUTE = 12
 MAX_TEXT = 12000
 MAX_HEADINGS = 24
 MAX_LINKS = 32
+MAX_FORMS = 16
 MAX_CLAIMS = 32
 MAX_URL = 1024
 
@@ -44,11 +45,15 @@ def validate_snapshot(snapshot: dict, expected_route_id: str, expected_source_ur
     if snapshot["route_id"]!=expected_route_id: raise ValueError("snapshot route mismatch")
     if snapshot["source_url"]!=expected_source_url: raise ValueError("snapshot source mismatch")
     if not snapshot["source_url"].startswith(("https://","http://")): raise ValueError("snapshot source must be http(s)")
-    if len(snapshot["source_url"])>MAX_URL or len(snapshot["canonical_url"])>MAX_URL: raise ValueError("url too long")
-    if len(snapshot["visible_text"])>MAX_TEXT: raise ValueError("visible text too long")
-    if len(snapshot["headings"])>MAX_HEADINGS or len(snapshot["important_links"])>MAX_LINKS or len(snapshot["claims"])>MAX_CLAIMS: raise ValueError("snapshot collection bound exceeded")
-    for key in ("headings","important_links","forms","claims"):
-        if not isinstance(snapshot[key],list) or not all(isinstance(x,str) for x in snapshot[key]): raise ValueError(f"{key} must be string array")
+    if not isinstance(snapshot["captured_at"],str) or len(snapshot["captured_at"])>80: raise ValueError("capture timestamp invalid")
+    if not isinstance(snapshot["title"],str) or len(snapshot["title"])>240: raise ValueError("title invalid")
+    if not isinstance(snapshot["canonical_url"],str) or len(snapshot["canonical_url"])>MAX_URL: raise ValueError("canonical url invalid")
+    if not isinstance(snapshot["visible_text"],str) or len(snapshot["visible_text"])>MAX_TEXT: raise ValueError("visible text too long")
+    bounds={"headings":(MAX_HEADINGS,240),"important_links":(MAX_LINKS,MAX_URL),"forms":(MAX_FORMS,600),"claims":(MAX_CLAIMS,600)}
+    for key,(max_items,max_len) in bounds.items():
+        value=snapshot[key]
+        if not isinstance(value,list) or len(value)>max_items or not all(isinstance(x,str) and len(x)<=max_len for x in value):
+            raise ValueError(f"{key} invalid")
 
 def derive_route(statuses: Iterable[str], evidence_available: bool=True, source_match: bool=True) -> Aggregate:
     values=[RuleStatus(s) for s in statuses]
@@ -66,6 +71,9 @@ def derive_candidate(route_results: Iterable[str], required_count: int, assessed
 
 def authorization_allowed(*,aggregate:str,review_deadline:int,now:int,challenge_open:bool,assessed_generation:int,current_generation:int,candidate_ref:str,authorized_ref:str|None=None)->bool:
     return (Aggregate(aggregate) is Aggregate.READY and now>=review_deadline and not challenge_open and assessed_generation==current_generation and bool(candidate_ref) and (authorized_ref is None or authorized_ref==candidate_ref))
+
+def challenge_allowed(*,state:str,now:int,review_deadline:int,challenge_open:bool,challenge_used_generation:int,current_generation:int)->bool:
+    return state=="READY" and now<review_deadline and not challenge_open and challenge_used_generation!=current_generation
 
 def defuse_untrusted_text(text:str,limit:int=MAX_TEXT)->str:
     text=text[:limit]
