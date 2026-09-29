@@ -1,27 +1,29 @@
 # Mutation testing
 
-The mutation jobs target consequences that could create an unsafe release if accidentally inverted.
+CUTOVER mutation testing targets the real implementation paths that could turn a bad migration into an accepted one. Equivalent/noise mutations are excluded rather than used to inflate the score.
 
-## Contract model
+## Actual contract mutation sweep
 
-`scripts/contract_mutation.py` creates a fresh temporary copy for each mutation and runs the normal unit suite. A mutant counts as killed only when the tests fail. The harness also fails if its source pattern disappears, preventing silent mutation drift.
+`scripts/contract_mutation.py` mutates **`contracts/cutover.py` itself**. Before any mutant is accepted, the harness runs the complete unmodified Direct Mode suite as a mandatory control. Each mutant is written to a fresh temporary contract file, compiled, then exercised by the Direct Mode test that proves the changed invariant. The job fails if:
 
-Current consequential mutants cover:
-- MATERIAL_CHANGE no longer blocking;
-- UNREADABLE incorrectly passing;
-- source/evidence failure incorrectly passing;
-- a missing required route assessment being ignored;
-- stale candidate generation being ignored;
-- open challenge being ignored;
-- review deadline being ignored;
-- authorized/current candidate ref mismatch being ignored;
-- a second challenge being allowed;
-- a challenge after the window being allowed.
+- the unmodified control suite fails;
+- a mutation source pattern disappears or becomes ambiguous;
+- a generated mutant is syntactically invalid; or
+- a meaningful mutant survives its targeted Direct Mode test.
 
-Equivalent/noise mutants are excluded rather than inflating a count.
+The current sweep contains **63 meaningful actual-contract mutants** covering route/rule bounds, ownership, same-origin routing, snapshot schema and authenticated artefacts, baseline-source availability, candidate manifest identity and response-body digests, candidate-generation binding, immutable assessment attempts, retry limits, blocking/uncertain semantic outcomes, validator disagreement, READY aggregation, review-window stability, anti-self-challenge and anti-griefing rules, verified challenge evidence, authorization timing/evidence roots, terminal states, event-ring retention, owner pagination, and assessment-history pagination.
 
-## Frontend policy
+The three final gaps found by the hostile audit were closed explicitly:
+- the snapshot HTTP-status mutant is isolated from unrelated baseline-source failure;
+- an equivalent uncertainty mutant was replaced with a behavioral mutant that incorrectly treats uncertain findings as passing; and
+- the READY aggregation mutant is tested through `derive_candidate`, not only the per-route assessment.
 
-`mutations/frontend/run.mjs` now performs actual source mutations against `apps/web/lib/policy.ts`. For every mutant it runs the real Vitest policy suite, requires a failure, then restores the original file. Mutants cover authorize-while-challenged, READY-as-authorized, stale generation, premature authorization, wrong network, late challenge, second challenge and non-owner cancellation.
+## Frontend workflow mutation sweep
 
-The transaction lifecycle has separate tests ensuring an accepted decision is not displayed as finalized execution success.
+`mutations/frontend/run.mjs` performs real source mutations across the frontend policy/workflow surface and runs the real Vitest tests for every mutant. The suite covers, among other cases, challenge-on-wrong-network, non-owner cancellation, premature/stale authorization, challenged authorization, late/repeated challenge behavior, and terminal-state restrictions.
+
+A mutant counts as killed only when the normal product test fails under the mutated source. The original file is restored after each attempt.
+
+## CI acceptance
+
+The handoff package job depends on both mutation jobs. A ZIP cannot be produced from a run in which either the actual-contract mutation sweep or frontend mutation sweep fails.
