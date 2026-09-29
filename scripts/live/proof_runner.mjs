@@ -9,12 +9,14 @@ import path from "node:path";
 import crypto from "node:crypto";
 import {spawnSync} from "node:child_process";
 
-const args=process.argv.slice(2);const execute=args.includes("--execute");const planArg=args.find(x=>x.endsWith(".json"));
+const args=process.argv.slice(2);const execute=args.includes("--execute");const offlineDryRun=args.includes("--offline-dry-run");const planArg=args.find(x=>x.endsWith(".json"));
 if(!planArg)throw new Error("Usage: node scripts/live/proof_runner.mjs proof/live-plan.json [--execute]");
 const plan=JSON.parse(fs.readFileSync(planArg,"utf8"));const rpc=plan.rpc||"https://studio.genlayer.com/api";
 if(plan.chain_id!==61999)throw new Error(`Plan chain_id must be 61999, got ${plan.chain_id}`);
 async function rpcCall(method,params=[]){const res=await fetch(rpc,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",method,params,id:1})});if(!res.ok)throw new Error(`RPC HTTP ${res.status}`);const body=await res.json();if(body.error)throw new Error(JSON.stringify(body.error));return body.result;}
-const actualChain=Number.parseInt(await rpcCall("eth_chainId"),16);if(actualChain!==61999)throw new Error(`Refusing non-Studionet chain ${actualChain}`);
+if(execute&&offlineDryRun)throw new Error("--offline-dry-run cannot be combined with --execute");
+if(offlineDryRun&&rpc!=="https://studio.genlayer.com/api")throw new Error("Offline dry run requires the pinned Studionet RPC");
+const actualChain=offlineDryRun?61999:Number.parseInt(await rpcCall("eth_chainId"),16);if(actualChain!==61999)throw new Error(`Refusing non-Studionet chain ${actualChain}`);
 const sourcePath=path.resolve("contracts/cutover.py");const source=fs.readFileSync(sourcePath);const sourceSha=crypto.createHash("sha256").update(source).digest("hex");
 const preview={mode:execute?"EXECUTE":"DRY_RUN",network:{name:"studionet",chain_id:actualChain,rpc},source:{path:"contracts/cutover.py",sha256:sourceSha},planned_steps:(plan.steps||[]).map(x=>({name:x.name,kind:x.kind,method:x.method||null}))};
 if(!execute){console.log(JSON.stringify(preview,null,2));process.exit(0);}
