@@ -14,13 +14,21 @@ export type TxPhase=
 
 export const readClient=createClient({chain:studionet});
 
-export async function waitForFinality(hash:TransactionHash,onPhase:(phase:TxPhase)=>void){
+function toTransactionHash(hash:`0x${string}`):TransactionHash{
+  if(!/^0x[a-fA-F0-9]{64}$/.test(hash)){
+    throw new Error("Invalid GenLayer transaction hash");
+  }
+  return hash as TransactionHash;
+}
+
+export async function waitForFinality(hash:`0x${string}`,onPhase:(phase:TxPhase)=>void){
+  const txHash=toTransactionHash(hash);
   onPhase("submitted");
 
   // In genlayer-js 1.1.8, waiting for ACCEPTED returns once the transaction
   // reaches any decided state. Check that state explicitly before proceeding.
   const decided=await readClient.waitForTransactionReceipt({
-    hash,
+    hash:txHash,
     status:TransactionStatus.ACCEPTED,
   });
 
@@ -35,7 +43,7 @@ export async function waitForFinality(hash:TransactionHash,onPhase:(phase:TxPhas
   const finalized=decided.statusName===TransactionStatus.FINALIZED
     ? decided
     : await readClient.waitForTransactionReceipt({
-        hash,
+        hash:txHash,
         status:TransactionStatus.FINALIZED,
       });
 
