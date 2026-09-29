@@ -1,24 +1,57 @@
-import {createClient,isSuccessful} from "genlayer-js";
+import {createClient} from "genlayer-js";
 import {studionet} from "genlayer-js/chains";
+import {ExecutionResult,TransactionStatus,type TransactionHash} from "genlayer-js/types";
 
-export type TxPhase="awaiting_signature"|"submitted"|"accepted"|"finalizing"|"finalized"|"execution_success"|"execution_failure";
+export type TxPhase=
+  |"awaiting_signature"
+  |"submitted"
+  |"accepted"
+  |"decision_failure"
+  |"finalizing"
+  |"finalized"
+  |"execution_success"
+  |"execution_failure";
+
 export const readClient=createClient({chain:studionet});
 
-export async function waitForFinality(hash:`0x${string}`,onPhase:(p:TxPhase)=>void){
+export async function waitForFinality(hash:TransactionHash,onPhase:(phase:TxPhase)=>void){
   onPhase("submitted");
-  const decided=await readClient.waitForDecision({hash,fullTransaction:true});
+
+  // In genlayer-js 1.1.8, waiting for ACCEPTED returns once the transaction
+  // reaches any decided state. Check that state explicitly before proceeding.
+  const decided=await readClient.waitForTransactionReceipt({
+    hash,
+    status:TransactionStatus.ACCEPTED,
+    fullTransaction:true,
+  });
+
+  if(decided.statusName!==TransactionStatus.ACCEPTED&&decided.statusName!==TransactionStatus.FINALIZED){
+    onPhase("decision_failure");
+    throw new Error(`GenLayer decision did not accept the transaction: ${decided.statusName??"UNKNOWN"}`);
+  }
+
   onPhase("accepted");
-  if(!isSuccessful(decided)){
-    onPhase("execution_failure");
-    throw new Error(`GenLayer decision did not execute successfully: ${decided.statusName} / ${decided.txExecutionResultName}`);
-  }
   onPhase("finalizing");
-  const finalized=await readClient.waitForFinalization({hash,fullTransaction:true});
+
+  const finalized=decided.statusName===TransactionStatus.FINALIZED
+    ? decided
+    : await readClient.waitForTransactionReceipt({
+        hash,
+        status:TransactionStatus.FINALIZED,
+        fullTransaction:true,
+      });
+
   onPhase("finalized");
-  if(!isSuccessful(finalized)){
+
+  if(finalized.txExecutionResultName===ExecutionResult.FINISHED_WITH_ERROR){
     onPhase("execution_failure");
-    throw new Error(`GenLayer transaction finalized with execution failure: ${finalized.statusName} / ${finalized.txExecutionResultName}`);
+    throw new Error("GenLayer transaction finalized, but contract execution failed.");
   }
+  if(finalized.txExecutionResultName!==ExecutionResult.FINISHED_WITH_RETURN){
+    onPhase("execution_failure");
+    throw new Error(`GenLayer transaction finalized without a successful execution result: ${finalized.txExecutionResultName??"UNKNOWN"}`);
+  }
+
   onPhase("execution_success");
   return finalized;
 }
