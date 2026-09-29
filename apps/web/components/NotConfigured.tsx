@@ -1,0 +1,1 @@
+export function NotConfigured(){return <div className="notice"><strong>Contract not configured yet.</strong><div className="muted">Deploy the exact tracked contract to Studionet 61999, then set NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS. This app never substitutes fixture data for failed chain reads.</div></div>}
