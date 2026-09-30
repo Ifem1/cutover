@@ -15,6 +15,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  production-dependency-audit:
+    name: Production dependency audit (temporary evidence run)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Run npm audit --omit=dev
+        run: npm audit --omit=dev --json
+
   repository-integrity:
     name: Repository integrity
     runs-on: ubuntu-latest
