@@ -50,7 +50,7 @@ Release-candidate Studio-dev tooling is intentionally excluded from runtime path
 
 ## Validation boundary
 
-Offline/static checks and GitHub Actions are evidence only for the code paths they actually execute. The exact tracked contract is now deployed and source-verified on Studionet; public-app deployment and the migration scenario/browser-wallet proof remain incomplete. Do not describe CUTOVER as submission-ready solely because offline CI and contract deployment passed.
+Offline/static checks and GitHub Actions are evidence only for the code paths they actually execute. The exact tracked contract is deployed and source-verified on Studionet. Public fixture and frontend deployments are available, and one positive plus one negative migration cycle have been recorded. Live GitHub-gate verification and browser-wallet QA remain incomplete; do not describe CUTOVER as submission-ready yet.
 
 ## Phase 2 local offline validation
 
@@ -58,4 +58,8 @@ The local source at deployment commit `548cb04a79166a3fa59778c4214f7d3cc56b3059`
 
 ## Live deployment (partial)
 
-The contract is deployed on Studionet chain 61999 at `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`. Deployment transaction: `0xd20c981216ecccc524ca46ec32263a1698893704fad2a4309bbbece4bdbca65e`. The finalized source fetched through `genlayer-js` 1.1.8 has the same SHA-256 as `contracts/cutover.py`: `34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834`. See [deployment evidence](proof/live/deployment.json). The public fixture/frontend, on-chain migration cases, GitHub gate against live state and browser-wallet QA are still pending.
+The contract is deployed on Studionet chain 61999 at `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`. Deployment transaction: `0xd20c981216ecccc524ca46ec32263a1698893704fad2a4309bbbece4bdbca65e`. The finalized source fetched through `genlayer-js` 1.1.8 has the same SHA-256 as `contracts/cutover.py`: `34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834`. See [deployment evidence](proof/live/deployment.json), [positive authorized cycle](proof/live/positive-cycle.json), and [negative blocked cycle](proof/live/negative-cycle.json).
+
+The public CUTOVER frontend is [cutover-web.vercel.app](https://cutover-web.vercel.app), and the public fixture lab is [cutover-fixtures.vercel.app](https://cutover-fixtures.vercel.app). For a Vercel frontend deployment, set `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`. Network, RPC and explorer are pinned in the frontend source. For the fixture deployment, set `CUTOVER_CANDIDATE_MANIFEST_JSON` to the JSON returned by `https://cutover-fixtures.vercel.app/.well-known/cutover.json`; generate and verify it with `scripts/live/build_manifest.mjs` whenever the fixture source or deployment changes.
+
+The live positive cycle (migration 3) ended `AUTHORIZED` after the review deadline, with an independent challenge resolved and re-derived. The negative cycle (migration 4) ended `BLOCKED` for pricing, legal, signup and injection fixtures. The unrelated-route assessment produced validator `MAJORITY_DISAGREE` and remained unapproved. Live unavailable-source, wrong-ref, body-digest mismatch, GitHub gate, and browser-wallet cases remain outstanding.

@@ -1,0 +1,70 @@
+{
+  "schema_version": "cutover.live-case.v1",
+  "case_id": "positive-cycle-3",
+  "recorded_at": "2026-09-30T10:56:54Z",
+  "network": {
+    "name": "studionet",
+    "chain_id": 61999,
+    "rpc": "https://studio.genlayer.com/api"
+  },
+  "contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
+  "contract_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
+  "source_commit": "548cb04a79166a3fa59778c4214f7d3cc56b3059",
+  "candidate_ref": "796473c3eda18701ca293cb1100b065652f1da9c",
+  "candidate_origin": "https://cutover-fixtures.vercel.app",
+  "manifest_digest": "d033ea262585b556462e5d387655b4dd809626280a40dfefe680763ac17630d5",
+  "migration_id": 3,
+  "owner": "0x77e2EdBb43277bf772e207C517dde731935ffbA5",
+  "expected": "READY after preservation and semantic-equivalence checks, then AUTHORIZED only after the challenge window and a resolved challenge",
+  "actual": "AUTHORIZED; both preserved and cosmetic routes assessed READY; challenge reassessment resolved READY; candidate was re-derived after the challenge; authorization receipt finalized with MAJORITY_AGREE and leader SUCCESS",
+  "route_results": {
+    "exact": {
+      "expected_body_sha256": "86ef5c0ff18f3b2c250e84000ad98235d7f8015e6f3d1381c31b42d8c11a5d75",
+      "result": "READY"
+    },
+    "cosmetic": {
+      "expected_body_sha256": "9ad27d7f25755bd2c9f5edc63ee17f90d91b1d1e80ab1f5bf3b540d63d2144c9",
+      "result": "READY"
+    }
+  },
+  "challenge": {
+    "challenger": "0x6b476bf35c4968f3f1775c0ca2110591b4b5fcbe",
+    "route_id": "exact",
+    "evidence_url": "https://cutover-fixtures.vercel.app/baseline/preserved",
+    "evidence_sha256": "6274e846191a6edf860af8983fb424c8c35f7d4de3961e2190b3e36f5b894afc",
+    "open_tx": "0x44dc6ab3fdb289a3718a7633a53dd37767ed1a89d9fc8913b1c9ec61f19e6c40",
+    "reassess_tx": "0xe2f8fa20d109d89bd70275a60ec8ec97495669e5f1e200c42451b41e315bc684",
+    "result": "READY",
+    "consensus": "MAJORITY_AGREE",
+    "leader_execution": "SUCCESS"
+  },
+  "authorization": {
+    "tx": "0xd2c9010a0e8a75c637691aefa6b89c9261cb08d354f93a8eb8359dbcdf318f93",
+    "status": "FINALIZED",
+    "consensus": "MAJORITY_AGREE",
+    "leader_execution": "SUCCESS",
+    "authorization_digest": "27145e0002af476c6680b09efe526e92b8c96ae6a7fe50e1e87f2059c71a0220",
+    "evidence_root": "2f55dc76473f8672c7118e59d5c68f3bc41d11c31f73ad461ec2e5754f72bbd6"
+  },
+  "transaction_refs": {
+    "create_migration": "0x3e95de15c787d955c7d2ef02514f791be0bff2583c45f46b7c93e7049d07d187",
+    "seal_baseline": "0x5009276663b1b13d25b358f9f57cca9d1996120b98dd5c3e48f74d0cd0d4b485",
+    "set_candidate": "0xfd1fdbc5f9ad4151c352fa93860322f8b4b9a31c7bb0daa51cbc89237708250a",
+    "derive_ready": "0x418783af8318df3441d8b8c007ed35441f2704ee302e7b59467554280077e87c",
+    "derive_after_challenge": "0x488a4b994f56cc32db7492ddffa6f1ed0a081b463b4a0d52b477164c36765357"
+  },
+  "evidence_files": [
+    "artifacts/live/2026-09-30T10-08-25-022Z/run.json",
+    "artifacts/live/2026-09-30T10-17-55-918Z/run.json",
+    "artifacts/live/2026-09-30T10-20-32-577Z/run.json",
+    "artifacts/live/2026-09-30T10-56-39-998Z/01-receipt-accepted.txt",
+    "artifacts/live/2026-09-30T10-56-39-998Z/02-receipt-finalized.txt",
+    "artifacts/live/final-positive-state.txt",
+    "proof/live/deployment.json"
+  ],
+  "limitations": [
+    "Browser-wallet end-to-end verification and public verification-page screenshots were not performed.",
+    "The transaction receipt lookup initially hit a transient RPC service error; the same submitted authorization transaction was retrieved on retry and was not resubmitted.",
+    "Fees were not reported because captured Studionet receipts did not expose reliable fee data."
+  ]
+}

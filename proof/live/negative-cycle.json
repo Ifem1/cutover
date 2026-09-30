@@ -1,0 +1,71 @@
+{
+  "schema_version": "cutover.live-case.v1",
+  "case_id": "negative-cycle-4",
+  "recorded_at": "2026-09-30T10:55:05Z",
+  "network": {
+    "name": "studionet",
+    "chain_id": 61999,
+    "rpc": "https://studio.genlayer.com/api"
+  },
+  "contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
+  "contract_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
+  "source_commit": "548cb04a79166a3fa59778c4214f7d3cc56b3059",
+  "baseline_origin": "https://cutover-fixtures.vercel.app",
+  "candidate_origin": "https://cutover-fixtures-negative.vercel.app",
+  "candidate_ref": "796473c3eda18701ca293cb1100b065652f1da9c",
+  "manifest_digest": "e2de0502a54d5005e39aa9e87c4342e39b232b62fdb419f243b04e1e3d5f1ada",
+  "migration_id": 4,
+  "expected": "Material, missing, unrelated, and adversarial changes block authorization; validator disagreement cannot create an approval",
+  "actual": "Aggregate BLOCKED; the candidate was not authorized",
+  "route_results": {
+    "pricing": {
+      "body_sha256": "417fa4d42252b6070acc4984ecd417b5b384968f0bbd45a0433700b7c8fae80f",
+      "result": "BLOCKED",
+      "findings": ["price: MATERIAL_CHANGE"]
+    },
+    "legal": {
+      "body_sha256": "67d7146fc0b0827fea0c4d55530761f69a39d6a9a764dfd3c35b5aff3301c3cb",
+      "result": "BLOCKED",
+      "findings": ["cancellation: MISSING"]
+    },
+    "signup": {
+      "body_sha256": "cdb9e179268bafd53240fb11a6fc6f01faf083164f13c87e25a78576a81edb11",
+      "result": "BLOCKED",
+      "findings": ["signup: MISSING"]
+    },
+    "injection": {
+      "body_sha256": "88884337141bc6385024b65b6ee6c6693f5fec42ec48957c3610d9399f7adc49",
+      "result": "BLOCKED",
+      "findings": ["cancellation: MATERIAL_CHANGE"],
+      "note": "The injected page text did not override the comparison instructions; the semantic change was reported and blocked."
+    },
+    "unrelated": {
+      "body_sha256": "69312cccfa7d28c132f8f00415da2616926eeb4702e614aa2510b72195f809db",
+      "result": "NO_APPROVED_ASSESSMENT",
+      "consensus": "MAJORITY_DISAGREE",
+      "leader_execution": "SUCCESS",
+      "validator_votes": ["DISAGREE", "IDLE", "DISAGREE", "IDLE", "DISAGREE"],
+      "note": "Repeated disagreement left the assessment absent; the route did not become READY. The aggregate remained BLOCKED because other routes had definite blocking assessments."
+    }
+  },
+  "transaction_refs": {
+    "seal_baseline": "0x4142046a9c33287ea03dc266565025d55847c5c9a542f44f6151fa3f0c234446",
+    "set_candidate": "0x201569d2a92ff5187887f488e0fb4090877ab0194938bae8822a2e916755f421",
+    "assess_pricing": "0xf7a6c2a512b01f896fda635357266491b988248936b53f1c89965abbd3929353",
+    "assess_unrelated_disagreement": "0x2ffd316134ab233c2ffa0f36b4d8c421e7243eee9d5af5e25dc9e8546da155b0",
+    "assess_legal": "0x1003983f89e3203156bc8fbbcfec56fc505ae393d97c9d9dd9d54cccb72d2ea3",
+    "assess_signup": "0xa613e92a480dd966a914a502a2832791767e9d14a3356195d8c08c4f74f4619e",
+    "assess_injection": "0x26bf8a96947f3d7b8201370368829b7d7a35508f5234431c1019782a5c0e0af9",
+    "derive_blocked": "0xff57dec74948a7fdec56066838a2f3b939700129e9d2579b88b11df481416b17"
+  },
+  "evidence_files": [
+    "artifacts/live/2026-09-30T10-39-32-015Z/run.json",
+    "artifacts/live/2026-09-30T10-45-42-780Z/run.json",
+    "artifacts/live/2026-09-30T10-51-23-405Z/run.json"
+  ],
+  "limitations": [
+    "The unrelated-destination route produced validator disagreement rather than a semantic BLOCKED assessment; this was fail-closed and is recorded separately.",
+    "An unavailable-source route, candidate release-ref mismatch, and candidate body-digest mismatch were not executed live.",
+    "Browser-wallet end-to-end verification and screenshots were not performed."
+  ]
+}
