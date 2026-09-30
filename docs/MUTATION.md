@@ -11,7 +11,7 @@ CUTOVER mutation testing targets the real implementation paths that could turn a
 - a generated mutant is syntactically invalid; or
 - a meaningful mutant survives its targeted Direct Mode test.
 
-The current sweep defines **65 actual-contract mutants** covering route/rule bounds, ownership, same-origin routing, snapshot schema and authenticated artefacts, baseline-source availability, candidate manifest identity and response-body digests, candidate-generation binding, immutable assessment attempts, retry limits, blocking/uncertain semantic outcomes, validator disagreement, READY aggregation, review-window stability, anti-self-challenge and anti-griefing rules, per-route and per-generation challenge bounds, verified challenge evidence, authorization timing/evidence roots, terminal states, event-ring retention, owner pagination, and assessment-history pagination. In this local Phase 2 run, the full unmodified Direct Mode control passed **92/92** and the sweep killed **65/65**. CI has not yet run for this changed source.
+The current sweep defines **73 actual-contract mutants** covering route/rule bounds, ownership, same-origin routing, snapshot schema and authenticated artefacts, baseline-source availability and probe binding, candidate manifest identity and response-body digests, candidate-generation binding, immutable assessment attempts, retry limits, blocking/uncertain semantic outcomes, validator disagreement, READY aggregation, review-window stability, anti-self-challenge and anti-griefing rules, per-route and per-generation challenge bounds, verified challenge evidence and exact evidence-text binding, authorization timing/evidence roots, candidate-probe revalidation, terminal states, event-ring retention, owner pagination, and assessment-history pagination. The completed local run against the revised source passed the full unmodified Direct Mode control at **111/111** and killed **73/73** meaningful mutants. The earlier 92/92 and 65/65 counts belong to the previous source and are historical only. CI is run for the pushed final commit.
 
 The three final gaps found by the hostile audit were closed explicitly:
 - the snapshot HTTP-status mutant is isolated from unrelated baseline-source failure;
@@ -20,7 +20,7 @@ The three final gaps found by the hostile audit were closed explicitly:
 
 ## Frontend workflow mutation sweep
 
-`mutations/frontend/run.mjs` performs real source mutations across the frontend policy/workflow surface and runs the real Vitest tests for every mutant. The suite covers, among other cases, challenge-on-wrong-network, non-owner cancellation, premature/stale authorization, challenged authorization, late/repeated challenge behavior, and terminal-state restrictions.
+`mutations/frontend/run.mjs` performs real source mutations across the frontend policy/workflow surface and runs the real Vitest tests for every mutant. The latest local run passed its unmodified control and killed **20/20** mutants. The suite covers, among other cases, challenge-on-wrong-network, non-owner cancellation, premature/stale authorization, challenged authorization, late/repeated challenge behavior, and terminal-state restrictions.
 
 A mutant counts as killed only when the normal product test fails under the mutated source. The original file is restored after each attempt.
 

@@ -13,6 +13,10 @@ BASELINE_BODY="<html><head><title>Pricing</title><link rel='canonical' href='htt
 def _canon(v): return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False)
 def _digest(v): return hashlib.sha256(_canon(v).encode()).hexdigest()
 def _body_digest(v): return hashlib.sha256(v.encode()).hexdigest()
+def _assessment_commitment(v):
+    fields=("generation","route_id","candidate_ref","candidate_manifest_digest","baseline_digest","candidate_url","manifest_match","content_match",
+            "source_match","evidence_available","candidate_probe_digest","expected_body_sha256","challenge","findings","route_result","attempt","attempt_kind")
+    return _digest({key:v.get(key) for key in fields})
 def _rules(one=False):
     rules=[{"id":"pricing","question":"Is the $49 monthly commitment preserved?","allowed_changes":"Cosmetic copy/layout changes only."}]
     if not one: rules.append({"id":"cancel","question":"Is the 30 day cancellation obligation preserved?","allowed_changes":"Equivalent wording is allowed."})
@@ -22,11 +26,11 @@ def _snapshot(route_id="pricing",source_url=BASE_ORIGIN+"/pricing",text="Pro $49
 def _manifest(ref="release-a",body=CANDIDATE_BODY,routes=None,origin=CANDIDATE_ORIGIN):
     if routes is None: routes=[{"route_id":"pricing","path":"/pricing","content_sha256":_body_digest(body)}]
     return {"schema_version":"cutover.candidate.v1","candidate_origin":origin,"release_ref":ref,"routes":routes}
-def _mock_baseline(vm,snapshot=None,baseline_body=BASELINE_BODY,artifact_body=None,status=200,faithful=True):
+def _mock_baseline(vm,snapshot=None,baseline_body=BASELINE_BODY,artifact_body=None,status=200,faithful=True,reason="snapshot comparison"):
     s=snapshot or _snapshot(); artifact_body=artifact_body if artifact_body is not None else json.dumps(s)
     vm.mock_web(r".*fixture\.local/pricing.*",{"status":status,"body":baseline_body})
     vm.mock_web(r".*proof\.local/baseline-pricing\.json.*",{"status":200,"body":artifact_body})
-    vm.mock_llm(r".*Authenticate a CUTOVER baseline snapshot.*",json.dumps({"faithful":faithful,"reason":"snapshot comparison"}))
+    vm.mock_llm(r".*Authenticate a CUTOVER baseline snapshot.*",json.dumps({"faithful":faithful,"reason":reason}))
 def _create_route(c,mid,route_id="pricing",baseline_url=BASE_ORIGIN+"/pricing",candidate_path="/pricing",rules=None):
     c.add_route(mid,route_id,baseline_url,candidate_path,rules or _rules())
 def _baseline(vm,c,review=300):
@@ -38,7 +42,7 @@ def _set_candidate(vm,c,mid,ref="release-a",body=CANDIDATE_BODY,manifest=None):
     man=manifest or _manifest(ref,body); _mock_manifest(vm,man)
     assert c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(man))>=1
     return man
-def _mock_assessment(vm,manifest,statuses=("PRESERVED","PRESERVED"),body=CANDIDATE_BODY,http_status=200,canonical=True,malformed=False):
+def _mock_assessment(vm,manifest,statuses=("PRESERVED","PRESERVED"),body=CANDIDATE_BODY,http_status=200,canonical=True,malformed=False,reason_suffix="explanation"):
     _mock_manifest(vm,manifest)
     rendered=body
     if not canonical: rendered=body.replace("https://candidate.local/pricing","https://other.example/pricing")
@@ -47,7 +51,7 @@ def _mock_assessment(vm,manifest,statuses=("PRESERVED","PRESERVED"),body=CANDIDA
         vm.mock_llm(r".*CUTOVER semantic comparison stage.*",json.dumps({"wrong":[]})); return
     findings=[]
     ids=["pricing","cancel"][:len(statuses)]
-    for rid,status in zip(ids,statuses): findings.append({"rule_id":rid,"status":status,"reason":f"{rid} explanation"})
+    for rid,status in zip(ids,statuses): findings.append({"rule_id":rid,"status":status,"reason":f"{rid} {reason_suffix}"})
     vm.mock_llm(r".*CUTOVER semantic comparison stage.*",json.dumps({"findings":findings}))
 def _ready(vm,c,mid,ref="release-a",body=CANDIDATE_BODY):
     man=_set_candidate(vm,c,mid,ref,body); _mock_assessment(vm,man,body=body); assert c.assess_route(mid,"pricing")=="READY"; c.derive_candidate(mid); return man
@@ -148,12 +152,15 @@ def test_baseline_malformed_consensus_output_fails_closed(direct_vm,direct_deplo
 
 def test_frozen_baseline_is_immutable(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c)
+    route=c.get_route(mid,"pricing"); probe=json.loads(route["baseline_probe"])
+    assert probe["available"] is True and route["baseline_probe_digest"]==_digest(probe)
     with direct_vm.expect_revert("baseline registration closed"): c.freeze_route(mid,"pricing",SNAPSHOT_URL,json.dumps(_snapshot()),_digest(_snapshot()))
 
 # --- candidate provenance ---
 def test_candidate_manifest_binds_ref_and_generation(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); m1=_set_candidate(direct_vm,c,mid,"release-a"); state=c.get_migration(mid)
     assert state["candidate_ref"]=="release-a" and state["candidate_manifest_digest"]==_digest(m1) and state["candidate_generation"]==1
+    assert json.loads(state["candidate_manifest"])==m1
     direct_vm.clear_mocks(); m2=_manifest("release-b"); _mock_manifest(direct_vm,m2); assert c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(m2))==2
 
 def test_candidate_ref_is_not_owner_argument(direct_deploy):
@@ -166,6 +173,16 @@ def test_manifest_url_must_be_well_known_same_origin(direct_vm,direct_deploy):
 def test_manifest_digest_mismatch_rejected(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_manifest(); _mock_manifest(direct_vm,man)
     with direct_vm.expect_revert("candidate manifest verification failed"): c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,"0"*64)
+
+@pytest.mark.parametrize("field",["content_sha256","candidate_origin","route_mapping"])
+def test_leader_cannot_substitute_manifest_payload_while_claiming_same_digest(direct_vm,direct_deploy,field):
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_manifest(); _mock_manifest(direct_vm,man); c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(man))
+    forged=dict(man)
+    if field=="content_sha256": forged["routes"]=[dict(man["routes"][0],content_sha256="0"*64)]
+    elif field=="candidate_origin": forged["candidate_origin"]="https://forged.local"
+    else: forged["routes"]=[dict(man["routes"][0],path="/forged")]
+    leader_result={"ok":True,"code":"OK","digest":_digest(man),"release_ref":"release-a","manifest":forged}
+    assert direct_vm.run_validator(leader_result=leader_result) is False
 
 def test_manifest_origin_mismatch_rejected(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_manifest(origin="https://other.example"); _mock_manifest(direct_vm,man)
@@ -223,6 +240,14 @@ def test_inconclusive_retries_are_counted_and_preserved(direct_vm,direct_deploy)
         history=c.get_assessment_attempts(mid,1,"pricing",0,10); assert len(history)==attempt and history[-1]["attempt"]==attempt
     with direct_vm.expect_revert("ordinary retry limit"): c.assess_route(mid,"pricing")
 
+def test_non_owner_cannot_consume_ordinary_inconclusive_retry_budget(direct_vm,direct_deploy,direct_owner,direct_bob):
+    direct_vm.sender=direct_owner; c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid)
+    direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_assessment(direct_vm,man,("UNREADABLE","PRESERVED"))
+    with direct_vm.expect_revert("not migration owner"): c.assess_route(mid,"pricing")
+    assert c.get_assessment_attempts(mid,1,"pricing",0,10)==[]
+    direct_vm.sender=direct_owner; direct_vm.clear_mocks(); _mock_assessment(direct_vm,man,("UNREADABLE","PRESERVED"))
+    assert c.assess_route(mid,"pricing")=="INCONCLUSIVE"
+
 def test_malformed_semantic_output_is_inconclusive_and_preserved(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man,malformed=True)
     assert c.assess_route(mid,"pricing")=="INCONCLUSIVE"; assert c.get_assessment_attempts(mid,1,"pricing",0,10)[0]["findings"]==[]
@@ -239,6 +264,51 @@ def test_validator_status_disagreement_is_detected(direct_vm,direct_deploy):
 def test_validator_source_disagreement_is_detected(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing")
     direct_vm.clear_mocks(); _mock_manifest(direct_vm,man); direct_vm.mock_web(r".*candidate\.local/pricing.*",{"status":503,"body":""}); assert direct_vm.run_validator() is False
+
+def test_validator_cannot_substitute_assessment_candidate_probe(direct_vm,direct_deploy):
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing")
+    stored=c.get_route_assessment(mid,1,"pricing")
+    leader_result={k:v for k,v in stored.items() if k not in ("attempt","attempt_kind","assessment_digest","leader_explanations_consensus_bound")}
+    leader_result["candidate_probe"]=dict(leader_result["candidate_probe"],body_sha256="0"*64)
+    assert direct_vm.run_validator(leader_result=leader_result) is False
+
+def test_validator_rejects_altered_assessment_expected_body_sha(direct_vm,direct_deploy):
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing")
+    stored=c.get_route_assessment(mid,1,"pricing")
+    leader_result={k:v for k,v in stored.items() if k not in ("attempt","attempt_kind","assessment_digest","leader_explanations_consensus_bound")}
+    leader_result["expected_body_sha256"]="0"*64
+    assert direct_vm.run_validator(leader_result=leader_result) is False
+
+@pytest.mark.parametrize("field,value",[("canonical_url","https://attacker.local/pricing"),("status",503)])
+def test_validator_cannot_substitute_candidate_probe_metadata(direct_vm,direct_deploy,field,value):
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing")
+    stored=c.get_route_assessment(mid,1,"pricing")
+    leader_result={k:v for k,v in stored.items() if k not in ("attempt","attempt_kind","assessment_digest","leader_explanations_consensus_bound")}
+    leader_result["candidate_probe"]=dict(leader_result["candidate_probe"],**{field:value})
+    assert direct_vm.run_validator(leader_result=leader_result) is False
+
+def test_leader_explanations_are_bounded_presentation_only(direct_vm,direct_deploy):
+    c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing")
+    stored=c.get_route_assessment(mid,1,"pricing")
+    leader_result={k:v for k,v in stored.items() if k not in ("attempt","attempt_kind","assessment_digest","leader_explanations_consensus_bound")}
+    leader_result["leader_explanations"]=[dict(item,text="different bounded display-only prose") for item in stored["leader_explanations"]]
+    assert direct_vm.run_validator(leader_result=leader_result) is True
+
+def test_leader_explanation_changes_do_not_change_assessment_or_authorization(direct_vm,direct_deploy):
+    evidence=[]; direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT)
+    for explanation in ("explanation-one","explanation-two"):
+        direct_vm.clear_mocks(); mid=c.create_migration("Pricing migration",BASE_ORIGIN,300); _create_route(c,mid); snapshot=_snapshot(); _mock_baseline(direct_vm,snapshot,reason=explanation)
+        c.freeze_route(mid,"pricing",SNAPSHOT_URL,json.dumps(snapshot),_digest(snapshot)); c.seal_baseline(mid)
+        manifest=_manifest(); _mock_manifest(direct_vm,manifest); c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(manifest))
+        direct_vm.clear_mocks(); _mock_assessment(direct_vm,manifest,reason_suffix=explanation); assert c.assess_route(mid,"pricing")=="READY"; c.derive_candidate(mid)
+        assessment=c.get_route_assessment(mid,1,"pricing"); direct_vm.warp("2026-09-29T12:05:00Z"); c.authorize(mid); authorization=c.get_authorization(mid)
+        evidence.append((assessment,authorization))
+        direct_vm.warp("2026-09-29T12:00:00Z")
+    assert evidence[0][0]["leader_explanations"]!=evidence[1][0]["leader_explanations"]
+    assert evidence[0][0]["baseline_digest"]==evidence[1][0]["baseline_digest"]
+    assert evidence[0][0]["assessment_digest"]==evidence[1][0]["assessment_digest"]
+    assert evidence[0][1]["evidence_root"]==evidence[1][1]["evidence_root"]
+    assert evidence[0][1]["evidence_set"]==evidence[1][1]["evidence_set"]
 
 def test_candidate_http_failure_is_inconclusive(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid); _mock_assessment(direct_vm,man,http_status=503)
@@ -280,7 +350,7 @@ def test_unavailable_challenge_evidence_does_not_burn_slot(direct_vm,direct_depl
 def test_challenge_blocks_authorization_until_reassessed(direct_vm,direct_deploy,direct_bob):
     direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_ready(direct_vm,c,mid); direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")
     direct_vm.warp("2026-09-29T12:05:00Z")
-    with direct_vm.expect_revert("candidate not ready"): c.authorize(mid)
+    with direct_vm.expect_revert("challenge unresolved"): c.authorize(mid)
     direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); assert c.reassess_challenge(mid)=="READY"; assert c.get_challenge(mid)["resolved"] is True
 
 def test_consequential_challenge_result_is_preserved_and_blocks_candidate(direct_vm,direct_deploy,direct_bob):
@@ -339,7 +409,20 @@ def test_stale_generation_challenge_context_not_reused(direct_vm,direct_deploy,d
 
 def test_challenge_evidence_is_bound_into_reassessment_digest(direct_vm,direct_deploy,direct_bob):
     direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_ready(direct_vm,c,mid); direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="proof-A"); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change"); challenge=c.get_challenge(mid)
-    direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); c.reassess_challenge(mid); a=c.get_route_assessment(mid,1,"pricing"); assert challenge["evidence_digest"] in _canon(c.get_challenge(mid)) and a["attempt_kind"]=="CHALLENGE"
+    direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); c.reassess_challenge(mid); a=c.get_route_assessment(mid,1,"pricing")
+    assert challenge["evidence_digest"] in _canon(c.get_challenge(mid)) and a["attempt_kind"]=="CHALLENGE"
+    assert challenge["evidence_text"]=="proof-A"
+    assert a["challenge"]=={"id":challenge["id"],"evidence_digest":challenge["evidence_digest"]}
+    assert "evidence_text" not in a["challenge"]
+
+def test_challenge_prose_is_not_in_semantic_reassessment_prompt(direct_vm,direct_deploy,direct_bob):
+    marker="CHALLENGE_PROSE_MUST_NOT_REACH_VERDICT"
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_ready(direct_vm,c,mid)
+    direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body=marker); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")
+    direct_vm.clear_mocks(); _mock_manifest(direct_vm,man); direct_vm.mock_web(r".*candidate\.local/pricing.*",{"status":200,"body":CANDIDATE_BODY})
+    response=json.dumps({"findings":[{"rule_id":"pricing","status":"PRESERVED","reason":"ok"},{"rule_id":"cancel","status":"PRESERVED","reason":"ok"}]})
+    direct_vm.mock_llm(r"(?s)^(?!.*CHALLENGE_PROSE_MUST_NOT_REACH_VERDICT).*CUTOVER semantic comparison stage.*",response)
+    assert c.reassess_challenge(mid)=="READY"
 
 # --- authorization and terminal walls ---
 def test_authorization_uses_time_and_evidence_root(direct_vm,direct_deploy):
@@ -347,10 +430,33 @@ def test_authorization_uses_time_and_evidence_root(direct_vm,direct_deploy):
     with direct_vm.expect_revert("review window open"): c.authorize(mid)
     direct_vm.warp("2026-09-29T12:05:00Z"); digest=c.authorize(mid); a=c.get_authorization(mid)
     assert a["candidate_ref"]=="release-exact" and a["candidate_manifest_digest"] and a["evidence_root"] and a["authorization_digest"]==digest and len(a["evidence_set"]["routes"])==1
+    assert a["evidence_set"]["candidate_origin"]==CANDIDATE_ORIGIN
+    route=a["evidence_set"]["routes"][0]
+    assert route["candidate_url"]==CANDIDATE_ORIGIN+"/pricing" and route["candidate_probe_digest"] and route["candidate_body_sha256"]==_body_digest(CANDIDATE_BODY)
 
 def test_authorization_reflects_exact_assessment_digest(direct_vm,direct_deploy):
     direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); _ready(direct_vm,c,mid); current=c.get_route_assessment(mid,1,"pricing"); direct_vm.warp("2026-09-29T12:05:00Z"); c.authorize(mid); a=c.get_authorization(mid)
     assert a["evidence_set"]["routes"][0]["assessment_digest"]==current["assessment_digest"]
+
+@pytest.mark.parametrize("mutation",["probe_digest","body_hash","canonical_url"])
+def test_authorization_revalidates_persisted_candidate_probe(direct_vm,direct_deploy,mutation):
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); _ready(direct_vm,c,mid)
+    key="1:1:pricing"; assessment=json.loads(c.assessments.get(key)); probe=dict(assessment["candidate_probe"])
+    if mutation=="probe_digest": assessment["candidate_probe_digest"]="0"*64
+    elif mutation=="body_hash":
+        probe["body_sha256"]="0"*64; assessment["candidate_probe"]=probe; assessment["candidate_probe_digest"]=_digest(probe)
+    else:
+        probe["canonical_url"]="https://attacker.local/pricing"; assessment["candidate_probe"]=probe; assessment["candidate_probe_digest"]=_digest(probe)
+    assessment["assessment_digest"]=_assessment_commitment(assessment); c.assessments[key]=_canon(assessment)
+    direct_vm.warp("2026-09-29T12:05:00Z")
+    with direct_vm.expect_revert("authorization evidence incomplete"): c.authorize(mid)
+
+def test_authorization_revalidates_stored_manifest_against_registered_digest(direct_vm,direct_deploy):
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); _ready(direct_vm,c,mid)
+    migration=json.loads(c.migrations.get(str(mid))); manifest=json.loads(migration["candidate_manifest"])
+    manifest["schema_version"]="tampered"; migration["candidate_manifest"]=_canon(manifest); c.migrations[str(mid)]=_canon(migration)
+    direct_vm.warp("2026-09-29T12:05:00Z")
+    with direct_vm.expect_revert("authorization evidence incomplete"): c.authorize(mid)
 
 def test_missing_current_generation_assessment_cannot_ready(direct_vm,direct_deploy):
     c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_set_candidate(direct_vm,c,mid,"a"); _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing"); c.derive_candidate(mid); direct_vm.clear_mocks(); man2=_manifest("b"); _mock_manifest(direct_vm,man2); c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(man2)); assert c.derive_candidate(mid)=="INCONCLUSIVE"
@@ -464,6 +570,25 @@ def test_baseline_validator_probe_disagreement_detected(direct_vm,direct_deploy)
     c=direct_deploy(CONTRACT); mid=c.create_migration("x",BASE_ORIGIN,300); _create_route(c,mid); s=_snapshot(); _mock_baseline(direct_vm,s); c.freeze_route(mid,"pricing",SNAPSHOT_URL,json.dumps(s),_digest(s))
     direct_vm.clear_mocks(); direct_vm.mock_web(r".*fixture\.local/pricing.*",{"status":200,"body":BASELINE_BODY+" changed"}); direct_vm.mock_web(r".*proof\.local/baseline-pricing\.json.*",{"status":200,"body":json.dumps(s)}); direct_vm.mock_llm(r".*Authenticate a CUTOVER baseline snapshot.*",json.dumps({"faithful":True,"reason":"still says faithful"}))
     assert direct_vm.run_validator() is False
+
+@pytest.mark.parametrize("mutation",["probe_content","json_type"])
+def test_baseline_leader_cannot_substitute_probe_with_same_digest_claim(direct_vm,direct_deploy,mutation):
+    c=direct_deploy(CONTRACT); mid=c.create_migration("x",BASE_ORIGIN,300); _create_route(c,mid); s=_snapshot(); _mock_baseline(direct_vm,s); c.freeze_route(mid,"pricing",SNAPSHOT_URL,json.dumps(s),_digest(s))
+    route=c.get_route(mid,"pricing"); probe=json.loads(route["baseline_probe"])
+    if mutation=="probe_content": probe["visible_text"]="forged baseline"
+    else: probe["available"]=1
+    leader_result={"ok":True,"code":"FAITHFUL","snapshot_digest":route["baseline_digest"],"probe_digest":route["baseline_probe_digest"],"probe":probe,"explanation":"snapshot comparison"}
+    assert direct_vm.run_validator(leader_result=leader_result) is False
+
+@pytest.mark.parametrize("mutation",["evidence_text","json_type"])
+def test_challenge_leader_cannot_substitute_evidence_text_with_same_digest_claim(direct_vm,direct_deploy,direct_bob,mutation):
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); _ready(direct_vm,c,mid)
+    direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="authentic challenge evidence"); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")
+    challenge=c.get_challenge(mid)
+    evidence_text="forged challenge text" if mutation=="evidence_text" else challenge["evidence_text"]
+    relevant=1 if mutation=="json_type" else True
+    leader_result={"ok":True,"code":"RELEVANT","evidence_digest":challenge["evidence_digest"],"text":evidence_text,"relevant":relevant,"explanation":"route specific evidence"}
+    assert direct_vm.run_validator(leader_result=leader_result) is False
 
 def test_challenge_validator_digest_disagreement_detected(direct_vm,direct_deploy,direct_bob):
     direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); _ready(direct_vm,c,mid); direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="proof A"); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")

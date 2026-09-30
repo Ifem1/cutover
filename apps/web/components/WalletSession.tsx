@@ -116,6 +116,6 @@ export function WalletBar(){
   const w=useWallet();
   return <div className="walletBar" aria-label="Wallet status">
     <div><span className={`statusPill ${w.account&&w.networkOk?"ok":"warn"}`}>{!w.account?"Wallet disconnected":w.networkOk?"Studionet · 61999":`Wrong network${w.chainId?` · ${w.chainId}`:""}`}</span><span className="mono walletAccount">{w.account?`${w.account.slice(0,8)}…${w.account.slice(-6)}`:"Connect from the navbar to enable transaction actions."}</span></div>
-    <span className="walletBarHint">Wallet controls are in the top navigation.</span>
+    <span className="walletBarHint">{w.provider?"Wallet controls are in the top navigation.":"No injected wallet is available in this browser."}</span>
   </div>;
 }

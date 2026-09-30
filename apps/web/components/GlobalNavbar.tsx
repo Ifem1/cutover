@@ -27,7 +27,7 @@ function WalletControl(){
     window.setTimeout(()=>setCopied(false),1500);
   }
 
-  if(!wallet.account)return <div className="walletControl" ref={root}><button className="walletTrigger disconnected" type="button" onClick={()=>void wallet.connect()} aria-label="Connect wallet">Connect wallet</button></div>;
+  if(!wallet.account)return <div className="walletControl" ref={root}><button className="walletTrigger disconnected" type="button" onClick={()=>void wallet.connect()} aria-label="Connect wallet" disabled={!wallet.provider}>Connect wallet</button>{!wallet.provider&&<span className="walletUnavailable" role="status">No injected wallet found in this browser.</span>}</div>;
 
   return <div className="walletControl" ref={root}>
     <button className={`walletTrigger ${wallet.networkOk?"connected":"wrongNetwork"}`} type="button" aria-expanded={open} aria-controls="wallet-menu" onClick={()=>setOpen(value=>!value)}>

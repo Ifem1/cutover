@@ -26,6 +26,13 @@ beforeEach(()=>{
 });
 
 describe("shared injected wallet navigation",()=>{
+  it("explains when no injected wallet is available",()=>{
+    Object.defineProperty(window,"ethereum",{value:undefined,writable:true,configurable:true});
+    render(<WalletSessionProvider><GlobalNavbar/><WalletBar/></WalletSessionProvider>);
+    expect(screen.getByRole("button",{name:/connect wallet/i}).hasAttribute("disabled")).toBe(true);
+    expect(screen.getAllByText(/no injected wallet/i).length).toBeGreaterThan(0);
+  });
+
   it("uses the navbar as the only primary connect action",async()=>{
     render(<WalletSessionProvider><GlobalNavbar/><WalletBar/></WalletSessionProvider>);
     expect(screen.getAllByRole("button",{name:/connect wallet/i})).toHaveLength(1);
@@ -60,6 +67,9 @@ describe("shared injected wallet navigation",()=>{
     await act(async()=>listeners.accountsChanged?.(["0x2222222222222222222222222222222222222222"]));
     expect(await screen.findByRole("button",{name:/0x2222/i})).toBeTruthy();
     expect(screen.getAllByText(/0x2222/).length).toBeGreaterThan(1);
+    await act(async()=>listeners.accountsChanged?.([]));
+    expect(await screen.findByRole("button",{name:/connect wallet/i})).toBeTruthy();
+    expect(screen.getByText(/wallet disconnected/i)).toBeTruthy();
   });
 
   it("offers a clear Studionet switch after a wrong-network event",async()=>{
@@ -71,5 +81,25 @@ describe("shared injected wallet navigation",()=>{
     fireEvent.click(screen.getByRole("button",{name:/switch to studionet/i}));
     await waitFor(()=>expect(provider.request).toHaveBeenCalledWith(expect.objectContaining({method:"wallet_switchEthereumChain"})));
     expect(await screen.findByRole("button",{name:/0x1111/i})).toBeTruthy();
+  });
+
+  it("adds the Studionet network when the wallet does not know it yet",async()=>{
+    provider.request.mockImplementation(async({method}:{method:string})=>{
+      if(method==="eth_requestAccounts")return [firstAccount];
+      if(method==="eth_accounts")return accounts;
+      if(method==="eth_chainId")return chain;
+      if(method==="wallet_switchEthereumChain")throw Object.assign(new Error("Unknown chain"),{code:4902});
+      if(method==="wallet_addEthereumChain"){chain="0xf22f";return null;}
+      return null;
+    });
+    render(<WalletSessionProvider><GlobalNavbar/></WalletSessionProvider>);
+    fireEvent.click(screen.getByRole("button",{name:/connect wallet/i}));
+    await screen.findByRole("button",{name:/0x1111/i});
+    await act(async()=>listeners.chainChanged?.("0x1"));
+    fireEvent.click(await screen.findByRole("button",{name:/wrong network/i}));
+    fireEvent.click(screen.getByRole("button",{name:/switch to studionet/i}));
+    await waitFor(()=>expect(provider.request).toHaveBeenCalledWith(expect.objectContaining({method:"wallet_addEthereumChain"})));
+    expect(await screen.findByRole("button",{name:/0x1111/i})).toBeTruthy();
+    expect(screen.getByText(/Studionet · 61999/)).toBeTruthy();
   });
 });

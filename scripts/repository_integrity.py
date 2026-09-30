@@ -5,7 +5,7 @@ forbidden_runtime=['61997','studio-dev.genlayer.com','studioDevnet']
 runtime_allow={'README.md','docs/TOOLCHAIN.md','docs/SECURITY.md','scripts/live/README.md','scripts/repository_integrity.py','scripts/check-network.mjs'}
 viol=[]
 for p in root.rglob('*'):
-    if not p.is_file() or any(x in p.parts for x in ('node_modules','.git','.next')): continue
+    if not p.is_file() or any(x in p.parts for x in ('node_modules','.git','.next','.venv','__pycache__','.pytest_cache')): continue
     rel=p.as_posix()
     if rel.startswith('packages/gate/dist/'): continue
     try:text=p.read_text()

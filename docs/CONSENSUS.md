@@ -1,24 +1,40 @@
-# Consensus design
+# Consensus design and payload binding
 
-CUTOVER uses GenLayer only for questions that require interpretation. Deterministic Python owns identities, hashes, bounds, generations, route completeness, precedence, challenge limits, transaction-time deadlines, and authorization.
+CUTOVER uses GenLayer consensus for baseline interpretation, candidate rule classification, and challenge relevance admission. Deterministic contract code owns identities, bounds, hashes, generations, route completeness, retry/challenge limits, state precedence, deadlines, evidence roots, and authorization. A validator that cannot independently reproduce and bind the leader's consequential result rejects the write.
 
-## Baseline authentication
+## Nondeterministic boundary audit
 
-`freeze_route` independently renders the public baseline inside leader and validator execution. The proposed snapshot and rendered page are fenced as untrusted data. Consequential consensus fields are `ok`, `code`, and the baseline digest; explanatory text is not consensus-critical.
+`contracts/cutover.py` has four `run_nondet_unsafe` call sites. This table classifies every leader-returned field and the actual comparison performed by the validator. Compared fields use canonical JSON serialization, so a type-changing substitution such as `true` for `1` cannot pass Python's looser value equality.
 
-## Candidate assessment: observe, then compare
+| Path | Leader return fields | State / later effect | Validator recomputation and binding | Deliberately unbound fields | Direct Mode attack test |
+|---|---|---|---|---|---|
+| `freeze_route` baseline authentication | `ok`, `code`, snapshot digest, probe digest, full probe, explanation | The probe and its digest are persisted and later supplied as baseline context to semantic comparison. | Re-fetches the snapshot artifact, re-probes the baseline, re-runs the faithful-snapshot comparison, requires the exact payload key set and equality for every field except explanation, directly compares the full probe and verifies its canonical digest. | `explanation`, bounded to 240 characters; UI labels it leader-only. | `test_baseline_leader_cannot_substitute_probe_with_same_digest_claim`; `test_baseline_validator_probe_disagreement_detected` |
+| `set_candidate` manifest verification | `ok`, `code`, manifest digest, release ref, full manifest | The manifest is stored and supplies route body-hash expectations for future assessments. | Independently fetches and validates the manifest, checks its expected digest, then requires exact equality of the complete leader and validator payloads. Thus origin, release metadata, route mappings, and every route hash are all bound. | None. | `test_leader_cannot_substitute_manifest_payload_while_claiming_same_digest` (hash, origin, and mapping variants) |
+| `_run_assessment` semantic comparison | Candidate/generation/route identity, manifest and baseline digests, URL, probe and probe digest, expected body hash, evidence flags, findings/statuses, route result, bounded leader explanations, challenge provenance | Probe, statuses, findings and commitments are persisted; the digest and probe feed route evidence and authorization. | Re-fetches the manifest and candidate, independently re-renders the probe, re-runs the semantic comparison, and exactly compares the complete payload except `leader_explanations`. The explanation list must still have exactly the registered rule IDs and bounded text. Assessment digest commits candidate URL, expected body SHA, probe digest, findings, flags, route result, attempt and challenge ID/digest. | `leader_explanations`, bounded and excluded from assessment and authorization digests; rendered separately as leader-only prose. | `test_validator_cannot_substitute_assessment_candidate_probe`; `test_validator_rejects_altered_assessment_expected_body_sha`; `test_validator_cannot_substitute_candidate_probe_metadata`; `test_leader_explanations_are_bounded_presentation_only`; `test_leader_explanation_changes_do_not_change_assessment_or_authorization` |
+| `_verify_challenge` admission | `ok`, `code`, evidence SHA-256, exact decoded text, relevance boolean, explanation | Exact retrieved text and digest are retained in the challenge audit record. Challenge admission only opens a bounded challenge and triggers a new independent candidate assessment. | Re-fetches the URL and re-runs relevance admission; compares the complete payload except explanation. UTF-8 must decode strictly, text must fit the bound, and successful returned text must exactly match validator-retrieved text represented by the agreed digest. | Bounded `explanation`; it is not used to judge the candidate. | `test_challenge_leader_cannot_substitute_evidence_text_with_same_digest_claim`; `test_challenge_validator_digest_disagreement_detected` |
 
-`assess_route` is intentionally two-stage inside each leader/validator execution:
+No other `run_nondet` or `run_nondet_unsafe` call exists in the contract. If an error payload is returned, its complete schema and values must also match; the deterministic caller then fails closed.
 
-1. **Observe** — independently render the candidate and extract an exact bounded observation schema: title, canonical URL, headings, visible text, links, forms, and claims. The observation prompt does not receive the baseline and is told not to decide readiness.
-2. **Compare** — supply the authenticated frozen baseline, route rules/allowed changes, exact candidate identity/generation, the candidate observation, and matching bounded challenge evidence if one is open. The model must emit exactly one closed-enum finding per rule.
+## Deterministic observation and semantic judgment
 
-Allowed statuses are `PRESERVED`, `ALLOWED_CHANGE`, `MATERIAL_CHANGE`, `MISSING`, `BROKEN`, `CONFLICTING`, and `UNREADABLE`. Models never answer whether the migration should be authorized.
+The leader and validator independently call `web.get` for original response bytes, then use GenLayer rendering for bounded HTML/text observations. HTTP status, body SHA-256, title, canonical URL, headings, links, forms and visible text are included in the probe object. These observations are not assumed stable: disagreement between independent executions prevents the write from being accepted. A missing candidate source, body mismatch, manifest drift, or cross-origin canonical source yields `INCONCLUSIVE` before semantic comparison.
 
-The validator reruns the consequential work and compares generation, route, candidate ref, baseline digest, evidence availability, route consequence, and the rule/status signature. Free-form reason wording is deliberately non-critical.
+Only after identity and content checks pass do the leader and validator compare the frozen baseline, registered route rules and candidate observation. The model returns one closed-enum status per rule. It does not return READY or authorize. Contract code derives `BLOCKED` before `INCONCLUSIVE`, and READY only when every required finding passes.
 
-## Fail closed
+## Challenge trust policy
 
-A candidate source failure or malformed observation becomes `INCONCLUSIVE`. Malformed findings become `INCONCLUSIVE`. A definite blocking status retains precedence over uncertainty. Validator disagreement rejects the nondeterministic write.
+Challenge evidence is **relevant, retrieved audit material**, not authority over the migration verdict. The contract independently fetches it, admits only bounded strictly decoded text that consensus judges relevant, and records its digest/text for audit. The evidence text and leader explanation are never included in the semantic reassessment prompt. An admitted challenge instead triggers a fresh independent read of the candidate and a new comparison against the already frozen baseline and rules. The assessment commitment retains only challenge ID and evidence digest as provenance.
 
-Prompt-injection controls—explicit data fencing, closing-delimiter defusing, text bounds, exact JSON schemas, enum validation, and output bounds—reduce authority of hostile page text but cannot prove that every model/provider is immune to adversarial content.
+This keeps challenge submission permissionless for non-owners while separating relevance from truth. A challenge cannot force BLOCKED or READY by writing arbitrary prose. It can trigger only the same bounded fresh candidate judgment that the owner can otherwise request. Per-route and per-generation caps bound repeated triggers. The remaining trust dependency is GenLayer's semantic judgment of the independently observed candidate; the protocol does not claim external challenge prose is authoritative.
+
+Ordinary assessments are owner-only because an inconclusive source failure consumes a bounded retry. This prevents arbitrary callers from exhausting the migration owner's retry budget. Non-owners can still submit bounded challenges during the review window.
+
+## Authorization commitment
+
+Before authorizing, the contract recomputes each assessment commitment and the candidate-probe digest, checks current generation, exact ref/origin/manifest identity, route URL, body SHA against the registered manifest, available/valid response metadata, passing findings, and source identity. The evidence root includes candidate origin/ref/generation/manifest digest, baseline generation, and for every route its identity, baseline digest, candidate URL, candidate-probe digest, assessment digest, and body SHA-256. The authorization digest commits the evidence root and migration authorization record.
+
+`accepted` transaction status is not finality. The frontend waits for finalization and rereads finalized contract state before reporting the resulting state.
+
+## Limits
+
+Prompt fencing, delimiter defusing, strict schemas, closed enums and output bounds reduce hostile-text authority; they do not prove that every model/provider is immune to prompt injection. Validators may receive personalized, regional, or A/B-tested content. Candidate pages can change during a consensus round, rendering may differ, redirects can be ambiguous, model outputs can be correlated, and RPC outages can interrupt reads. SHA-256 identifies bytes; it does not establish that a site's claims are true.

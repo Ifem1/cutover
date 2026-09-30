@@ -1,17 +1,74 @@
-# Frozen toolchain
+# Reproducible toolchain and commands
 
-Target network: `studionet`; chain ID `61999`; currency `GEN`; RPC `https://studio.genlayer.com/api`; explorer `https://explorer-studio.genlayer.com`.
+## Pinned versions
 
-Pinned repository tooling:
-- GenLayer CLI `0.39.1`
-- `genlayer-js` `1.1.8`
-- `genlayer-py` `v0.16.3`, the newest stable release satisfying `genlayer-test v0.29.2`'s declared `<0.17` compatibility
-- `genlayer-test` `v0.29.2`, the latest non-prerelease 0.29 release
-- `genvm-linter` `v0.11.0`, the latest non-prerelease linter release\n- Direct Mode GenVM bundle `v0.2.16` (exact pin; stable release with the `genvm-universal.tar.xz` layout required by `genlayer-test v0.29.2`)
-- contract dependency header uses the stable py-genlayer artefact used by GenLayer's stable project examples
+| Tool | Repository/CI version |
+|---|---|
+| Python | 3.12 (`.github/workflows/ci.yml`); local audit used 3.12.10 |
+| Node.js | 22.x (`.nvmrc` and CI); local audit used 24.16.0 |
+| Package manager | npm with committed `package-lock.json` (lockfile version 3); use `npm ci` |
+| GenLayer CLI | 0.39.1, installed from the root npm lockfile |
+| `genlayer-js` | 1.1.8 |
+| `genlayer-py` | v0.16.3 |
+| `genlayer-test` | v0.29.2 |
+| GenVM bundle | v0.2.16, pinned in `tests/direct/conftest.py` and `GENVM_VERSION` for contract lint/validation |
+| `genvm-linter` | v0.11.0 |
+| pytest | 8.3.5 |
 
-`genlayer-py v0.18.0` is a stable client release but is not used in the offline test environment because `genlayer-test v0.29.2` declares `genlayer-py>=0.13,<0.17`. The September 2026 `genlayer-test v0.30.0-rc.*` and `genvm-linter v0.11.1-rc.*` releases are intentionally excluded. The separate release-candidate Studio-dev environment uses chain 61997 and matching RC SDK/CLI families. Those values may be mentioned in documentation only to explain the exclusion; they are not runtime paths in CUTOVER.
+The GenLayer Python pins are in `requirements.txt`; JavaScript versions are in workspace manifests and `package-lock.json`. Node/npm versions printed above are the versions used for the local audit, not substitutes for the CI Node 22.x target. The repository-local CLI script is invoked rather than a global CLI.
 
-The repository package scripts invoke the local `genlayer` dependency, so a globally installed CLI cannot silently replace the pinned `0.39.1` binary.
+## Network and configuration
 
-Direct Mode does not follow the GenVM `/latest` redirect. Stable `genlayer-test v0.29.2` still expects `genvm-universal.tar.xz`, while the June v0.3.0-rc* GenVM releases renamed the runner archive to `genvm-runners-all.tar.xz`. CUTOVER therefore pins `v0.2.16`, the stable March 10 release immediately preceding the official boilerplate's March 11 runner-hash pin, rather than silently depending on the renamed RC-family asset.
+- Network: `studionet`
+- Chain ID: `61999`
+- RPC: `https://studio.genlayer.com/api`
+- Explorer: `https://explorer-studio.genlayer.com`
+- Local Direct Mode default: `http://127.0.0.1:4000/api` (`gltest.config.yaml`)
+- Live proof may set `GENLAYER_RPC`; scripts default it to the Studionet RPC and reject any chain other than 61999.
+- Wallet signing uses the locally unlocked GenLayer CLI keystore. Do not place private keys in an environment variable, proof plan, or repository file.
+- Vercel frontend variable: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS` (set to the newly deployed address only after deployment).
+- Vercel proof-fixture variable: `CUTOVER_CANDIDATE_MANIFEST_JSON` (fixture project only).
+- GitHub gate variables: `CUTOVER_CONTRACT_ADDRESS` and `CUTOVER_MIGRATION_ID`.
+
+Studionet, chain ID, RPC and explorer are also pinned in frontend source. Studio-dev / chain 61997 is not a supported runtime target.
+
+## Clean install and offline validation
+
+From the repository root:
+
+```powershell
+npm ci
+python -m pip install -r requirements.txt
+python -m compileall -q contracts tests scripts
+python scripts/check_contract_surface.py
+python scripts/repository_integrity.py
+node scripts/check-network.mjs
+$env:GENVM_VERSION='v0.2.16'
+genvm-lint check contracts/cutover.py
+python -m pytest tests/direct -v
+python scripts/contract_mutation.py
+npm run lint
+npm run typecheck
+npm run test:web
+npm run mutation:web
+npm run test:gate
+npm run build
+```
+
+The CI workflow additionally runs live-proof schema/offline checks, verifies committed generated gate bundles, builds each workspace, and runs the handoff packaging job. `npm run build` builds the web app, fixture app, and gate. Exact test/mutant counts must be taken from the completed command output or a specific CI run.
+
+## Deployment and source verification
+
+The deployment command is for the exact committed `contracts/cutover.py` after the owner has approved the deployment and the intended CLI-keystore account is unlocked:
+
+```powershell
+node node_modules/genlayer/dist/index.js deploy --contract contracts/cutover.py --rpc https://studio.genlayer.com/api
+```
+
+The repository's live proof runner is the preferred path for a complete recorded lifecycle; it defaults to dry-run and requires explicit `--execute` to write. After a finalized deployment, retrieve and compare the deployed source using the new address and expected local file:
+
+```powershell
+node scripts/live/verify_source.mjs --address 0xNEW_CONTRACT_ADDRESS --source contracts/cutover.py --rpc https://studio.genlayer.com/api
+```
+
+That script prints both SHA-256 values and exits nonzero unless exact source bytes match. Do not run a full live plan until the new source is approved, deployed, finalized, and verified.

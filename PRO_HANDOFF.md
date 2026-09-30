@@ -1,43 +1,28 @@
-# CUTOVER — ChatGPT Pro handoff
+# CUTOVER — audit and release handoff
 
-## Repository
+## Repository and exact source
 
-- Target repository: `Ifem1/cutover`
+- Repository: [Ifem1/cutover](https://github.com/Ifem1/cutover)
 - Branch: `main`
-- Network: stable Studionet only (chain `61999`)
-- Source state: complete offline implementation; exact final commit and CI run are filled in the final report after GitHub Actions validation.
+- Network: GenLayer Studionet, chain ID `61999`
+- Canonical frontend: [https://cutover-kappa.vercel.app/](https://cutover-kappa.vercel.app/)
+- Revised contract SHA-256: `13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79`
+- Revised contract deployment: **not deployed; waiting at the human wallet-signature boundary**
 
-## Implemented in this phase
+## Revised-source offline validation
 
-- single CUTOVER Intelligent Contract with frozen baseline provenance, candidate generations, two-stage semantic assessment, deterministic aggregation, bounded challenge and exact-ref authorization;
-- complete Next.js control-room frontend with injected-wallet-only writes, finalized reads, state-aware actions and explicit transaction lifecycle;
-- deterministic proof fixture lab covering preservation, cosmetic change, pricing change, redirect mismatch, missing legal content, broken journey, prompt injection and unavailable source;
-- read-only GitHub deployment gate;
-- Direct Mode tests, state-machine/invariant coverage, contract mutation sweep, frontend tests and frontend mutation sweep;
-- repository/network/schema integrity checks;
-- CI and source packaging;
-- architecture, consensus, baseline, security, testing, frontend, gate and live-proof documentation.
+The exact revised source passed **111/111 Direct Mode tests**, **73/73 meaningful contract mutants**, **73/73 frontend tests**, **20/20 frontend mutants**, and **7/7 gate tests**. Frontend lint and typecheck, web/fixture/gate production builds, Python compile, contract-surface parity, repository integrity, network discipline, pinned GenVM lint/validation, and the **118-entry handoff archive content audit** passed locally. The complete local run is recorded in [`proof/matrix.json`](proof/matrix.json). The final pushed GitHub Actions run is still pending and must not be inferred from these offline checks.
 
-## Validation status
+## Live-evidence boundary
 
-Do not infer a pass from this handoff file. The final ChatGPT report records the exact completed GitHub Actions jobs and counts. Live rows in `proof/matrix.json` remain `NOT YET RUN` until real Studionet evidence exists.
+The address `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`, its deployment/source match, migrations, adversarial outcomes, browser observations and GitHub live-gate run all belong to historical source SHA-256 `34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834`. Preserve those records. They do not verify or prove the revised source. The current wallet/manual browser checklist is [`docs/MANUAL_QA_RUNBOOK.md`](docs/MANUAL_QA_RUNBOOK.md); all its rows are NOT RUN for the revised contract/frontend pair.
 
-## Remaining local/live work
+## Remaining release sequence
 
-1. Clone/unzip and independently reproduce green offline checks.
-2. Connect/use a funded wallet/account appropriate for stable Studionet 61999.
-3. Deploy the exact tracked `contracts/cutover.py` source with repository-local CLI 0.39.1.
-4. Record the real deployment transaction and contract address.
-5. Fetch deployed source back where supported and compare exact bytes/SHA-256 using `scripts/live/verify_source.py`.
-6. Populate the single canonical deployment environment/config; do not duplicate the address in source.
-7. Deploy `apps/fixtures` publicly and record its immutable deployment reference.
-8. Deploy the CUTOVER frontend with the canonical contract address.
-9. Execute live proof cases 1–13 from `docs/LIVE_PROOF_PLAN.md`; record accepted/decision/finalization/execution separately.
-10. Exercise the real challenge/finality path and collect real validator/disagreement evidence where feasible.
-11. Verify every UI write against the deployed schema and perform real injected-wallet QA, wrong-network switching, refresh/recovery and responsive/browser checks.
-12. Run the CUTOVER GitHub gate against a real `AUTHORIZED` exact candidate ref and preserve both pass and deliberate wrong-ref failure runs.
-13. Measure fees/consensus behavior only if actually observable; never invent measurements.
-14. Update `proof/matrix.json` / `docs/PROOF_MATRIX.md` with real transaction hashes and evidence.
-15. Perform a hostile final audit before submission.
+1. Finish clean packaging verification, push the final commit to `main`, wait for its actual GitHub Actions run, and record its URL and status.
+2. Before any revised-contract deployment, review the final commit, contract SHA-256, Studionet chain ID `61999`, and command documented in [`docs/TOOLCHAIN.md`](docs/TOOLCHAIN.md). Deployment requires the operator's wallet signature; stop until that approval is supplied.
+3. After approval, record deployment hash/address, accepted and finalized status, execution result, `get_config()`, and retrieved source equality. Stop if exact source equality fails.
+4. Configure the revised address on the canonical frontend and execute the live positive, negative, challenge, inconclusive/failure, live gate, and manual browser cases in [`docs/LIVE_PROOF_PLAN.md`](docs/LIVE_PROOF_PLAN.md) and [`docs/MANUAL_QA_RUNBOOK.md`](docs/MANUAL_QA_RUNBOOK.md). Save only observed transaction and browser evidence as versioned records.
+5. Perform the hostile re-audit and update the proof matrix without overwriting historical evidence.
 
-No ordinary implementation task is intentionally deferred here; the remaining list is deployment/environment/live-proof work.
+No deployment, live revised-source cycle, revised-source gate proof, or revised-pair wallet QA is claimed complete in this handoff.

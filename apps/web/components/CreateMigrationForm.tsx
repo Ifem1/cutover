@@ -11,6 +11,6 @@ export function CreateMigrationForm(){
     <label>Baseline origin<input aria-label="Baseline origin" type="url" required placeholder="https://old.example.com" value={origin} onChange={e=>setOrigin(e.target.value)}/></label>
     <label>Review window (seconds)<input aria-label="Review window seconds" type="number" min={300} max={604800} required value={windowSec} onChange={e=>setWindowSec(Number(e.target.value))}/></label>
     <button className="button hot" disabled={tx.busy||!tx.wallet.account||!tx.wallet.networkOk}>Create migration</button>
-    <TxFeedback phase={tx.phase} message={tx.message} confirmed={tx.confirmed}/>
+    <TxFeedback phase={tx.phase} message={tx.message} confirmed={tx.confirmed} pending={tx.pending} onRecover={tx.recover} busy={tx.busy}/>
   </form>;
 }

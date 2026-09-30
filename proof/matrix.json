@@ -1,10 +1,33 @@
 {
-  "schema_version": "cutover.proof-matrix.v2",
+  "schema_version": "cutover.proof-matrix.v3",
   "network": {
     "name": "studionet",
     "chain_id": 61999
   },
-  "live_evidence_status": "PARTIAL: migration 3 AUTHORIZED, migration 4 BLOCKED, four adversarial outcomes, and live GitHub gate proof are recorded; injected-wallet wrong-network/switch and account-change cases remain untested",
+  "active_source_commit": "pending",
+  "active_contract_source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
+  "active_source_deployment_status": "PENDING_HUMAN_WALLET_APPROVAL",
+  "historical_live_contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
+  "historical_live_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
+  "live_evidence_status": "HISTORICAL_ONLY: all current live deployment/cycle/gate evidence applies to historical source SHA-256 34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834; revised source SHA-256 13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79 is not deployed",
+  "local_validation": {
+    "source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
+    "direct_mode": {"status": "PASS", "passed": 111, "total": 111},
+    "contract_mutants": {"status": "PASS", "killed": 73, "total": 73},
+    "frontend_tests": {"status": "PASS", "passed": 73, "total": 73},
+    "frontend_mutants": {"status": "PASS", "killed": 20, "total": 20},
+    "gate_tests": {"status": "PASS", "passed": 7, "total": 7},
+    "eslint": "PASS",
+    "typecheck": "PASS",
+    "builds": {"web": "PASS", "fixtures": "PASS", "gate": "PASS"},
+    "python_compile": "PASS",
+    "contract_surface": "PASS",
+    "repository_integrity": "PASS",
+    "network_discipline": "PASS",
+    "genvm_lint_and_validation": "PASS",
+    "package_audit": {"status": "PASS", "archive": "cutover-chatgpt-pro-handoff.zip", "entries": 118},
+    "ci": "PENDING_FINAL_PUSH"
+  },
   "deployment_evidence": "proof/live/deployment.json",
   "invariants": [
     {
@@ -14,12 +37,15 @@
         "test_snapshot_digest_mismatch_fails_before_consensus",
         "test_snapshot_artifact_content_is_authenticated",
         "test_baseline_source_unavailable_fails_closed",
-        "test_frozen_baseline_is_immutable"
+        "test_frozen_baseline_is_immutable",
+        "test_baseline_leader_cannot_substitute_probe_with_same_digest_claim"
       ],
       "contract_mutants": [
         "skip_snapshot_digest",
         "ignore_snapshot_artifact_digest",
-        "ignore_baseline_source_failure"
+        "ignore_baseline_source_failure",
+        "ignore_baseline_probe_payload_binding",
+        "store_unverified_baseline_probe"
       ],
       "frontend_tests": [
         "apps/web/tests/workflow.test.ts"
@@ -34,6 +60,7 @@
       "invariant": "Candidate generation, same-origin manifest, exact ref, route mapping and body digests bind every assessment.",
       "direct_mode_tests": [
         "test_candidate_manifest_binds_ref_and_generation",
+        "test_leader_cannot_substitute_manifest_payload_while_claiming_same_digest",
         "test_manifest_digest_mismatch_rejected",
         "test_manifest_origin_mismatch_rejected",
         "test_manifest_route_mapping_mismatch_rejected",
@@ -46,6 +73,8 @@
         "do_not_increment_generation",
         "ignore_manifest_expected_digest",
         "ignore_manifest_route_mapping",
+        "drop_manifest_payload_binding",
+        "store_unverified_manifest",
         "force_manifest_match",
         "force_content_match"
       ],
@@ -68,13 +97,17 @@
         "test_uncertain_finding_is_inconclusive",
         "test_missing_current_generation_assessment_cannot_ready",
         "test_multi_route_aggregation_precedence",
-        "test_candidate_http_failure_is_inconclusive"
+        "test_candidate_http_failure_is_inconclusive",
+        "test_validator_cannot_substitute_assessment_candidate_probe",
+        "test_validator_rejects_altered_assessment_expected_body_sha",
+        "test_validator_cannot_substitute_candidate_probe_metadata"
       ],
       "contract_mutants": [
         "ignore_blocking_findings",
         "treat_uncertain_as_passing",
         "ignore_blocked_aggregate_precedence",
-        "never_ready_aggregate"
+        "never_ready_aggregate",
+        "ignore_candidate_probe_payload_binding"
       ],
       "frontend_tests": [
         "apps/web/tests/policy.test.ts",
@@ -91,6 +124,26 @@
       "live_evidence": "PARTIAL: negative-cycle-4 proves price/legal/signup/injection BLOCKED and unrelated disagreement stayed NOT ASSESSED; migration 5 HTTP 503 produced INCONCLUSIVE; migration 6 manifest-ref and body-SHA mismatches each produced INCONCLUSIVE; see proof/live/adversarial-cases.json"
     },
     {
+      "id": "retry-griefing",
+      "invariant": "Ordinary retry budget is owner-controlled and bounded; non-owners retain the separately capped challenge path.",
+      "direct_mode_tests": [
+        "test_non_owner_cannot_consume_ordinary_inconclusive_retry_budget",
+        "test_inconclusive_retries_are_counted_and_preserved",
+        "test_ready_assessment_is_locked_from_ordinary_resampling",
+        "test_blocked_cannot_be_retried_into_ready_same_generation"
+      ],
+      "contract_mutants": [
+        "drop_owner_only_assessment_guard",
+        "ordinary_retry_cap_plus_one",
+        "allow_fourth_ordinary_retry"
+      ],
+      "frontend_tests": [
+        "apps/web/tests/MigrationWorkbench.test.tsx"
+      ],
+      "planned_live_cases": [],
+      "live_evidence": "NOT RUN: owner-only retry and retry-budget griefing are covered offline; no live proof is claimed for the revised source"
+    },
+    {
       "id": "challenge-admission",
       "invariant": "Owners cannot self-challenge; unavailable, invalid or irrelevant evidence consumes no attempt; only retrievable, relevant evidence is admitted.",
       "direct_mode_tests": [
@@ -98,12 +151,14 @@
         "test_irrelevant_first_challenger_does_not_burn_slot",
         "test_unavailable_challenge_evidence_does_not_burn_slot",
         "test_invalid_challenge_url_rejected_before_evidence_fetch",
-        "test_challenge_validator_digest_disagreement_detected"
+        "test_challenge_validator_digest_disagreement_detected",
+        "test_challenge_leader_cannot_substitute_evidence_text_with_same_digest_claim"
       ],
       "contract_mutants": [
         "allow_owner_self_challenge",
         "accept_unverified_challenge_evidence",
-        "ignore_challenge_evidence_digest_disagreement"
+        "ignore_challenge_text_binding",
+        "store_unverified_challenge_text"
       ],
       "frontend_tests": [
         "apps/web/tests/policy.test.ts",
@@ -122,6 +177,7 @@
         "test_challenges_capped_per_generation",
         "test_consequential_challenge_result_is_preserved_and_blocks_candidate",
         "test_challenge_evidence_is_bound_into_reassessment_digest",
+        "test_challenge_prose_is_not_in_semantic_reassessment_prompt",
         "test_new_candidate_supersedes_open_challenge_record"
       ],
       "contract_mutants": [
@@ -170,12 +226,17 @@
         "test_authorization_uses_time_and_evidence_root",
         "test_authorization_reflects_exact_assessment_digest",
         "test_authorization_evidence_root_is_deterministic",
+        "test_authorization_revalidates_persisted_candidate_probe",
+        "test_authorization_revalidates_stored_manifest_against_registered_digest",
         "test_authorize_before_ready_rejected",
         "test_repeated_ready_derivation_does_not_extend_review_window"
       ],
       "contract_mutants": [
         "require_extra_second_after_deadline",
         "weaken_authorization_evidence_root",
+        "use_unbound_candidate_body_hash_in_authorization",
+        "remove_candidate_probe_digest_check",
+        "skip_stored_manifest_digest_recheck",
         "reset_review_window_on_rederive",
         "allow_authorize_before_ready"
       ],
@@ -191,17 +252,22 @@
     },
     {
       "id": "consensus-agreement",
-      "invariant": "Independent validators must agree on source identity, findings and challenge evidence digest.",
+      "invariant": "Independent validators must bind the complete consequential leader payload for source identity, manifest, probe, findings and challenge evidence.",
       "direct_mode_tests": [
         "test_validator_status_disagreement_is_detected",
         "test_validator_source_disagreement_is_detected",
         "test_baseline_validator_probe_disagreement_detected",
-        "test_challenge_validator_digest_disagreement_detected"
+        "test_challenge_validator_digest_disagreement_detected",
+        "test_baseline_leader_cannot_substitute_probe_with_same_digest_claim",
+        "test_leader_cannot_substitute_manifest_payload_while_claiming_same_digest",
+        "test_validator_cannot_substitute_assessment_candidate_probe",
+        "test_challenge_leader_cannot_substitute_evidence_text_with_same_digest_claim"
       ],
       "contract_mutants": [
-        "ignore_validator_finding_signature",
-        "ignore_baseline_probe_validator_binding",
-        "ignore_challenge_evidence_digest_disagreement"
+        "ignore_candidate_probe_payload_binding",
+        "ignore_baseline_probe_payload_binding",
+        "ignore_challenge_text_binding",
+        "drop_manifest_payload_binding"
       ],
       "frontend_tests": [],
       "planned_live_cases": [
