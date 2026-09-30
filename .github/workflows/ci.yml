@@ -96,7 +96,63 @@ jobs:
       - name: Verify committed action bundle
         run: |
           test -s packages/gate/dist/index.js
-          git diff --exit-code -- packages/gate/dist/index.js
+          test -s packages/gate/dist/338.index.js
+          git ls-files --error-unmatch packages/gate/dist/338.index.js
+          git diff --exit-code -- packages/gate/dist/index.js packages/gate/dist/338.index.js
+
+  live-gate-proof:
+    name: CUTOVER live Studionet action proof
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Install pinned Node dependencies
+        run: npm ci
+      - name: PASS exact authorized migration 3 candidate ref
+        id: exact-ref
+        uses: ./packages/gate
+        with:
+          contract-address: 0xB8B2157c9d4f19c66e241178A63A89B13EAB3237
+          migration-id: "3"
+          expected-candidate-ref: 796473c3eda18701ca293cb1100b065652f1da9c
+          chain-id: "61999"
+      - name: FAIL a mismatched candidate ref
+        id: wrong-ref
+        continue-on-error: true
+        uses: ./packages/gate
+        with:
+          contract-address: 0xB8B2157c9d4f19c66e241178A63A89B13EAB3237
+          migration-id: "3"
+          expected-candidate-ref: cutover-live-proof-wrong-ref
+          chain-id: "61999"
+      - name: Assert the wrong-ref failure came from the exact-ref guard
+        if: always()
+        env:
+          ACTION_OUTCOME: ${{ steps.wrong-ref.outcome }}
+          GATE_ERROR: ${{ steps.wrong-ref.outputs.gate-error }}
+        run: |
+          test "$ACTION_OUTCOME" = "failure"
+          [[ "$GATE_ERROR" == *"does not equal expected cutover-live-proof-wrong-ref"* ]]
+      - name: FAIL a non-AUTHORIZED migration
+        id: blocked-state
+        continue-on-error: true
+        uses: ./packages/gate
+        with:
+          contract-address: 0xB8B2157c9d4f19c66e241178A63A89B13EAB3237
+          migration-id: "4"
+          expected-candidate-ref: 796473c3eda18701ca293cb1100b065652f1da9c
+          chain-id: "61999"
+      - name: Assert the BLOCKED-state failure came from the state guard
+        if: always()
+        env:
+          ACTION_OUTCOME: ${{ steps.blocked-state.outcome }}
+          GATE_ERROR: ${{ steps.blocked-state.outputs.gate-error }}
+        run: |
+          test "$ACTION_OUTCOME" = "failure"
+          [[ "$GATE_ERROR" == *"CUTOVER state is BLOCKED, expected AUTHORIZED"* ]]
 
   generated-artifacts:
     name: Verify lockfile + action bundle
@@ -111,12 +167,15 @@ jobs:
         run: |
           test -s package-lock.json
           test -s packages/gate/dist/index.js
-          git diff --exit-code -- package-lock.json packages/gate/dist/index.js
+          test -s packages/gate/dist/338.index.js
+          git ls-files --error-unmatch packages/gate/dist/338.index.js
+          git diff --exit-code -- package-lock.json packages/gate/dist/index.js packages/gate/dist/338.index.js
       - name: Stage generated deliverables
         run: |
           mkdir -p generated/packages/gate/dist
           cp package-lock.json generated/package-lock.json
           cp packages/gate/dist/index.js generated/packages/gate/dist/index.js
+          cp packages/gate/dist/338.index.js generated/packages/gate/dist/338.index.js
       - uses: actions/upload-artifact@v4
         with:
           name: cutover-generated-files
@@ -138,6 +197,7 @@ jobs:
           cp generated/package-lock.json package-lock.json
           mkdir -p packages/gate/dist
           cp generated/packages/gate/dist/index.js packages/gate/dist/index.js
+          cp generated/packages/gate/dist/338.index.js packages/gate/dist/338.index.js
           rm -rf generated
       - name: Create source handoff
         run: |

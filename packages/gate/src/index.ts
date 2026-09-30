@@ -36,4 +36,8 @@ async function main(){
   core.info(`CUTOVER authorization verified for ${expected}`);
 }
 
-main().catch(error=>core.setFailed(error instanceof Error?error.message:String(error)));
+main().catch(error=>{
+  const message=error instanceof Error?error.message:String(error);
+  core.setOutput("gate-error",message);
+  core.setFailed(message);
+});
