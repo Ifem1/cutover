@@ -4,7 +4,7 @@
     "name": "studionet",
     "chain_id": 61999
   },
-  "active_source_commit": "pending",
+  "active_source_commit": "df47e9e1728a51afe51d8d6a25e0efbd29204741",
   "active_contract_source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
   "active_source_deployment_status": "PENDING_HUMAN_WALLET_APPROVAL",
   "historical_live_contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
@@ -26,7 +26,7 @@
     "network_discipline": "PASS",
     "genvm_lint_and_validation": "PASS",
     "package_audit": {"status": "PASS", "archive": "cutover-chatgpt-pro-handoff.zip", "entries": 118},
-    "ci": "PENDING_FINAL_PUSH"
+    "ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36753618050 (source commit df47e9e1728a51afe51d8d6a25e0efbd29204741; live-gate job exercised historical deployment only)"
   },
   "deployment_evidence": "proof/live/deployment.json",
   "invariants": [
@@ -327,7 +327,7 @@
         12,
         13
       ],
-      "live_evidence": "PASS: committed live-gate-proof job in https://github.com/Ifem1/cutover/actions/runs/36735999116 — migration 3 exact ref passed; wrong ref failed at the exact-ref guard; migration 4 failed at the BLOCKED-state guard. Job and complete workflow run succeeded."
+      "live_evidence": "HISTORICAL PASS: live-gate job in https://github.com/Ifem1/cutover/actions/runs/36753618050/job/110018493960 (run https://github.com/Ifem1/cutover/actions/runs/36753618050) repeated the actual Studionet checks: migration 3 exact ref passed, wrong ref failed at exact-ref guard, migration 4 failed at BLOCKED-state guard. These records apply to historical source SHA-256 34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834; no revised-source live-gate proof is claimed."
     }
   ]
 }
