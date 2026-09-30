@@ -1,0 +1,95 @@
+{
+  "schema_version": "cutover.live-deployment.v1",
+  "recorded_at": "2026-09-30T08:47:30.299Z",
+  "git_commit": "548cb04a79166a3fa59778c4214f7d3cc56b3059",
+  "network": {
+    "name": "studionet",
+    "chain_id": 61999,
+    "rpc": "https://studio.genlayer.com/api"
+  },
+  "tooling": {
+    "genlayer_cli": "0.39.1",
+    "genlayer_js": "1.1.8"
+  },
+  "contract": {
+    "address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
+    "explorer": "https://explorer-studio.genlayer.com",
+    "source_path": "contracts/cutover.py",
+    "source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
+    "deployed_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
+    "exact_source_match": true,
+    "source_retrieval": "gen_getContractCode via pinned genlayer-js 1.1.8 after finalized deployment receipt"
+  },
+  "deployer_address": "0xA49c51d759790116D451f256654dD9F0549D341F",
+  "transaction": {
+    "hash": "0xd20c981216ecccc524ca46ec32263a1698893704fad2a4309bbbece4bdbca65e",
+    "submitted_at": "2026-09-30T08:40:44.142Z",
+    "accepted": {
+      "observed_status": "ACCEPTED",
+      "consensus_result": "MAJORITY_AGREE",
+      "leader_execution_result": "SUCCESS",
+      "observed_by": "pinned GenLayer CLI 0.39.1 deploy command"
+    },
+    "finalized": {
+      "observed_status": "FINALIZED",
+      "consensus_result": "MAJORITY_AGREE",
+      "leader_execution_result": "SUCCESS",
+      "observed_at": "2026-09-30T08:41:44.782Z"
+    },
+    "application_result": {
+      "contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
+      "config_call": {
+        "network": "studionet",
+        "chain_id": 61999,
+        "max_challenges_per_generation": 3,
+        "max_challenges_per_route": 2
+      }
+    }
+  },
+  "consensus_receipt": {
+    "canceled_after_quorum_receipts": 2,
+    "note": "Two validator executions were canceled after quorum and recorded IDLE; no dissenting vote is shown in this deployment receipt.",
+    "leader": "0x5310dcF075E0BD47d29B8ec6581F736C767f54D2",
+    "round_validators": [
+      "0x5310dcF075E0BD47d29B8ec6581F736C767f54D2",
+      "0xDB1c35c1f05d885999b8f13e5735307BcC16Be88",
+      "0x9ea87b28DcA2F79fe108CF06a4c13B4c876AC23d",
+      "0x6737ca1d6BDF8b7C4f19143E2D55581Ca64eb7C3",
+      "0x36728d2a123aB444E603EE5b2ad17d18Bb193557"
+    ],
+    "validator_votes_by_address": [
+      {
+        "validator": "0x36728d2a123aB444E603EE5b2ad17d18Bb193557",
+        "vote": "IDLE"
+      },
+      {
+        "validator": "0x5310dcF075E0BD47d29B8ec6581F736C767f54D2",
+        "vote": "AGREE"
+      },
+      {
+        "validator": "0x6737ca1d6BDF8b7C4f19143E2D55581Ca64eb7C3",
+        "vote": "AGREE"
+      },
+      {
+        "validator": "0x9ea87b28DcA2F79fe108CF06a4c13B4c876AC23d",
+        "vote": "AGREE"
+      },
+      {
+        "validator": "0xDB1c35c1f05d885999b8f13e5735307BcC16Be88",
+        "vote": "IDLE"
+      }
+    ]
+  },
+  "timing": {
+    "acceptance_observed_within_seconds": 10.164,
+    "finalization_observed_within_seconds": 60.64,
+    "fees": null,
+    "fee_note": "No reliable deployment fee value was exposed by the captured CLI receipt."
+  },
+  "raw_receipt_recovery": {
+    "initial_deploy_cli_output": "artifacts/live/2026-09-30T08-40-44-142Z/01-deploy.txt",
+    "finalized_receipt": "artifacts/live/2026-09-30T08-40-44-142Z/02-receipt-finalized.txt",
+    "structured_run": "artifacts/live/2026-09-30T08-47-19-981Z/run.json",
+    "note": "Raw captures remain in ignored local artifacts; this tracked record summarizes their observed fields."
+  }
+}

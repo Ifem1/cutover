@@ -1,6 +1,6 @@
 # Live proof plan
 
-After exact-source deployment to Studionet 61999 and public deployment of `apps/fixtures`, execute and record real receipts for:
+The contract is deployed with exact-source verification on Studionet 61999; deployment evidence is in [`proof/live/deployment.json`](../proof/live/deployment.json). Deploy `apps/web` and `apps/fixtures` publicly, configure the contract address and fetched manifest, then execute and record real receipts for:
 
 1. perfect preservation → READY → AUTHORIZED;
 2. cosmetic redesign with preserved meaning → READY;

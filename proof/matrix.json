@@ -1,7 +1,8 @@
 {
   "schema_version": "cutover.proof-matrix.v2",
   "network": { "name": "studionet", "chain_id": 61999 },
-  "live_evidence_status": "NOT RUN",
+  "live_evidence_status": "PARTIAL: contract deployed and source verified; migration scenarios not run",
+  "deployment_evidence": "proof/live/deployment.json",
   "invariants": [
     {
       "id": "baseline-authentication",

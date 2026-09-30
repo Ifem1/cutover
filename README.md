@@ -50,10 +50,12 @@ Release-candidate Studio-dev tooling is intentionally excluded from runtime path
 
 ## Validation boundary
 
-Offline/static checks and GitHub Actions are evidence only for the code paths they actually execute. **Live Studionet deployment, wallet signing, transaction hashes, deployed-source verification, real validator behaviour and browser-wallet QA remain NOT YET RUN until the funded-wallet phase.**
-
-Do not describe CUTOVER as production-ready solely because offline CI passes.
+Offline/static checks and GitHub Actions are evidence only for the code paths they actually execute. The exact tracked contract is now deployed and source-verified on Studionet; public-app deployment and the migration scenario/browser-wallet proof remain incomplete. Do not describe CUTOVER as submission-ready solely because offline CI and contract deployment passed.
 
 ## Phase 2 local offline validation
 
-The current local source passed **92/92 Direct Mode cases**, killed **65/65 actual-contract mutants**, passed **62/62 frontend tests**, killed **20/20 frontend mutants**, and passed **7/7 GitHub gate tests**. ESLint, TypeScript, web/fixture/gate builds, repository integrity and contract-surface checks passed. Direct Mode needed a temporary Windows tempfile compatibility shim because the pinned test helper unlinks a file while Windows still has it open; that shim changed no repository files. GenVM lint reported three lint checks passed, but validation could not complete because the pinned `py-genlayer` runner archive was missing locally. These are local results; final GitHub Actions and live proof remain pending.
+The local source at deployment commit `548cb04a79166a3fa59778c4214f7d3cc56b3059` passed **92/92 Direct Mode cases**, killed **65/65 actual-contract mutants**, passed **62/62 frontend tests**, killed **20/20 frontend mutants**, and passed **7/7 GitHub gate tests**. ESLint, TypeScript, web/fixture/gate builds, repository integrity and contract-surface checks passed. GitHub Actions run [36688808069](https://github.com/Ifem1/cutover/actions/runs/36688808069) passed on that commit. Direct Mode needed a temporary Windows tempfile compatibility shim because the pinned test helper unlinks a file while Windows still has it open; that shim changed no repository files.
+
+## Live deployment (partial)
+
+The contract is deployed on Studionet chain 61999 at `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`. Deployment transaction: `0xd20c981216ecccc524ca46ec32263a1698893704fad2a4309bbbece4bdbca65e`. The finalized source fetched through `genlayer-js` 1.1.8 has the same SHA-256 as `contracts/cutover.py`: `34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834`. See [deployment evidence](proof/live/deployment.json). The public fixture/frontend, on-chain migration cases, GitHub gate against live state and browser-wallet QA are still pending.

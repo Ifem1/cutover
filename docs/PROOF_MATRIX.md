@@ -1,6 +1,6 @@
 # Proof matrix
 
-`proof/matrix.json` is the machine-readable source of truth. The live-evidence column is **NOT RUN** until the corresponding real Studionet case has been executed and its transaction/receipt evidence recorded. Offline tests do not count as live proof.
+`proof/matrix.json` is the machine-readable source of truth. The contract is deployed and exact-source verified on Studionet; see [`proof/live/deployment.json`](../proof/live/deployment.json). This is deployment evidence only. The live-evidence column remains **NOT RUN** until each corresponding real Studionet migration case has been executed and its transaction/receipt evidence recorded. Offline tests do not count as live proof.
 
 | Invariant | Current Direct Mode tests | Actual-contract mutant(s) | Frontend/gate test(s) | Live case(s) | Live evidence |
 |---|---|---|---|---:|---|
