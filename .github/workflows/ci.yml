@@ -115,7 +115,7 @@ jobs:
         id: exact-ref
         uses: ./packages/gate
         with:
-          contract-address: 0xB8B2157c9d4f19c66e241178A63A89B13EAB3237
+          contract-address: "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
           migration-id: "3"
           expected-candidate-ref: 796473c3eda18701ca293cb1100b065652f1da9c
           chain-id: "61999"
@@ -124,7 +124,7 @@ jobs:
         continue-on-error: true
         uses: ./packages/gate
         with:
-          contract-address: 0xB8B2157c9d4f19c66e241178A63A89B13EAB3237
+          contract-address: "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
           migration-id: "3"
           expected-candidate-ref: cutover-live-proof-wrong-ref
           chain-id: "61999"
@@ -141,7 +141,7 @@ jobs:
         continue-on-error: true
         uses: ./packages/gate
         with:
-          contract-address: 0xB8B2157c9d4f19c66e241178A63A89B13EAB3237
+          contract-address: "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
           migration-id: "4"
           expected-candidate-ref: 796473c3eda18701ca293cb1100b065652f1da9c
           chain-id: "61999"
