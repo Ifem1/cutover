@@ -28,11 +28,11 @@ The tracked evidence record [`revised-live-cases.json`](../proof/live/revised-li
 
 ## Workflow, frontend, and finality
 
-- `.github/workflows/ci.yml` now queries the revised contract and migration 1 exact ref, wrong ref, and migration 2's non-AUTHORIZED state. This is configuration only until its actual GitHub Actions run passes; run and job URLs must be recorded after execution.
+- `.github/workflows/ci.yml` queries the revised contract and migration 1 exact ref, wrong ref, and migration 2's non-AUTHORIZED state. All jobs passed in [run 36769705489](https://github.com/Ifem1/cutover/actions/runs/36769705489), and the three live-gate assertions passed in [job 110073021673](https://github.com/Ifem1/cutover/actions/runs/36769705489/job/110073021673). A documentation-only follow-up commit will trigger one final CI check.
 - The canonical frontend is `https://cutover-kappa.vercel.app/`, but its deployed configuration still reads the historical contract. Current browser observations are therefore not revised-pair wallet proof. Required Vercel value: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3`.
 - Do not conflate `ACCEPTED` with `FINALIZED`. Each successful lifecycle write observed both phases. The unresolved-challenge authorization finalized with execution failure, not success. Deployment has the phase-observation caveat above.
 - Real injected-wallet account change, wrong network, switch to 61999, revised-pair refresh recovery, revised migration views, and revised-pair explorer lifecycle remain unverified. Current and historical browser records are separate.
 
 ## Release decision
 
-**Not submission-ready.** Required remaining evidence: green final CI with the revised live gate and its preserved run/job URLs, plus the user's production frontend redeploy and real injected-wallet QA against the revised contract. Do not infer that a passing CI configuration, local wallet-control UI, or historical browser record satisfies either requirement.
+**Not submission-ready.** The revised-source live gate and all jobs passed in run 36769705489. Remaining evidence is the user's production frontend redeploy and real injected-wallet QA against the revised contract, plus the final CI rerun for the documentation-only follow-up commit. Do not infer that a passing CI configuration, local wallet-control UI, or historical browser record satisfies frontend wallet QA.

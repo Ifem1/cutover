@@ -24,7 +24,7 @@ The committed CI workflow now targets the revised deployment and will assert:
 2. migration 1 with an incorrect expected ref fails at the exact-ref guard;
 3. migration 2, whose finalized state is `INCONCLUSIVE`, fails at the authorization-state guard.
 
-The new workflow run URL and job URL will be recorded after GitHub Actions runs against the pushed commit. The prior [run 36753618050](https://github.com/Ifem1/cutover/actions/runs/36753618050) and its [live-gate job](https://github.com/Ifem1/cutover/actions/runs/36753618050/job/110018493960) used the previous contract and remain historical only.
+The revised-source assertions passed in [GitHub Actions run 36769705489](https://github.com/Ifem1/cutover/actions/runs/36769705489), with the [live-gate job](https://github.com/Ifem1/cutover/actions/runs/36769705489/job/110073021673) confirming the exact-ref PASS and the two asserted FAIL cases. The full workflow run finished green, including package handoff. The prior [run 36753618050](https://github.com/Ifem1/cutover/actions/runs/36753618050) and its [live-gate job](https://github.com/Ifem1/cutover/actions/runs/36753618050/job/110018493960) used the previous contract and remain historical only.
 
 ## Production frontend and wallet QA
 

@@ -10,13 +10,13 @@
   "active_contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
   "historical_live_contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
   "historical_live_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
-  "live_evidence_status": "REVISED_SOURCE_PARTIAL: revised source deployed at 0x2A19548ae8A86a6d678890095f9F25eddeC16DD3 and exact source match verified; positive authorization and fail-closed INCONCLUSIVE cases are recorded. Revised-source live GitHub gate and production frontend/wallet QA are pending. Historical records remain separately preserved.",
+  "live_evidence_status": "REVISED_SOURCE_PARTIAL: revised source deployment/source match, positive authorization, fail-closed INCONCLUSIVE cases, and live GitHub gate passed. Production frontend/wallet QA remains pending because the canonical frontend still points to the historical contract. Historical records remain separately preserved.",
   "revised_source_deployment_evidence": "proof/live/revised-deployment.json",
   "revised_source_live_cases": "proof/live/revised-live-cases.json",
   "revised_frontend_url": "https://cutover-kappa.vercel.app/",
   "revised_frontend_contract_configured": false,
-  "revised_source_final_ci_status": "PENDING_UPDATED_WORKFLOW_RUN",
-  "revised_source_live_gate_status": "PENDING_UPDATED_WORKFLOW_RUN",
+  "revised_source_final_ci_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36769705489",
+  "revised_source_live_gate_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36769705489/job/110073021673",
   "revised_frontend_wallet_qa_status": "PENDING_USER_FRONTEND_DEPLOY_AND_REAL_INJECTED_WALLET",
   "local_validation": {
     "source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
@@ -35,7 +35,7 @@
     "genvm_lint_and_validation": "PASS",
     "package_audit": {"status": "PASS", "archive": "cutover-chatgpt-pro-handoff.zip", "entries": 118},
     "ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36753618050 (source commit df47e9e1728a51afe51d8d6a25e0efbd29204741; live-gate job exercised historical deployment only)",
-    "revised_final_ci": "PENDING_UPDATED_WORKFLOW_RUN"
+    "revised_final_ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36769705489"
   },
   "deployment_evidence": "proof/live/revised-deployment.json",
   "historical_deployment_evidence": "proof/live/deployment.json",
@@ -337,7 +337,7 @@
         12,
         13
       ],
-      "live_evidence": "PENDING REVISED-SOURCE ACTION RUN: CI live-gate workflow now targets the source-matched revised contract, migration 1 AUTHORIZED with exact ref c75641176acc263f9a35fab2d9b7c9f9bfb29c19, wrong ref failure, and migration 2 INCONCLUSIVE-state failure. Awaiting the actual GitHub Actions run URL. Historical run 36753618050 remains linked in docs/GITHUB_GATE.md."
+      "live_evidence": "REVISED SOURCE PASS: run 36769705489, live-gate job 110073021673; exact ref c75641176acc263f9a35fab2d9b7c9f9bfb29c19 passed, wrong ref failed at the exact-ref guard, and migration 2 failed at the INCONCLUSIVE state guard. Historical run 36753618050 remains linked in docs/GITHUB_GATE.md."
     }
   ]
 }

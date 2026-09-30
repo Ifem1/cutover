@@ -18,7 +18,7 @@ The deployment receipt's ACCEPTED-labeled poll first returned after the transact
 
 Migration 1 completed the positive lifecycle, accepted and resolved an independent challenge, was re-derived, waited past its review deadline, then reached `AUTHORIZED`. An authorization attempt while the challenge was unresolved finalized with execution `ERROR` and rollback `challenge unresolved`; authorization was not granted. Migration 2 (source HTTP 503), migration 3 (manifest release-ref mismatch), and migration 4 (body-SHA mismatch) finalized as `INCONCLUSIVE`. Every transaction hash and case summary is in [`proof/live/revised-live-cases.json`](proof/live/revised-live-cases.json).
 
-The revised-source GitHub gate workflow now targets the new deployment and will test exact ref PASS, wrong ref FAIL, and non-AUTHORIZED migration 2 FAIL. The updated workflow has not yet completed in GitHub Actions; record its run/job URLs in [`docs/GITHUB_GATE.md`](docs/GITHUB_GATE.md) after the push.
+The revised-source GitHub gate passed: [run 36769705489](https://github.com/Ifem1/cutover/actions/runs/36769705489), [live-gate job 110073021673](https://github.com/Ifem1/cutover/actions/runs/36769705489/job/110073021673). The exact candidate ref passed; the wrong ref and non-AUTHORIZED migration 2 failed with their asserted guard reasons. Every CI job, including package handoff, passed on this commit.
 
 ## Frontend deployment and wallet QA
 
@@ -36,4 +36,4 @@ Contract `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`, its deployment/source pro
 
 ## CI baseline
 
-The previously recorded CI run [36753618050](https://github.com/Ifem1/cutover/actions/runs/36753618050) passed on commit `df47e9e1728a51afe51d8d6a25e0efbd29204741`; its live-gate job checked the historical contract. The final CI run for the revised live-gate configuration is pending the updated push.
+The previous [CI run 36753618050](https://github.com/Ifem1/cutover/actions/runs/36753618050) is historical and checked the old contract in its live-gate job. Revised live proof and CI passed in [run 36769705489](https://github.com/Ifem1/cutover/actions/runs/36769705489). This proof-link update is a documentation-only commit; its own CI run is the final required CI check.
