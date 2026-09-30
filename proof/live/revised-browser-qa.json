@@ -1,0 +1,44 @@
+{
+  "schema_version": "cutover.live-browser-qa.v1",
+  "recorded_date": "2026-09-30",
+  "status": "BLOCKED_ON_PRODUCTION_FRONTEND_CONFIGURATION",
+  "frontend_url": "https://cutover-kappa.vercel.app/",
+  "expected_contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
+  "expected_chain_id": 61999,
+  "observed_contract_pair": "historical frontend configuration; it does not yet target the revised contract",
+  "browser": "Chrome via Codex browser control",
+  "observations": {
+    "canonical_frontend_load": {
+      "result": "PASS_FOR_PAGE_LOAD_ONLY",
+      "detail": "The canonical /migrations page rendered. Its migration records were the historical dataset (including historical migration 3 AUTHORIZED and migration 4 BLOCKED), not the newly deployed contract's migrations 1-4."
+    },
+    "historical_migration_3_page": {
+      "result": "PASS_HISTORICAL_VIEW_ONLY",
+      "url": "https://cutover-kappa.vercel.app/migrations/3",
+      "observed_state": "AUTHORIZED",
+      "observed_routes": ["exact READY", "cosmetic READY"],
+      "observed_contract": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
+    },
+    "historical_migration_4_page": {
+      "result": "PASS_HISTORICAL_VIEW_ONLY",
+      "url": "https://cutover-kappa.vercel.app/migrations/4",
+      "observed_state": "BLOCKED",
+      "observed_routes": ["pricing BLOCKED", "legal BLOCKED", "signup BLOCKED", "injection BLOCKED", "unrelated NOT ASSESSED"],
+      "observed_contract": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
+    },
+    "wallet_ui_toggle": {
+      "result": "UI_ONLY_NOT_INJECTED_PROVIDER_VERIFIED",
+      "detail": "The navbar exposed connected/disconnected states and a wallet menu in the current session. A page-context inspection did not expose window.ethereum, so this does not establish a real injected-wallet connect, account, signature or event lifecycle for the revised contract."
+    },
+    "revised_contract_migration_views": {
+      "result": "NOT RUN",
+      "detail": "The production frontend has not yet been redeployed/configured with NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3."
+    },
+    "account_change_wrong_network_switch_refresh_and_transaction_lifecycle": {
+      "result": "NOT VERIFIED",
+      "detail": "Requires the revised production frontend and an accessible real injected-wallet provider. No browser state or transaction result was fabricated."
+    }
+  },
+  "required_follow_up": "Set NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS to the expected address on the canonical Vercel project, deploy the frontend, then rerun the human/browser wallet runbook.",
+  "historical_record": "proof/live/browser-qa.json"
+}

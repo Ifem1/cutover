@@ -1,0 +1,762 @@
+{
+  "schema_version": "cutover.revised-live-cases.v1",
+  "recorded_at": "2026-09-30",
+  "contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
+  "contract_source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
+  "network": "studionet",
+  "chain_id": 61999,
+  "fixture_origin": "https://cutover-live-proof-20260930.vercel.app",
+  "fixture_deployments": [
+    {
+      "case": "positive migration and challenge evidence",
+      "deployment": "https://fixtures-9niixzjv8-ifem1s-projects.vercel.app"
+    },
+    {
+      "case": "HTTP 503 source-unavailable endpoint",
+      "deployment": "https://fixtures-7ucnpo3tf-ifem1s-projects.vercel.app"
+    },
+    {
+      "case": "registered manifest candidate A",
+      "deployment": "https://fixtures-dphql7xeg-ifem1s-projects.vercel.app"
+    },
+    {
+      "case": "live manifest candidate B with changed release ref",
+      "deployment": "https://fixtures-3vu2p4igi-ifem1s-projects.vercel.app"
+    },
+    {
+      "case": "wrong declared body SHA-256",
+      "deployment": "https://fixtures-ep4kdpsxu-ifem1s-projects.vercel.app"
+    }
+  ],
+  "transaction_receipt_convention": {
+    "successful_write": "Each listed normal write was separately observed ACCEPTED, then FINALIZED, with MAJORITY_AGREE and leader execution SUCCESS.",
+    "exceptions": "Per-transaction deviations are recorded inline. Reads are recorded as final-state observations and have no transaction hash."
+  },
+  "cases": [
+    {
+      "id": 1,
+      "name": "positive lifecycle, open challenge refusal, challenge resolution, and authorization",
+      "owner": "0xA49c51d759790116D451f256654dD9F0549D341F",
+      "candidate_ref": "c75641176acc263f9a35fab2d9b7c9f9bfb29c19",
+      "candidate_manifest_digest": "c111060408ef0dc2124a1d2fe7d1e9135954717dd0cae1bd42e1014d7df6d3aa",
+      "candidate_body_sha256": "e7d9102402d3f45fe474b1a26d795f152d11c603e5c205b8a1acb8b48f3b6a4c",
+      "challenge": {
+        "challenger": "0x77e2edbb43277bf772e207c517dde731935ffba5",
+        "evidence_url": "https://cutover-live-proof-20260930.vercel.app/cases/pricing-change",
+        "evidence_sha256": "941fe92511c2dae687900d93efa8a1840efa2491f1937526a577c27be447e794",
+        "observed_claim": "$89/month contradicted the frozen $49/month requirement",
+        "resolved": true,
+        "final_result": "READY after independent reassessment; candidate re-derived; challenge_open=false"
+      },
+      "writes": [
+        {
+          "method": "create_migration",
+          "tx": "0x8dc4cb8abf349b92afa6300d70cb0bac60734b6c8cbcf3ab288c64ad13cc9d0c",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:37:13.274Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:37:59.246Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:37:59.246Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "add_route",
+          "tx": "0x1a869801fd3c26a68892548d503c5f2316a285e2de98afabc02f3cedeb33729c",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:37:59.247Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:38:34.472Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:38:34.472Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "freeze_route",
+          "tx": "0x87596038a6716e2ea231c2faa84e932832f937502a2555c49d5c95aa35f318ff",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:38:34.473Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:39:19.898Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:39:19.898Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "seal_baseline",
+          "tx": "0xda8756f045076ead77be33027166ae09baadbfd07e12e213f0242b43f2bfa858",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:39:19.901Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:39:58.613Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:39:58.613Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "set_candidate",
+          "tx": "0xd6cf9201c60e7ac023a35ae07ba538826636a17ee09554155057c2d4fcd86757",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:39:58.615Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:40:44.913Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:40:44.913Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "assess_route",
+          "tx": "0x5b03ec26dcce55b310edc32dd00edd0531d894e6746858736c0b4b143ab0c6dd",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:40:44.915Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:41:36.132Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:41:36.132Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "derive_candidate",
+          "tx": "0x1cb8056486d3ee4908307d29b8a69721cb53f72d113db26cd726963d8e09e175",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:41:36.136Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:42:10.017Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:42:10.017Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "open_challenge",
+          "tx": "0x8de6a70cb1c9c548c82adc4f858fd6d6cbf19cdb0c1286d7d5b15513444b09f7",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:43:09.683Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:44:00.379Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:44:00.379Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "authorize",
+          "tx": "0x3f5f38864efb479a51c66560009b6b46bc12f69c6570e04b412ac0b224ace4c9",
+          "rollback": "challenge unresolved",
+          "authorization_granted": false,
+          "receipt": {
+            "submitted_at": "2026-09-30T18:44:41.235Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:45:24.749Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "ERROR"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:45:24.749Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "ERROR"
+            }
+          }
+        },
+        {
+          "method": "reassess_challenge",
+          "tx": "0xc810107db92944e6f858e4dc0dfa28e1be376688de0d17cbb1569e47c10d1a50",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:54:57.924Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:55:55.194Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:55:55.194Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "derive_candidate",
+          "tx": "0x3a44b3497737a04665d6a00b9f4cce5eeeb3341c7200be79def23de7893015a7",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:55:55.195Z",
+            "accepted": {
+              "observed_at": "2026-09-30T18:56:35.324Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T18:56:35.324Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "authorize",
+          "tx": "0xccf8847e1a3718170a56dbd96c17af27497a9328479800aac5aa358bcde8e656",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:05:52.536Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:06:37.254Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:06:37.254Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        }
+      ],
+      "final_state": "AUTHORIZED",
+      "authorization_digest": "55c5863c0ede04e85de9627f9d2e30589c4d9f6b4ead4183af9069f9cb846e47",
+      "authorization_evidence_root": "9d00b074d093f9a3365887152f296a5c2f8a70c72038385aaeb2f6a82b357be1",
+      "review_deadline_elapsed_before_authorize": true,
+      "raw_evidence_runs": [
+        "artifacts/live/2026-09-30T18-37-10-407Z/run.json",
+        "artifacts/live/2026-09-30T18-43-07-243Z/run.json",
+        "artifacts/live/2026-09-30T18-44-38-865Z/run.json",
+        "artifacts/live/2026-09-30T18-54-55-798Z/run.json",
+        "artifacts/live/2026-09-30T19-05-50-354Z/run.json"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "candidate source unavailable",
+      "writes": [
+        {
+          "method": "create_migration",
+          "tx": "0xace167934c4ea97d6b07e825238c1e8d807fe3db7e630288fe211f796e3c7914",
+          "receipt": {
+            "submitted_at": "2026-09-30T18:59:38.578Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:00:25.214Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:00:25.214Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "add_route",
+          "tx": "0xb1d94b921473669292ee0e821af27b7e089e6a7d4c274ab83ab7d3d200a5fddf",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:00:25.215Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:01:12.788Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:01:12.788Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "freeze_route",
+          "tx": "0x9551e23d0983a4bde8f923f80ae7f3f16200882924562c99a1551519230c4f51",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:01:12.790Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:02:10.834Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:02:10.834Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "seal_baseline",
+          "tx": "0xd206612f6f02ade1018c736e29597cdb8d2746ddaf715ca5089138dab67fe870",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:02:10.837Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:02:50.806Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:02:50.806Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "set_candidate",
+          "tx": "0x5a6f7dde16c1b8bcb9b5bc5ba0944abebfc8f0ae22dc9adcede25d8ca22e055b",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:02:50.809Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:03:32.057Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:03:32.057Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "assess_route",
+          "tx": "0xce97c3b0b27248836d5febaf9b7b9b90be9071a8c2e507419f5c05f717f73926",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:03:32.060Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:04:12.472Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:04:12.472Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "derive_candidate",
+          "tx": "0x977b4800e4dcb303b27875d118e79ec86ed0b66086d948e59ca196f24dbaa4ad",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:04:12.478Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:04:59.691Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:04:59.691Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        }
+      ],
+      "source_response": {
+        "http_status": 503,
+        "body_sha256": "debf7969bb52ea15cca68321842ba2c51a0fe792071123dbe12dae82a72b151c"
+      },
+      "assessment": {
+        "code": "HTTP_STATUS",
+        "evidence_available": false,
+        "manifest_match": true,
+        "content_match": false,
+        "route_result": "INCONCLUSIVE"
+      },
+      "final_state": "INCONCLUSIVE",
+      "raw_evidence_run": "artifacts/live/2026-09-30T18-59-35-938Z/run.json"
+    },
+    {
+      "id": 3,
+      "name": "candidate manifest release-ref mismatch fails closed",
+      "candidate_a_ref": "cutover-proof-ref-a-20260930",
+      "candidate_a_manifest_digest": "d21113a0f362cd37363b7081956ecc9e8ac840f76d96b812db7f228c2f655f29",
+      "live_manifest_ref_during_assessment": "cutover-proof-ref-b-20260930",
+      "live_manifest_digest_during_assessment": "72a36a7cc22154210e8401aaab8e93d51d09f669603abf53e694af7a72223348",
+      "same_body_sha256": "e7d9102402d3f45fe474b1a26d795f152d11c603e5c205b8a1acb8b48f3b6a4c",
+      "writes": [
+        {
+          "method": "create_migration",
+          "tx": "0xceb1f69688b28f025d96b75452a8b3683fe29fb4be15d83cd3139cabec7e380e",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:10:05.328Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:10:51.303Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:10:51.303Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "add_route",
+          "tx": "0x98cdbe6de15d0d70c47a645f751462609b36a6e1c63299d677ee1026d909da88",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:10:51.305Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:11:33.501Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:11:33.501Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "freeze_route",
+          "tx": "0xf3f55f22699a7099f2cc30f27e1731eb32da4bff60a84131c1f1be5ad2556dfb",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:11:33.502Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:12:25.363Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:12:25.363Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "seal_baseline",
+          "tx": "0x032c65a0a9ab564450db97226f0dc2f3c71e717790f744a597164b70f1bb493e",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:12:25.364Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:13:04.970Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:13:04.970Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "set_candidate",
+          "tx": "0x1c0d7c4a2b980de70f9a0e4e5c27ee1e3720bfd90808bc8cddb0f3aaa9e7c454",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:13:04.973Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:13:45.555Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:13:45.556Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "assess_route",
+          "tx": "0xb6ef43dad5cc5ff3116032f0899102a72289559113e08dc2d9c57d78beba9746",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:15:32.186Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:16:22.201Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:16:22.201Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "derive_candidate",
+          "tx": "0xa6030412d0d2cef2894802560fb2c7d78a1db68bb7642ac345c09cab0f1e569b",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:16:22.202Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:17:03.299Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:17:03.299Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        }
+      ],
+      "assessment": {
+        "manifest_match": false,
+        "content_match": true,
+        "source_match": true,
+        "evidence_available": true,
+        "route_result": "INCONCLUSIVE"
+      },
+      "final_state": "INCONCLUSIVE",
+      "raw_evidence_runs": [
+        "artifacts/live/2026-09-30T19-10-03-099Z/run.json",
+        "artifacts/live/2026-09-30T19-15-30-029Z/run.json"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "candidate body SHA mismatch fails closed",
+      "expected_body_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observed_body_sha256": "e7d9102402d3f45fe474b1a26d795f152d11c603e5c205b8a1acb8b48f3b6a4c",
+      "writes": [
+        {
+          "method": "create_migration",
+          "tx": "0x33048003f710bb95d26b6974d8c11513d1ac33df59ef98e69855403c186adc5d",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:19:42.349Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:20:27.353Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:20:27.353Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "add_route",
+          "tx": "0x1ef4414bbda201e4b6803e7f1d2e6f5cf90d09ccdc15ad76656358dfa35e23da",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:20:27.354Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:21:07.226Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:21:07.226Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "freeze_route",
+          "tx": "0x227bfa030ed4426ead9308a49fa1538adbe2f128e4620319ba67849f4ac4fc8c",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:21:07.228Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:22:05.087Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:22:05.087Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "seal_baseline",
+          "tx": "0x9123f78a1597d2619344d72d50845fecc6e7a2f38b654f146276772c8b143c45",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:22:05.089Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:22:45.958Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:22:45.958Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "set_candidate",
+          "tx": "0x2b6cd375fe90baffa7d9aa565cbc6580d371870a621bcb689f4ed8b014f47e3c",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:22:45.960Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:23:26.413Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:23:26.413Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "assess_route",
+          "tx": "0xe7dae64056ccd9b0f7afd409348ddf612e49cb951afa28f67296866ec02db255",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:23:26.420Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:24:14.345Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:24:14.346Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        },
+        {
+          "method": "derive_candidate",
+          "tx": "0xcdc4b7c842dd87eedd24cc7a0b1a87a7bf2a05b2eb77754dc974ed508fec50b2",
+          "receipt": {
+            "submitted_at": "2026-09-30T19:24:14.358Z",
+            "accepted": {
+              "observed_at": "2026-09-30T19:24:57.946Z",
+              "status": "ACCEPTED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            },
+            "finalized": {
+              "observed_at": "2026-09-30T19:24:57.946Z",
+              "status": "FINALIZED",
+              "consensus_result": "MAJORITY_AGREE",
+              "leader_execution_result": "SUCCESS"
+            }
+          }
+        }
+      ],
+      "assessment": {
+        "manifest_match": true,
+        "content_match": false,
+        "source_match": true,
+        "evidence_available": true,
+        "route_result": "INCONCLUSIVE"
+      },
+      "final_state": "INCONCLUSIVE",
+      "raw_evidence_run": "artifacts/live/2026-09-30T19-19-40-240Z/run.json"
+    }
+  ],
+  "non_quorum_retry": {
+    "method": "reassess_challenge",
+    "tx": "0x85b9ef02572810468da6c74cecac338e53d9e4615ebb5103bffd19b4ec3d0049",
+    "observed_status": "CANCELED",
+    "consensus_result": "NO_MAJORITY",
+    "effect": "No state change; the challenge stayed open and was later resolved by the successful retry recorded under migration 1.",
+    "raw_evidence": "artifacts/live/2026-09-30T18-45-48-588Z/02-receipt-canceled.txt"
+  }
+}

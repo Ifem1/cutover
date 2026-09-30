@@ -1,0 +1,46 @@
+{
+  "schema_version": "cutover.live-deployment.v1",
+  "recorded_at": "2026-09-30T18:26:38.065Z",
+  "git_commit": "c75641176acc263f9a35fab2d9b7c9f9bfb29c19",
+  "network": {
+    "name": "studionet",
+    "chain_id": 61999,
+    "rpc": "https://studio.genlayer.com/api"
+  },
+  "tooling": {
+    "genlayer_cli": "0.39.1",
+    "genlayer_js": "1.1.8"
+  },
+  "contract": {
+    "address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
+    "explorer": "https://explorer-studio.genlayer.com",
+    "deployment_transaction": "0xc95764f9ac1e81b28941261662c46aae0a49cae14c0719e6059106190b5994de",
+    "source_path": "contracts/cutover.py",
+    "source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
+    "deployed_source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
+    "exact_source_match": true,
+    "source_retrieval": "gen_getContractCode via pinned genlayer-js 1.1.8 after finalized deployment receipt"
+  },
+  "deployer_address": "0xA49c51d759790116D451f256654dD9F0549D341F",
+  "deployment_receipt": {
+    "observed_status": "FINALIZED",
+    "consensus_result": "MAJORITY_AGREE",
+    "leader_execution_result": "SUCCESS",
+    "accepted_phase_observed_separately": false,
+    "note": "The receipt poll labeled ACCEPTED first returned after the transaction had already reached FINALIZED. Do not treat that poll as evidence that ACCEPTED was separately observed. Finalized status and source match were observed."
+  },
+  "application_result": {
+    "config_call": {
+      "network": "studionet",
+      "chain_id": 61999,
+      "max_challenges_per_generation": 3,
+      "max_challenges_per_route": 2
+    }
+  },
+  "raw_evidence": {
+    "deployment_run": "artifacts/live/2026-09-30T18-26-38-065Z/run.json",
+    "accepted_poll_output": "artifacts/live/2026-09-30T18-26-38-065Z/01-receipt-accepted.txt",
+    "finalized_poll_output": "artifacts/live/2026-09-30T18-26-38-065Z/01-receipt-finalized.txt",
+    "note": "The artifacts directory is local and git-ignored. The public transaction and deployed source can be independently checked on Studionet."
+  }
+}

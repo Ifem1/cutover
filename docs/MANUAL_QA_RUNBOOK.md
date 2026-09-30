@@ -6,13 +6,14 @@ Run these checks against the revised contract after it has been deployed, source
 
 - Frontend: <https://cutover-kappa.vercel.app/>
 - Expected network: Studionet, chain ID `61999`
-- Expected contract: the revised contract address from the new deployment record (not the previous `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237` address)
+- Expected contract: `0x2A19548ae8A86a6d678890095f9F25eddeC16DD3` (not the previous `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237` address)
 - Wallet: injected wallet with an account intended for the specific test; do not paste or record private keys.
-- Use the browser at 100% zoom and record browser size/device. Test only the revised frontend deployment after its contract address is configured.
+- Vercel environment: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3`; deploy the frontend after setting it.
+- Use the browser at 100% zoom and record browser size/device. Test only after the canonical frontend points at the revised contract.
 
 ## Tests
 
-1. **Load the production frontend.** Open the URL above. Confirm the app renders, shows the revised contract address, and identifies Studionet / `61999`. Confirm no fabricated migration appears when the address is unset or a chain read fails.
+1. **Load the production frontend.** Open the URL above. Confirm the app renders, shows contract `0x2A19548ae8A86a6d678890095f9F25eddeC16DD3`, and identifies Studionet / `61999`. Confirm migration 1 is `AUTHORIZED` and migrations 2–4 are `INCONCLUSIVE` for this deployment. Confirm no fabricated migration appears when the address is unset or a chain read fails. The earlier deployment's migration 3 `AUTHORIZED` and migration 4 `BLOCKED` do not apply to this new address.
 
 2. **Connect wallet.** Select Connect wallet. Confirm the injected wallet prompt names the expected account and the navbar shows the connected shortened address. Open the wallet menu, verify the full shortened address, copy-address action, network label, explorer/account link where applicable, and Disconnect.
 
@@ -55,4 +56,4 @@ Screenshot needed: YES / NO
 Operator and date:
 ```
 
-Current status: all 13 rows are **NOT RUN for the revised contract/frontend pair**. Historical observations are preserved in `proof/live/browser-qa.json` and are scoped to the earlier contract source hash.
+Current status: all 13 rows are **NOT RUN for the revised contract/frontend pair**. The canonical frontend has not yet been deployed with the revised address. Historical observations are preserved in `proof/live/browser-qa.json` and are scoped to the earlier contract source hash; the current visit limitation is in `proof/live/revised-browser-qa.json`.

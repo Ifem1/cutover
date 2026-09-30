@@ -4,12 +4,20 @@
     "name": "studionet",
     "chain_id": 61999
   },
-  "active_source_commit": "df47e9e1728a51afe51d8d6a25e0efbd29204741",
+  "active_source_commit": "c75641176acc263f9a35fab2d9b7c9f9bfb29c19",
   "active_contract_source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
-  "active_source_deployment_status": "PENDING_HUMAN_WALLET_APPROVAL",
+  "active_source_deployment_status": "DEPLOYED_AND_SOURCE_VERIFIED",
+  "active_contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
   "historical_live_contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
   "historical_live_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
-  "live_evidence_status": "HISTORICAL_ONLY: all current live deployment/cycle/gate evidence applies to historical source SHA-256 34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834; revised source SHA-256 13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79 is not deployed",
+  "live_evidence_status": "REVISED_SOURCE_PARTIAL: revised source deployed at 0x2A19548ae8A86a6d678890095f9F25eddeC16DD3 and exact source match verified; positive authorization and fail-closed INCONCLUSIVE cases are recorded. Revised-source live GitHub gate and production frontend/wallet QA are pending. Historical records remain separately preserved.",
+  "revised_source_deployment_evidence": "proof/live/revised-deployment.json",
+  "revised_source_live_cases": "proof/live/revised-live-cases.json",
+  "revised_frontend_url": "https://cutover-kappa.vercel.app/",
+  "revised_frontend_contract_configured": false,
+  "revised_source_final_ci_status": "PENDING_UPDATED_WORKFLOW_RUN",
+  "revised_source_live_gate_status": "PENDING_UPDATED_WORKFLOW_RUN",
+  "revised_frontend_wallet_qa_status": "PENDING_USER_FRONTEND_DEPLOY_AND_REAL_INJECTED_WALLET",
   "local_validation": {
     "source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
     "direct_mode": {"status": "PASS", "passed": 111, "total": 111},
@@ -26,9 +34,11 @@
     "network_discipline": "PASS",
     "genvm_lint_and_validation": "PASS",
     "package_audit": {"status": "PASS", "archive": "cutover-chatgpt-pro-handoff.zip", "entries": 118},
-    "ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36753618050 (source commit df47e9e1728a51afe51d8d6a25e0efbd29204741; live-gate job exercised historical deployment only)"
+    "ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36753618050 (source commit df47e9e1728a51afe51d8d6a25e0efbd29204741; live-gate job exercised historical deployment only)",
+    "revised_final_ci": "PENDING_UPDATED_WORKFLOW_RUN"
   },
-  "deployment_evidence": "proof/live/deployment.json",
+  "deployment_evidence": "proof/live/revised-deployment.json",
+  "historical_deployment_evidence": "proof/live/deployment.json",
   "invariants": [
     {
       "id": "baseline-authentication",
@@ -53,7 +63,7 @@
       "planned_live_cases": [
         1
       ],
-      "live_evidence": "PASS: positive-cycle-3 (two authenticated baselines sealed; see proof/live/positive-cycle.json)"
+      "live_evidence": "REVISED SOURCE PASS: migration 1 authenticated and sealed its baseline; source verification and transaction receipts are in proof/live/revised-live-cases.json. Historical cycles remain in proof/live/positive-cycle.json."
     },
     {
       "id": "candidate-identity",
@@ -86,7 +96,7 @@
         1,
         13
       ],
-      "live_evidence": "PASS: positive-cycle-3 and negative-cycle-4; migration 6 manifest release-ref mismatch (manifest_match=false, content_match=true) and body SHA mismatch (manifest_match=true, content_match=false) both finalized INCONCLUSIVE; see proof/live/adversarial-cases.json"
+      "live_evidence": "REVISED SOURCE PASS: migration 3 live release-ref mismatch (manifest_match=false, content_match=true) and migration 4 wrong body SHA (manifest_match=true, content_match=false) both finalized INCONCLUSIVE; see proof/live/revised-live-cases.json. Historical cases remain in proof/live/adversarial-cases.json."
     },
     {
       "id": "route-verdicts",
@@ -121,7 +131,7 @@
         6,
         7
       ],
-      "live_evidence": "PARTIAL: negative-cycle-4 proves price/legal/signup/injection BLOCKED and unrelated disagreement stayed NOT ASSESSED; migration 5 HTTP 503 produced INCONCLUSIVE; migration 6 manifest-ref and body-SHA mismatches each produced INCONCLUSIVE; see proof/live/adversarial-cases.json"
+      "live_evidence": "REVISED SOURCE PARTIAL: source HTTP 503 on migration 2 and manifest/content mismatches on migrations 3/4 produced INCONCLUSIVE. The definite BLOCKED outcomes and disagreement case remain historical-only in proof/live/adversarial-cases.json; a revised-source BLOCKED case is not claimed."
     },
     {
       "id": "retry-griefing",
@@ -217,7 +227,7 @@
         11,
         13
       ],
-      "live_evidence": "PARTIAL: on migration 7, an independent challenge remained unresolved and owner authorization was refused with finalized execution ERROR/rollback 'candidate not ready'; post-state remained CHALLENGED with challenge_open=true. The earlier state guard fired; the receipt does not establish that the later explicit challenge guard was reached. See proof/live/adversarial-cases.json"
+      "live_evidence": "REVISED SOURCE PASS: migration 1 owner authorize while challenge unresolved finalized MAJORITY_AGREE with execution ERROR/rollback 'challenge unresolved'; no authorization was granted. A first reassess attempt was CANCELED/NO_MAJORITY without state change; retry then resolved the challenge. See proof/live/revised-live-cases.json. The prior 'candidate not ready' record remains historical."
     },
     {
       "id": "review-window-authorization",
@@ -248,7 +258,7 @@
         11,
         12
       ],
-      "live_evidence": "PASS: positive-cycle-3 authorized after review deadline with evidence root"
+      "live_evidence": "REVISED SOURCE PASS: migration 1 authorized after the review deadline; finalized authorization digest/evidence root are recorded in proof/live/revised-live-cases.json."
     },
     {
       "id": "consensus-agreement",
@@ -274,7 +284,7 @@
         9,
         10
       ],
-      "live_evidence": "PARTIAL: successful majority-agreed receipts plus unrelated-route MAJORITY_DISAGREE preserved as unapproved"
+      "live_evidence": "REVISED SOURCE PARTIAL: revised deployment and recorded positive/adversarial writes reached MAJORITY_AGREE; no validator disagreement or malformed consensus output was produced in the revised live cases. Prior unrelated-route disagreement evidence is historical-only."
     },
     {
       "id": "prompt-injection-and-schema",
@@ -292,7 +302,7 @@
       "planned_live_cases": [
         8
       ],
-      "live_evidence": "PARTIAL: injection fixture assessed BLOCKED; malformed consensus output not live tested"
+      "live_evidence": "HISTORICAL ONLY: prompt-injection fixture was BLOCKED on the previous source deployment; revised-source live injection and malformed-consensus cases were not run."
     },
     {
       "id": "client-network-lifecycle",
@@ -309,7 +319,7 @@
       "planned_live_cases": [
         1
       ],
-      "live_evidence": "PARTIAL: live navbar connect/disconnect, wallet menu, refresh recovery, migration 3 AUTHORIZED, migration 4 BLOCKED, and an ACCEPTED→FINALIZED explorer transaction were observed on chain 61999. Wrong-network handling/switch and accountChanged remain untested; see proof/live/browser-qa.json"
+      "live_evidence": "REVISED PAIR NOT VERIFIED: the canonical frontend still reads the historical contract, so the new contract address has not been configured there. A current browser visit showed old migration records; see proof/live/revised-browser-qa.json. Historical injected-wallet observations are preserved in proof/live/browser-qa.json. Wrong-network, accountChanged and revised-contract transaction UI checks remain pending."
     },
     {
       "id": "github-gate-exact-ref",
@@ -327,7 +337,7 @@
         12,
         13
       ],
-      "live_evidence": "HISTORICAL PASS: live-gate job in https://github.com/Ifem1/cutover/actions/runs/36753618050/job/110018493960 (run https://github.com/Ifem1/cutover/actions/runs/36753618050) repeated the actual Studionet checks: migration 3 exact ref passed, wrong ref failed at exact-ref guard, migration 4 failed at BLOCKED-state guard. These records apply to historical source SHA-256 34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834; no revised-source live-gate proof is claimed."
+      "live_evidence": "PENDING REVISED-SOURCE ACTION RUN: CI live-gate workflow now targets the source-matched revised contract, migration 1 AUTHORIZED with exact ref c75641176acc263f9a35fab2d9b7c9f9bfb29c19, wrong ref failure, and migration 2 INCONCLUSIVE-state failure. Awaiting the actual GitHub Actions run URL. Historical run 36753618050 remains linked in docs/GITHUB_GATE.md."
     }
   ]
 }

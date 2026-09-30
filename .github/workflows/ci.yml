@@ -113,21 +113,21 @@ jobs:
         with: { node-version: "22" }
       - name: Install pinned Node dependencies
         run: npm ci
-      - name: PASS exact authorized migration 3 candidate ref
+      - name: PASS exact authorized revised-source migration 1 candidate ref
         id: exact-ref
         uses: ./packages/gate
         with:
-          contract-address: "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
-          migration-id: "3"
-          expected-candidate-ref: 796473c3eda18701ca293cb1100b065652f1da9c
+          contract-address: "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3"
+          migration-id: "1"
+          expected-candidate-ref: c75641176acc263f9a35fab2d9b7c9f9bfb29c19
           chain-id: "61999"
       - name: FAIL a mismatched candidate ref
         id: wrong-ref
         continue-on-error: true
         uses: ./packages/gate
         with:
-          contract-address: "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
-          migration-id: "3"
+          contract-address: "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3"
+          migration-id: "1"
           expected-candidate-ref: cutover-live-proof-wrong-ref
           chain-id: "61999"
       - name: Assert the wrong-ref failure came from the exact-ref guard
@@ -138,23 +138,23 @@ jobs:
         run: |
           test "$ACTION_OUTCOME" = "failure"
           [[ "$GATE_ERROR" == *"does not equal expected cutover-live-proof-wrong-ref"* ]]
-      - name: FAIL a non-AUTHORIZED migration
+      - name: FAIL a non-AUTHORIZED INCONCLUSIVE migration
         id: blocked-state
         continue-on-error: true
         uses: ./packages/gate
         with:
-          contract-address: "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
-          migration-id: "4"
-          expected-candidate-ref: 796473c3eda18701ca293cb1100b065652f1da9c
+          contract-address: "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3"
+          migration-id: "2"
+          expected-candidate-ref: c75641176acc263f9a35fab2d9b7c9f9bfb29c19
           chain-id: "61999"
-      - name: Assert the BLOCKED-state failure came from the state guard
+      - name: Assert the INCONCLUSIVE-state failure came from the state guard
         if: always()
         env:
           ACTION_OUTCOME: ${{ steps.blocked-state.outcome }}
           GATE_ERROR: ${{ steps.blocked-state.outputs.gate-error }}
         run: |
           test "$ACTION_OUTCOME" = "failure"
-          [[ "$GATE_ERROR" == *"CUTOVER state is BLOCKED, expected AUTHORIZED"* ]]
+          [[ "$GATE_ERROR" == *"CUTOVER state is INCONCLUSIVE, expected AUTHORIZED"* ]]
 
   generated-artifacts:
     name: Verify lockfile + action bundle
