@@ -3,14 +3,9 @@ import React,{useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 import {readCutover,writeCutover} from "@/lib/contract";
 import {isConfigured,NETWORK} from "@/lib/config";
+import {describeError,isWalletSignatureRejection} from "@/lib/errors";
 import {clearPendingTransaction,loadPendingTransaction,savePendingTransaction,TxExecutionError,TxTrackingError,waitForFinality,type PendingCutoverTransaction,type TxPhase} from "@/lib/tx";
 import {useWallet} from "./WalletSession";
-
-function isWalletSignatureRejection(error:unknown){
-  if(!error||typeof error!=="object")return false;
-  const candidate=error as {code?:unknown;message?:unknown};
-  return candidate.code===4001||candidate.code==="4001"||(typeof candidate.message==="string"&&/user rejected|user denied|request rejected/i.test(candidate.message));
-}
 
 export function useContractSubmit(){
   const router=useRouter(); const wallet=useWallet();
@@ -52,7 +47,7 @@ export function useContractSubmit(){
       return await trackTransaction(record);
     }catch(error){
       if(isWalletSignatureRejection(error)){setPhase("signature_rejected");setMessage("Wallet signature was rejected; no transaction was submitted.");}
-      else{const detail=error instanceof Error?error.message:String(error);setMessage(detail);if(!hashSubmitted)setPhase("submission_error");}
+      else{setMessage(describeError(error));if(!hashSubmitted)setPhase("submission_error");}
       throw error;
     }finally{setBusy(false);}
   }
@@ -62,7 +57,7 @@ export function useContractSubmit(){
     if(!record)return;
     setPending(record);setBusy(true);setConfirmed(null);setPhase("submitted");setMessage(`Checking saved transaction ${record.hash} on Studionet…`);
     try{return await trackTransaction(record);}
-    catch(error){setMessage(error instanceof Error?error.message:String(error));throw error;}
+    catch(error){setMessage(describeError(error));throw error;}
     finally{setBusy(false);}
   }
 

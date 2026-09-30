@@ -10,13 +10,8 @@ export type Eip1193Provider={
 };
 
 type ContractWrite={address:`0x${string}`;functionName:string;args:unknown[];value:bigint};
-type FeeEstimate={distribution:unknown;feeValue:unknown};
 type ReadClient={readContract:(request:Record<string,unknown>)=>Promise<unknown>};
-type WriteClient={
-  connect:(network:string)=>Promise<unknown>;
-  estimateTransactionFeesForWrite:(request:ContractWrite)=>Promise<FeeEstimate>;
-  writeContract:(request:ContractWrite&{fees:FeeEstimate})=>Promise<`0x${string}`>;
-};
+type WriteClient={writeContract:(request:ContractWrite)=>Promise<`0x${string}`>};
 
 export async function readCutover(functionName:string,args:unknown[]=[]):Promise<unknown>{
   if(!isConfigured())throw new Error("CUTOVER contract not configured");
@@ -26,9 +21,19 @@ export async function readCutover(functionName:string,args:unknown[]=[]):Promise
 
 export async function writeCutover(account:`0x${string}`,provider:Eip1193Provider,functionName:string,args:unknown[]=[]):Promise<`0x${string}`>{
   if(!isConfigured())throw new Error("CUTOVER contract not configured");
+
+  // genlayer-js@1.1.8 already routes eth_sendTransaction through the supplied
+  // EIP-1193 provider. Network switching is owned by WalletSession so this path
+  // never calls client.connect(), which in 1.1.8 uses global window.ethereum
+  // and the legacy MetaMask Snap flow instead of the selected provider.
+  //
+  // The stable 1.1.8 client also does not expose estimateTransactionFeesForWrite;
+  // writeContract performs the supported Studionet submission directly.
   const client=createClient({chain:studionet,account,provider} as never) as unknown as WriteClient;
-  await client.connect("studionet");
-  const write:ContractWrite={address:CONTRACT_ADDRESS as `0x${string}`,functionName,args,value:0n};
-  const fees=await client.estimateTransactionFeesForWrite(write);
-  return client.writeContract({...write,fees});
+  return client.writeContract({
+    address:CONTRACT_ADDRESS as `0x${string}`,
+    functionName,
+    args,
+    value:0n,
+  });
 }

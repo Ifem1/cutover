@@ -39,6 +39,16 @@ describe("contract submission recovery",()=>{
     expect(sessionStorage.length).toBe(0);
   });
 
+  it("renders structured provider failures instead of object Object",async()=>{
+    writeCutover.mockRejectedValueOnce({code:-32000,message:"Studionet write failed",data:{details:"RPC rejected transaction"}});
+    render(<Harness/>);
+    fireEvent.click(screen.getByRole("button",{name:"Submit"}));
+    await waitFor(()=>expect(screen.getByTestId("phase").textContent).toBe("submission_error"));
+    expect(screen.getByText(/Studionet write failed/)).toBeTruthy();
+    expect(screen.queryByText("[object Object]")).toBeNull();
+    expect(sessionStorage.length).toBe(0);
+  });
+
   it("restores an RPC-interrupted hash after refresh, resumes polling, and re-reads final state",async()=>{
     writeCutover.mockResolvedValueOnce(HASH);
     getTransaction.mockRejectedValueOnce(new Error("RPC offline"));
