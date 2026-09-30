@@ -16,4 +16,4 @@ Until `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS` contains a valid address, chain-bac
 
 The UI reports `awaiting_signature → submitted → accepted → finalizing → finalized → execution_success|execution_failure`. `accepted` is never treated as completion. A failed decision stops before finalization; a finalized execution failure remains a failure.
 
-Responsive matrices use bounded scrolling/wrapping for long URLs, hashes, candidate refs and route names. Real browser-wallet, refresh/recovery and device QA remain live-phase work rather than fabricated evidence.
+Responsive matrices use bounded scrolling/wrapping for long URLs, hashes, candidate refs and route names. Live Chrome checks confirmed navbar connect/disconnect, the connected-wallet menu, refresh recovery on migration 4, migration 3 `AUTHORIZED`, migration 4 `BLOCKED`, and a finalized explorer transaction; see [`proof/live/browser-qa.json`](../proof/live/browser-qa.json). Account changes and wrong-network switching were not tested because the permitted browser controls could not operate the wallet extension UI. Tablet/mobile device QA is not part of this live-proof record.

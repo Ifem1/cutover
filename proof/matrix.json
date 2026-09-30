@@ -4,7 +4,7 @@
     "name": "studionet",
     "chain_id": 61999
   },
-  "live_evidence_status": "PARTIAL: positive migration 3 AUTHORIZED and negative migration 4 BLOCKED on Studionet; browser-wallet, GitHub gate, and remaining adversarial live cases outstanding",
+  "live_evidence_status": "PARTIAL: migration 3 AUTHORIZED, migration 4 BLOCKED, four adversarial outcomes, and live GitHub gate proof are recorded; injected-wallet wrong-network/switch and account-change cases remain untested",
   "deployment_evidence": "proof/live/deployment.json",
   "invariants": [
     {
@@ -57,7 +57,7 @@
         1,
         13
       ],
-      "live_evidence": "PASS: positive-cycle-3 and negative-cycle-4 (manifest/ref/body digest bound; see both live records)"
+      "live_evidence": "PASS: positive-cycle-3 and negative-cycle-4; migration 6 manifest release-ref mismatch (manifest_match=false, content_match=true) and body SHA mismatch (manifest_match=true, content_match=false) both finalized INCONCLUSIVE; see proof/live/adversarial-cases.json"
     },
     {
       "id": "route-verdicts",
@@ -88,7 +88,7 @@
         6,
         7
       ],
-      "live_evidence": "PARTIAL: negative-cycle-4 proves price/legal/signup/injection BLOCKED; unrelated route disagreement stayed unapproved"
+      "live_evidence": "PARTIAL: negative-cycle-4 proves price/legal/signup/injection BLOCKED and unrelated disagreement stayed NOT ASSESSED; migration 5 HTTP 503 produced INCONCLUSIVE; migration 6 manifest-ref and body-SHA mismatches each produced INCONCLUSIVE; see proof/live/adversarial-cases.json"
     },
     {
       "id": "challenge-admission",
@@ -161,7 +161,7 @@
         11,
         13
       ],
-      "live_evidence": "NOT RUN: authorization after resolved challenge is proven; authorization during an unresolved challenge is not live tested"
+      "live_evidence": "PARTIAL: on migration 7, an independent challenge remained unresolved and owner authorization was refused with finalized execution ERROR/rollback 'candidate not ready'; post-state remained CHALLENGED with challenge_open=true. The earlier state guard fired; the receipt does not establish that the later explicit challenge guard was reached. See proof/live/adversarial-cases.json"
     },
     {
       "id": "review-window-authorization",
@@ -243,7 +243,7 @@
       "planned_live_cases": [
         1
       ],
-      "live_evidence": "PARTIAL: contract writes captured ACCEPTED and FINALIZED receipts on chain 61999; browser wallet lifecycle not tested"
+      "live_evidence": "PARTIAL: live navbar connect/disconnect, wallet menu, refresh recovery, migration 3 AUTHORIZED, migration 4 BLOCKED, and an ACCEPTED→FINALIZED explorer transaction were observed on chain 61999. Wrong-network handling/switch and accountChanged remain untested; see proof/live/browser-qa.json"
     },
     {
       "id": "github-gate-exact-ref",
@@ -261,7 +261,7 @@
         12,
         13
       ],
-      "live_evidence": "NOT RUN: live authorized/wrong-ref/unauthorized gate requests not exercised"
+      "live_evidence": "PASS: committed live-gate-proof job in https://github.com/Ifem1/cutover/actions/runs/36735999116 — migration 3 exact ref passed; wrong ref failed at the exact-ref guard; migration 4 failed at the BLOCKED-state guard. Job and complete workflow run succeeded."
     }
   ]
 }

@@ -1,0 +1,54 @@
+{
+  "schema_version": "cutover.live-browser-qa.v1",
+  "recorded_date": "2026-09-30",
+  "status": "PARTIAL",
+  "frontend_url": "https://cutover-kappa.vercel.app/",
+  "browser": "Chrome with the user's injected EIP-1193 wallet",
+  "connected_account": "0x7d1170bc98624f98183972fabd69418bb7d5d541",
+  "connected_chain": 61999,
+  "observations": {
+    "connect_and_disconnect": {
+      "result": "PASS",
+      "detail": "Disconnected and reconnected through the live navbar; the same injected account was displayed."
+    },
+    "connected_wallet_menu": {
+      "result": "PASS",
+      "detail": "Menu displayed full address, Copy address, Studionet · 61999, Studionet explorer link, and Disconnect."
+    },
+    "refresh_recovery": {
+      "result": "PASS",
+      "detail": "After connecting on /migrations/4, reloading kept the same address and Studionet · 61999 status."
+    },
+    "migration_3_authorized": {
+      "result": "PASS",
+      "url": "https://cutover-kappa.vercel.app/migrations/3",
+      "observed_state": "AUTHORIZED",
+      "candidate_ref": "796473c3eda18701ca293cb1100b065652f1da9c",
+      "routes": ["exact READY", "cosmetic READY"]
+    },
+    "migration_4_blocked": {
+      "result": "PASS",
+      "url": "https://cutover-kappa.vercel.app/migrations/4",
+      "observed_state": "BLOCKED",
+      "routes": ["pricing BLOCKED", "legal BLOCKED", "signup BLOCKED", "injection BLOCKED", "unrelated NOT ASSESSED"]
+    },
+    "explorer_links_and_transaction_lifecycle": {
+      "result": "PASS",
+      "explorer": "https://explorer-studio.genlayer.com/",
+      "transaction_url": "https://explorer-studio.genlayer.com/tx/0xd2c9010a0e8a75c637691aefa6b89c9261cb08d354f93a8eb8359dbcdf318f93",
+      "method": "authorize",
+      "observed_status": "FINALIZED",
+      "timeline": "ACCEPTED then FINALIZED",
+      "execution": "SUCCESS"
+    },
+    "wrong_network_and_switch_to_61999": {
+      "result": "NOT TESTED",
+      "detail": "The injected wallet was already on Studionet 61999. The browser-control policy blocked chrome://extensions and explicitly disallowed reaching wallet extension controls by an alternate route."
+    },
+    "account_change": {
+      "result": "NOT TESTED",
+      "detail": "Changing the selected injected-wallet account requires wallet extension UI, which was not available through the permitted browser controls."
+    }
+  },
+  "limitation": "Wallet state was verified only on the already-selected account and correct chain. Wrong-network handling, switching chains, and accountChanged were not exercised; no browser or application state was faked."
+}

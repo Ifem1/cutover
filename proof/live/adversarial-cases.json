@@ -1,0 +1,140 @@
+{
+  "schema_version": "cutover.live-adversarial-cases.v1",
+  "recorded_at": "2026-09-30T15:12:00Z",
+  "network": {
+    "name": "studionet",
+    "chain_id": 61999,
+    "rpc": "https://studio.genlayer.com/api"
+  },
+  "contract": {
+    "address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
+    "source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
+    "explorer_tx_base": "https://explorer-studio.genlayer.com/tx/"
+  },
+  "fixture_origin": "https://cutover-live-proof-20260930.vercel.app",
+  "receipt_semantics": "Each successful proof write below was observed ACCEPTED and later FINALIZED with MAJORITY_AGREE and leader SUCCESS. The intentionally refused authorize write was also ACCEPTED and FINALIZED, but consensus execution was ERROR and the contract returned a rollback; ACCEPTED is not reported as successful execution.",
+  "cases": [
+    {
+      "id": "candidate-source-unavailable",
+      "migration_id": 5,
+      "route_id": "source-unavailable",
+      "candidate_ref": "cutover-proof-unavailable-v1",
+      "candidate_url": "https://cutover-live-proof-20260930.vercel.app/api/unavailable",
+      "observed_http_status": 503,
+      "route_result": "INCONCLUSIVE",
+      "migration_state": "INCONCLUSIVE",
+      "assessment": {
+        "code": "HTTP_STATUS",
+        "manifest_match": true,
+        "content_match": false,
+        "evidence_available": false
+      },
+      "transactions": [
+        { "method": "create_migration", "hash": "0x7df8441dac7e659506260c5309b221527fd598cbae9ffef02ef95dc7d095ffca", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "add_route", "hash": "0x9c62cd6229fca3e8a1f9efab334ce2c57ce8477545e766c5c6229a223858c5f0", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "freeze_route", "hash": "0x0bec27604607daad1d0932f388b9dc4b017b3441446ae4d33b3d040e1a27fa9f", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "seal_baseline", "hash": "0xb8e965f5bdec4fcaae7fbd4079b2b1b81c31697b991ea79dc4ea058cc091e904", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "set_candidate", "hash": "0xecfa8e5ddf313b5c334e15c0116a8b21e924746802967c66568d84c2c671caa8", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "assess_route", "hash": "0x9c2ebccd8f4b424b423d2846051c688f3738880baa70922b1e8757ec0eb4eab4", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "derive_candidate", "hash": "0xbbcf0f1073a9ab29c4ca8b4842377245c3023784f62a3c1711da7b66002ecec6", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" }
+      ],
+      "raw_run_directory": "artifacts/live/2026-09-30T14-37-32-358Z"
+    },
+    {
+      "id": "candidate-manifest-release-ref-mismatch",
+      "migration_id": 6,
+      "route_id": "manifest-ref",
+      "candidate_ref_registered": "cutover-proof-ref-a",
+      "live_manifest_ref": "cutover-proof-ref-b",
+      "fixture_deployments": {
+        "registered_ref_a": "dpl_FAt9RQnfZ4xipdjYDYuTF2yuZJez",
+        "mismatched_ref_b": "dpl_2X9YhobiEg8eu8Z2V5mijZvRDUZa"
+      },
+      "candidate_body_sha256": "e7d9102402d3f45fe474b1a26d795f152d11c603e5c205b8a1acb8b48f3b6a4c",
+      "expected_body_sha256": "e7d9102402d3f45fe474b1a26d795f152d11c603e5c205b8a1acb8b48f3b6a4c",
+      "assessment": {
+        "manifest_match": false,
+        "content_match": true,
+        "evidence_available": true,
+        "route_result": "INCONCLUSIVE",
+        "migration_state": "INCONCLUSIVE"
+      },
+      "transactions": [
+        { "method": "set_candidate", "hash": "0xb929d6a48ef04d7481c3cf7edf5c69fdb8e122f06110f3f3e0cec76bbb822150", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "assess_route", "hash": "0xf669705124de2b009e94d8b70f89f75ae17632c61986c96d5518de854e9dfbf8", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "derive_candidate", "hash": "0x46186cce01a5d10451fa07a7e1c9be32ce591c37451fef0b4b197b62e0092f32", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" }
+      ],
+      "raw_run_directories": ["artifacts/live/2026-09-30T14-45-15-177Z", "artifacts/live/2026-09-30T14-54-25-841Z"]
+    },
+    {
+      "id": "candidate-body-sha-mismatch",
+      "migration_id": 6,
+      "route_id": "manifest-ref",
+      "candidate_ref": "cutover-proof-body-sha-v1",
+      "fixture_deployment": "dpl_F1ozw6BbxrJ3HHmuQ3W5aNAWb89e",
+      "expected_body_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observed_body_sha256": "e7d9102402d3f45fe474b1a26d795f152d11c603e5c205b8a1acb8b48f3b6a4c",
+      "assessment": {
+        "manifest_match": true,
+        "content_match": false,
+        "evidence_available": true,
+        "route_result": "INCONCLUSIVE",
+        "migration_state": "INCONCLUSIVE"
+      },
+      "transactions": [
+        { "method": "set_candidate", "hash": "0x0acdc4301e9fe1f8caeeb05f471ad0bdf2f0629f66d2e69eb8ca34e2f950cdcb", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "assess_route", "hash": "0x25a4c4f39b9a5964cf0f64e8355c0a0d8a4b154e45d23ab36b9965ccb95c8f22", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "derive_candidate", "hash": "0x8119626be04ad92ce38bbd68496840c4964d2221e649bf7b13f1ce05103cd18e", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" }
+      ],
+      "raw_run_directory": "artifacts/live/2026-09-30T14-57-42-510Z"
+    },
+    {
+      "id": "authorize-while-challenge-open",
+      "migration_id": 7,
+      "route_id": "challenge-lock",
+      "candidate_ref": "cutover-proof-challenge-v1",
+      "precondition": "READY; review window open; independent challenge admitted and unresolved",
+      "challenge": {
+        "id": 1,
+        "challenger": "0x6B476BF35C4968F3f1775c0CA2110591b4B5FCBe",
+        "evidence_url": "https://cutover-live-proof-20260930.vercel.app/cases/pricing-change",
+        "evidence_explanation": "Evidence states a price of $89/month, directly relevant to the price-preservation rule requiring $49/month.",
+        "evidence_digest": "941fe92511c2dae687900d93efa8a1840efa2491f1937526a577c27be447e794",
+        "resolved": false
+      },
+      "authorize_attempt": {
+        "hash": "0xd4d09743730d4ab7cc5036326322a9994b7c662bb9bf6b21ef9fa902244d258d",
+        "sender": "0x77e2EdBb43277bf772e207C517dde731935ffbA5",
+        "accepted": "ACCEPTED",
+        "finalized": "FINALIZED",
+        "consensus": "MAJORITY_AGREE",
+        "leader_execution": "ERROR",
+        "rollback_payload": "candidate not ready",
+        "transaction_effect": "rejected; no authorization state change"
+      },
+      "post_state": {
+        "state": "CHALLENGED",
+        "challenge_open": true,
+        "open_challenge_id": 1,
+        "aggregate": "READY"
+      },
+      "guard_order_note": "authorize returned the earlier state guard payload 'candidate not ready' because open_challenge changes state to CHALLENGED. The transaction was refused while challenge_open was true; the receipt does not claim the later explicit 'challenge unresolved' guard was reached.",
+      "setup_transactions": [
+        { "method": "create_migration", "hash": "0x5b1f9e80800cdaf5546f2ed00ecb49ef1161f5ec9f6618cde051fee179e98b52", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "add_route", "hash": "0x850a52e521fe81950300eed445ed62dc9ec3384ab5c2a3cf5e7d6154bd235415", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "freeze_route", "hash": "0x447547398052f6bc02e1a045ffa7fa7f18489c64d7dfacd841077b8cd7b024e5", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "seal_baseline", "hash": "0x9877c2b3ceea530b9f340ec34b6e902597cf222b7e56febaf21545aba6abd80b", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "set_candidate", "hash": "0x226d43d46cab27b02f004df7d890a7f56ca0b175e1ba5635fd3e2ec47cd0c5eb", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "assess_route", "hash": "0x4ccef62aae828e60d76f77d476b0e6fa590aead228b236b032d331577e1d0f12", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "derive_candidate", "hash": "0x65a533df4e98c6410c743b2b1e3792a6d512594f5eac1c06117ce279128bcd1f", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" },
+        { "method": "open_challenge", "hash": "0xe58957b6db10963568a0585829d8c6fcc82c020a546ab0c79c676ff18f35ba82", "accepted": "ACCEPTED", "finalized": "FINALIZED", "consensus": "MAJORITY_AGREE", "execution": "SUCCESS" }
+      ],
+      "raw_run_directories": ["artifacts/live/2026-09-30T15-02-30-234Z", "artifacts/live/2026-09-30T15-09-02-936Z", "artifacts/live/2026-09-30T15-11-15-988Z"]
+    }
+  ],
+  "fixture_deployments": {
+    "manifest_ref_b": "dpl_2X9YhobiEg8eu8Z2V5mijZvRDUZa",
+    "body_sha_mismatch": "dpl_F1ozw6BbxrJ3HHmuQ3W5aNAWb89e",
+    "challenge_fixture": "dpl_82FaUkxD5D2UVkY38HCzAdT1WaKe"
+  }
+}

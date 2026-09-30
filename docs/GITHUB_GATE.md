@@ -9,11 +9,11 @@ It reads **finalized** migration and authorization records and fails unless:
 - authorization ref equals the current candidate ref;
 - authorization ref exactly equals the caller's expected ref.
 
-The action uses GitHub's Node 24 JavaScript-action runtime and `@vercel/ncc` to produce a self-contained `dist/index.js` bundle.
+The action uses GitHub's Node 24 JavaScript-action runtime and `@vercel/ncc`; the committed runtime includes `dist/index.js` and its generated `dist/338.index.js` chunk.
 
 ## Source-repository usage
 
-The repository commits the generated `dist/index.js` and lockfile. CI verifies the bundle against the action source; local consumers can invoke the repository action directly:
+The repository commits both generated action runtime files and the lockfile. CI verifies that the generated files match the action source; local consumers can invoke the repository action directly:
 
 ```yaml
 - uses: actions/checkout@v4
@@ -27,6 +27,6 @@ The repository commits the generated `dist/index.js` and lockfile. CI verifies t
     expected-candidate-ref: ${{ github.sha }}
 ```
 
-CUTOVER CI rebuilds the gate and verifies that the committed `packages/gate/dist/index.js` is reproducible from source. The lockfile and bundled action are included in the repository.
+CUTOVER CI rebuilds the gate and verifies that the committed `packages/gate/dist/index.js` and `packages/gate/dist/338.index.js` are reproducible from source. The live-gate proof job reads migration 3 using its exact authorized candidate ref, then asserts that a wrong ref and migration 4's `BLOCKED` state fail for the expected guard reasons. This was exercised against live Studionet in the successful [full CI run 36735999116](https://github.com/Ifem1/cutover/actions/runs/36735999116); the [live-gate-proof job](https://github.com/Ifem1/cutover/actions/runs/36735999116/job/109958145534) passed all three assertions.
 
 It signs nothing, stores no private key and cannot authorize or bypass CUTOVER.
