@@ -14,7 +14,7 @@ CUTOVER therefore uses consensus only for bounded interpretation. Models never a
 
 `DRAFT → BASELINED → CANDIDATE → READY | BLOCKED | INCONCLUSIVE → CHALLENGED? → READY → AUTHORIZED`
 
-Changing `candidate_origin` or `candidate_ref` increments the candidate generation and invalidates prior assessment/authorization state. One bounded challenge is allowed per candidate generation. There is no force-ready or force-authorize escape hatch.
+Changing `candidate_origin` or `candidate_ref` increments the candidate generation and invalidates prior assessment/authorization state. A non-owner may submit at most three admitted challenge attempts per generation and two per route. Invalid, unavailable or irrelevant evidence consumes no attempt. A READY-preserving challenge does not permanently close the route; every admitted attempt and its evidence digest remain auditable. There is no force-ready or force-authorize escape hatch.
 
 ## Status meanings
 
@@ -53,3 +53,7 @@ Release-candidate Studio-dev tooling is intentionally excluded from runtime path
 Offline/static checks and GitHub Actions are evidence only for the code paths they actually execute. **Live Studionet deployment, wallet signing, transaction hashes, deployed-source verification, real validator behaviour and browser-wallet QA remain NOT YET RUN until the funded-wallet phase.**
 
 Do not describe CUTOVER as production-ready solely because offline CI passes.
+
+## Phase 2 local offline validation
+
+The current local source passed **92/92 Direct Mode cases**, killed **65/65 actual-contract mutants**, passed **62/62 frontend tests**, killed **20/20 frontend mutants**, and passed **7/7 GitHub gate tests**. ESLint, TypeScript, web/fixture/gate builds, repository integrity and contract-surface checks passed. Direct Mode needed a temporary Windows tempfile compatibility shim because the pinned test helper unlinks a file while Windows still has it open; that shim changed no repository files. GenVM lint reported three lint checks passed, but validation could not complete because the pinned `py-genlayer` runner archive was missing locally. These are local results; final GitHub Actions and live proof remain pending.

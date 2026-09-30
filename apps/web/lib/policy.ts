@@ -1,4 +1,7 @@
 export type MigrationState="DRAFT"|"BASELINED"|"CANDIDATE"|"READY"|"BLOCKED"|"INCONCLUSIVE"|"CHALLENGED"|"AUTHORIZED"|"CANCELLED";
+export const MAX_CHALLENGES_PER_GENERATION=3;
+export const MAX_CHALLENGES_PER_ROUTE=2;
+export function canChallengeRoute(generationAttempts:number,routeAttempts:number){return generationAttempts<MAX_CHALLENGES_PER_GENERATION&&routeAttempts<MAX_CHALLENGES_PER_ROUTE;}
 export type PolicyInput={
   state:MigrationState;
   isOwner:boolean;
@@ -19,7 +22,7 @@ export function actionPolicy(x:PolicyInput){return{
   sealBaseline:x.isOwner&&x.state==="DRAFT"&&x.routeCount>0&&x.allRoutesFrozen,
   setCandidate:x.isOwner&&["BASELINED","CANDIDATE","READY","BLOCKED","INCONCLUSIVE","CHALLENGED"].includes(x.state),
   derive:x.candidateGeneration>0&&["CANDIDATE","READY","BLOCKED","INCONCLUSIVE"].includes(x.state),
-  challenge:!x.isOwner&&x.state==="READY"&&!x.challengeOpen&&x.challengeCount<3&&x.now<x.reviewDeadline&&x.networkOk,
+  challenge:!x.isOwner&&x.state==="READY"&&!x.challengeOpen&&x.challengeCount<MAX_CHALLENGES_PER_GENERATION&&x.now<x.reviewDeadline&&x.networkOk,
   reassess:x.state==="CHALLENGED"&&x.challengeOpen&&x.networkOk,
   authorize:x.state==="READY"&&!x.challengeOpen&&x.assessedGeneration===x.candidateGeneration&&x.now>=x.reviewDeadline&&!x.authorized&&x.networkOk,
   cancel:x.isOwner&&!x.authorized&&x.state!=="CANCELLED",

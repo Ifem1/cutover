@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verify finalized CUTOVER authorization
-        uses: Ifem1/cutover/packages/gate@v1-audited
+        uses: Ifem1/cutover/packages/gate@36e759afc1195d31198124e1eda614c28f8972a9
         with:
           contract-address: ${{ vars.CUTOVER_CONTRACT_ADDRESS }}
           migration-id: ${{ vars.CUTOVER_MIGRATION_ID }}

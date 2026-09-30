@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {actionPolicy} from "../lib/policy";
+import {actionPolicy,canChallengeRoute} from "../lib/policy";
 const base={state:"READY" as const,isOwner:false,routeCount:2,allRoutesFrozen:true,candidateGeneration:2,assessedGeneration:2,challengeOpen:false,challengeCount:0,reviewDeadline:100,now:101,authorized:false,networkOk:true};
 describe("state-aware action policy",()=>{
  it("allows authorization only after deadline",()=>expect(actionPolicy(base).authorize).toBe(true));
@@ -11,6 +11,8 @@ describe("state-aware action policy",()=>{
  it("non-owner can challenge during review",()=>expect(actionPolicy({...base,now:99}).challenge).toBe(true));
  it("challenge closes at deadline",()=>expect(actionPolicy({...base,now:100}).challenge).toBe(false));
  it("challenge cap blocks additional challenges",()=>expect(actionPolicy({...base,now:99,challengeCount:3}).challenge).toBe(false));
+ it("bounds repeated challenges on one route without burning its second attempt",()=>{expect(canChallengeRoute(1,1)).toBe(true);expect(canChallengeRoute(1,2)).toBe(false)});
+ it("enforces the generation attempt cap across routes",()=>expect(canChallengeRoute(3,0)).toBe(false));
  it("wrong network blocks challenge",()=>expect(actionPolicy({...base,now:99,networkOk:false}).challenge).toBe(false));
  it("open challenge blocks new challenge",()=>expect(actionPolicy({...base,now:99,challengeOpen:true}).challenge).toBe(false));
  it("draft owner can add route",()=>expect(actionPolicy({...base,state:"DRAFT",isOwner:true,routeCount:0,allRoutesFrozen:false}).addRoute).toBe(true));

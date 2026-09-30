@@ -18,7 +18,7 @@ CUTOVER is designed to fail closed, but it is not a proof that websites or langu
 
 **Review-clock forgery.** Deadlines use GenVM-patched transaction datetime. The write surface has no caller timestamp for derivation or authorization.
 
-**Challenge griefing.** One bounded challenge is permitted per candidate generation, within the review window. It can delay authorization while unresolved but cannot directly authorize or force a verdict.
+**Challenge griefing.** A non-owner may open no more than three admitted attempts per candidate generation, with no more than two attempts on any route. Attempts are admitted only after the evidence is independently retrieved and found relevant; invalid, unavailable or irrelevant evidence consumes no attempt. Every admitted attempt stores its evidence digest and result. An unresolved challenge blocks authorization. A READY-preserving reassessment does not permanently close the route, so stronger later evidence may still be submitted within the bounds. A consequential BLOCKED or INCONCLUSIVE result changes candidate readiness and must be resolved through the normal assessment/derivation rules. A new candidate generation scopes old records out and marks an open old challenge superseded.
 
 **Owner bypass.** The owner can define the migration, routes, baseline proposal, candidate and cancel pre-authorization, but has no force-ready, force-authorize, hidden override, replace-frozen-baseline, or backend signer path.
 

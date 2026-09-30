@@ -283,10 +283,49 @@ def test_challenge_blocks_authorization_until_reassessed(direct_vm,direct_deploy
     with direct_vm.expect_revert("candidate not ready"): c.authorize(mid)
     direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); assert c.reassess_challenge(mid)=="READY"; assert c.get_challenge(mid)["resolved"] is True
 
-def test_repeat_challenge_same_route_rejected(direct_vm,direct_deploy,direct_bob,direct_charlie):
-    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_ready(direct_vm,c,mid); direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change"); direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); c.reassess_challenge(mid); c.derive_candidate(mid)
-    direct_vm.sender=direct_charlie; direct_vm.clear_mocks(); _mock_challenge(direct_vm)
-    with direct_vm.expect_revert("route already challenged"): c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")
+def test_consequential_challenge_result_is_preserved_and_blocks_candidate(direct_vm,direct_deploy,direct_bob):
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_ready(direct_vm,c,mid); direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="Decisive pricing evidence"); c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")
+    direct_vm.clear_mocks(); _mock_assessment(direct_vm,man,statuses=("MATERIAL_CHANGE","PRESERVED")); assert c.reassess_challenge(mid)=="BLOCKED"
+    challenge=c.get_challenge(mid); assert challenge["resolved"] is True and challenge["route_result"]=="BLOCKED" and challenge["assessment_digest"] and challenge["evidence_digest"]
+    assert c.derive_candidate(mid)=="BLOCKED" and c.get_migration(mid)["state"]=="BLOCKED"
+
+def test_ready_preserving_challenge_does_not_immunize_route_and_attempts_are_bounded(direct_vm,direct_deploy,direct_bob,direct_charlie):
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); man=_ready(direct_vm,c,mid)
+    direct_vm.sender=direct_bob; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="Relevant but non-decisive notice")
+    assert c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")==1
+    direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); assert c.reassess_challenge(mid)=="READY"; c.derive_candidate(mid)
+    direct_vm.sender=direct_charlie; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="Stronger independent pricing evidence")
+    assert c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")==2
+    challenges=c.get_challenges(mid,1,0,10)
+    assert [x["route_attempt"] for x in challenges]==[1,2]
+    assert len({x["evidence_digest"] for x in challenges})==2
+    direct_vm.clear_mocks(); _mock_assessment(direct_vm,man); assert c.reassess_challenge(mid)=="READY"; c.derive_candidate(mid)
+    direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="Third attempt exceeds route bound")
+    with direct_vm.expect_revert("route challenge limit"): c.open_challenge(mid,"pricing","https://evidence.local/pricing-change")
+
+def test_challenges_capped_per_generation(direct_vm,direct_deploy,direct_bob,direct_charlie,direct_alice):
+    direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=c.create_migration("Two-route migration",BASE_ORIGIN,300)
+    _create_route(c,mid,"pricing"); _create_route(c,mid,"legal",BASE_ORIGIN+"/legal","/legal")
+    s1=_snapshot(); s2=_snapshot("legal",BASE_ORIGIN+"/legal")
+    _mock_baseline(direct_vm,s1)
+    direct_vm.mock_web(r".*fixture\.local/legal.*",{"status":200,"body":BASELINE_BODY.replace("https://fixture.local/pricing","https://fixture.local/legal")})
+    direct_vm.mock_web(r".*proof\.local/legal\.json.*",{"status":200,"body":json.dumps(s2)})
+    c.freeze_route(mid,"pricing",SNAPSHOT_URL,json.dumps(s1),_digest(s1))
+    c.freeze_route(mid,"legal","https://proof.local/legal.json",json.dumps(s2),_digest(s2)); c.seal_baseline(mid)
+    legal_body=CANDIDATE_BODY.replace("https://candidate.local/pricing","https://candidate.local/legal")
+    man=_manifest(routes=[{"route_id":"pricing","path":"/pricing","content_sha256":_body_digest(CANDIDATE_BODY)},{"route_id":"legal","path":"/legal","content_sha256":_body_digest(legal_body)}])
+    _mock_manifest(direct_vm,man); c.set_candidate(mid,CANDIDATE_ORIGIN,MANIFEST_URL,_digest(man))
+    _mock_assessment(direct_vm,man); c.assess_route(mid,"pricing")
+    _mock_assessment(direct_vm,man,body=legal_body); direct_vm.mock_web(r".*candidate\.local/legal.*",{"status":200,"body":legal_body}); c.assess_route(mid,"legal"); c.derive_candidate(mid)
+    for index,route_id in enumerate(("pricing","pricing","legal")):
+        direct_vm.sender=direct_bob if index%2==0 else direct_charlie; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body=f"relevant evidence {index}")
+        c.open_challenge(mid,route_id,"https://evidence.local/pricing-change")
+        direct_vm.clear_mocks(); _mock_assessment(direct_vm,man,body=legal_body if route_id=="legal" else CANDIDATE_BODY)
+        if route_id=="legal": direct_vm.mock_web(r".*candidate\.local/legal.*",{"status":200,"body":legal_body})
+        assert c.reassess_challenge(mid)=="READY"; c.derive_candidate(mid)
+    direct_vm.sender=direct_alice; direct_vm.clear_mocks(); _mock_challenge(direct_vm,body="fourth attempt")
+    with direct_vm.expect_revert("challenge limit"): c.open_challenge(mid,"legal","https://evidence.local/pricing-change")
+    assert len(c.get_challenges(mid,1,0,10))==3
 
 def test_challenge_after_review_deadline_rejected(direct_vm,direct_deploy,direct_bob):
     direct_vm.warp("2026-09-29T12:00:00Z"); c=direct_deploy(CONTRACT); mid=_baseline(direct_vm,c); _ready(direct_vm,c,mid); direct_vm.warp("2026-09-29T12:05:00Z"); direct_vm.sender=direct_bob

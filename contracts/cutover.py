@@ -21,6 +21,7 @@ MAX_CLAIMS=32
 MAX_ORDINARY_ATTEMPTS=3
 MAX_TOTAL_ATTEMPTS=5
 MAX_CHALLENGES_PER_GENERATION=3
+MAX_CHALLENGES_PER_ROUTE=2
 MAX_PAGE=50
 RULE_STATUSES=("PRESERVED","ALLOWED_CHANGE","MATERIAL_CHANGE","MISSING","BROKEN","CONFLICTING","UNREADABLE")
 PASSING=("PRESERVED","ALLOWED_CHANGE")
@@ -189,6 +190,7 @@ class Cutover(gl.Contract):
     def _routes_by_id(self,m): return {rid:self._route(str(m["id"]),rid) for rid in m["route_ids"]}
     def _attempt_count(self,mid,gen,rid): return int(self.attempt_counts.get(_assessment_key(str(mid),gen,rid)) or "0")
     def _challenge_count(self,mid,gen): return int(self.challenge_counts.get(f"{mid}:{gen}") or "0")
+    def _challenge_route_count(self,mid,gen,rid): return int(self.challenge_route_used.get(_challenge_route_key(str(mid),gen,rid)) or "0")
 
     @gl.public.write
     def create_migration(self,title:str,baseline_origin:str,review_window_seconds:int)->int:
@@ -463,19 +465,20 @@ class Cutover(gl.Contract):
         if str(gl.message.sender_address).lower()==m["owner"].lower(): raise gl.vm.UserError("owner cannot challenge own candidate")
         if _now()>=m["review_deadline"]: raise gl.vm.UserError("review window closed")
         r=self._route(str(migration_id),route_id); gen=m["candidate_generation"]
-        if self.challenge_route_used.get(_challenge_route_key(str(migration_id),gen,route_id)): raise gl.vm.UserError("route already challenged")
+        route_count=self._challenge_route_count(migration_id,gen,route_id)
+        if route_count>=MAX_CHALLENGES_PER_ROUTE: raise gl.vm.UserError("route challenge limit")
         count=self._challenge_count(migration_id,gen)
-        if count>=min(MAX_CHALLENGES_PER_GENERATION,len(m["route_ids"])): raise gl.vm.UserError("challenge limit")
+        if count>=MAX_CHALLENGES_PER_GENERATION: raise gl.vm.UserError("challenge limit")
         _bounded(evidence_url,1024,"evidence url",False)
         if not evidence_url.startswith(("https://","http://")): raise gl.vm.UserError("evidence url must be http(s)")
         verified=self._verify_challenge(m,r,evidence_url)
         if not verified.get("ok"): raise gl.vm.UserError("challenge evidence rejected")
         challenge_id=count+1
-        c={"id":challenge_id,"generation":gen,"route_id":route_id,"challenger":str(gl.message.sender_address),"evidence_url":evidence_url,
+        c={"id":challenge_id,"generation":gen,"route_id":route_id,"route_attempt":route_count+1,"challenger":str(gl.message.sender_address),"evidence_url":evidence_url,
            "evidence_digest":verified["evidence_digest"],"evidence_text":verified["text"],"evidence_explanation":verified.get("explanation",""),"explanation_consensus_bound":False,
            "opened_at":_now(),"resolved":False,"route_result":""}
         self.challenges[_challenge_key(str(migration_id),gen,challenge_id)]=_dumps(c); self.challenge_counts[f"{migration_id}:{gen}"]=str(challenge_id)
-        self.challenge_route_used[_challenge_route_key(str(migration_id),gen,route_id)]="1"; self.route_challenge_contexts[_challenge_route_key(str(migration_id),gen,route_id)]=_dumps(c)
+        self.challenge_route_used[_challenge_route_key(str(migration_id),gen,route_id)]=str(route_count+1); self.route_challenge_contexts[_challenge_route_key(str(migration_id),gen,route_id)]=_dumps(c)
         m["challenge_open"]=True; m["open_challenge_id"]=challenge_id; m["state"]="CHALLENGED"; self._save_migration(m)
         self._emit("CHALLENGE_OPENED",str(migration_id),{"challenge_id":challenge_id,"route_id":route_id,"generation":gen,"evidence_digest":c["evidence_digest"]}); return challenge_id
 
@@ -520,7 +523,7 @@ class Cutover(gl.Contract):
 
     @gl.public.view
     def get_config(self)->dict:
-        return {"network":"studionet","chain_id":61999,"max_routes":MAX_ROUTES,"max_rules_per_route":MAX_RULES,"max_ordinary_attempts":MAX_ORDINARY_ATTEMPTS,"max_total_attempts":MAX_TOTAL_ATTEMPTS,"max_challenges_per_generation":MAX_CHALLENGES_PER_GENERATION,"snapshot_schema":"cutover.baseline.v1","candidate_manifest_schema":"cutover.candidate.v1"}
+        return {"network":"studionet","chain_id":61999,"max_routes":MAX_ROUTES,"max_rules_per_route":MAX_RULES,"max_ordinary_attempts":MAX_ORDINARY_ATTEMPTS,"max_total_attempts":MAX_TOTAL_ATTEMPTS,"max_challenges_per_generation":MAX_CHALLENGES_PER_GENERATION,"max_challenges_per_route":MAX_CHALLENGES_PER_ROUTE,"snapshot_schema":"cutover.baseline.v1","candidate_manifest_schema":"cutover.candidate.v1"}
     @gl.public.view
     def get_stats(self)->dict: return {"migrations":int(self.migration_count),"events_total":int(self.event_count),"events_retained":min(int(self.event_count),MAX_EVENTS)}
     @gl.public.view

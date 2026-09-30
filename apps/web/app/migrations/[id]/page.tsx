@@ -12,7 +12,7 @@ type RouteRecord={route_id:string;baseline_url:string;candidate_path:string;rule
 type Finding={rule_id:string;status:string};
 type Assessment={route_result?:string;findings?:Finding[];attempt?:number;assessment_digest?:string};
 type Authorization={candidate_generation?:number;candidate_ref?:string;candidate_manifest_digest?:string;evidence_root?:string;authorization_digest?:string};
-type Challenge={id?:number;route_id?:string;resolved?:boolean};
+type Challenge={id?:number;route_id?:string;route_attempt?:number;resolved?:boolean};
 const at=(n:number)=>n?new Date(n*1000).toISOString():"Not started";
 function decisive(a:Assessment){const f=(a.findings||[]).find(x=>["MATERIAL_CHANGE","MISSING","BROKEN","CONFLICTING","UNREADABLE"].includes(x.status));return f?`${f.rule_id}: ${f.status}`:(a.findings?.length?"All consensus-bound rule statuses pass.":"No current-generation assessment.");}
 
@@ -25,7 +25,7 @@ export default async function Page({params}:{params:Promise<{id:string}>}){
   const routePairs=await Promise.all((migration.route_ids||[]).map(async routeId=>{const [route,assessment]=await Promise.all([readCutover("get_route",[mid,routeId]) as Promise<RouteRecord>,migration.candidate_generation?readCutover("get_route_assessment",[mid,migration.candidate_generation,routeId]) as Promise<Assessment>:Promise.resolve({} as Assessment)]);return {route,assessment};}));
   const [challenges,authorization]=await Promise.all([migration.candidate_generation?readCutover("get_challenges",[mid,migration.candidate_generation,0,50]) as Promise<Challenge[]>:Promise.resolve([] as Challenge[]),readCutover("get_authorization",[mid]) as Promise<Authorization>]);
   const rows=routePairs.map(({route,assessment})=>({id:route.route_id,href:`/migrations/${mid}/routes/${encodeURIComponent(route.route_id)}`,route:route.baseline_url,destination:migration.candidate_origin?migration.candidate_origin+route.candidate_path:route.candidate_path,rules:route.rules.length,frozen:route.baseline_frozen,status:assessment.route_result||"NOT ASSESSED",attempts:Number(assessment.attempt||0),decisive:decisive(assessment)}));
-  const wbRoutes:WorkbenchRoute[]=routePairs.map(({route,assessment})=>({...route,assessment}));
+  const wbRoutes:WorkbenchRoute[]=routePairs.map(({route,assessment})=>({...route,assessment,challenge_attempts:challenges.filter(c=>c.route_id===route.route_id).length}));
   const wbMigration:WorkbenchMigration={id:mid,owner:migration.owner,state:migration.state as MigrationState,candidate_generation:migration.candidate_generation,assessed_generation:migration.assessed_generation,review_deadline:migration.review_deadline,challenge_open:migration.challenge_open,challenge_count:challenges.length,candidate_origin:migration.candidate_origin,candidate_ref:migration.candidate_ref,candidate_manifest_url:migration.candidate_manifest_url,candidate_manifest_digest:migration.candidate_manifest_digest};
   const progress=migration.ready_at&&migration.review_deadline?Math.max(0,Math.min(100,((Math.floor(Date.now()/1000)-migration.ready_at)/(migration.review_deadline-migration.ready_at))*100)):0;
   return <main className="wrap section"><div className="controlHero"><div><div className="eyebrow">Control room · migration {id}</div><h1>{migration.title}</h1><p className="lead">Finalized Studionet state. Candidate identity comes from its verified same-origin manifest, not an owner-entered release string.</p></div><div className={`stateStamp ${migration.state.toLowerCase()}`}><small>STATE</small>{migration.state}</div></div>

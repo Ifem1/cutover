@@ -13,15 +13,13 @@ The action uses GitHub's Node 24 JavaScript-action runtime and `@vercel/ncc` to 
 
 ## Source-repository usage
 
-The development repository intentionally tracks source rather than generated `dist`. Build the gate before invoking it as a local action:
+The repository commits the generated `dist/index.js` and lockfile. CI verifies the bundle against the action source; local consumers can invoke the repository action directly:
 
 ```yaml
 - uses: actions/checkout@v4
 - uses: actions/setup-node@v4
   with:
     node-version: '24'
-- run: npm install
-- run: npm run build -w @cutover/gate
 - uses: ./packages/gate
   with:
     contract-address: ${{ vars.CUTOVER_CONTRACT }}
@@ -29,6 +27,6 @@ The development repository intentionally tracks source rather than generated `di
     expected-candidate-ref: ${{ github.sha }}
 ```
 
-CUTOVER CI performs the same build and the final ChatGPT handoff ZIP includes both the generated lockfile and self-contained `packages/gate/dist/index.js`, so the packaged handoff is directly runnable without rebuilding the action bundle.
+CUTOVER CI rebuilds the gate and verifies that the committed `packages/gate/dist/index.js` is reproducible from source. The lockfile and bundled action are included in the repository.
 
 It signs nothing, stores no private key and cannot authorize or bypass CUTOVER.
