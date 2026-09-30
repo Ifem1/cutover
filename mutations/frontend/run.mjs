@@ -5,6 +5,7 @@ const original=Object.fromEntries(Object.entries(files).map(([k,p])=>[k,fs.readF
 const mutants=[
  ["policy","seal_without_routes","x.routeCount>0&&x.allRoutesFrozen","true&&x.allRoutesFrozen"],
  ["policy","seal_unfrozen","x.routeCount>0&&x.allRoutesFrozen","x.routeCount>0&&true"],
+ ["policy","derive_blocked_state","[\"CANDIDATE\",\"READY\",\"INCONCLUSIVE\"]","[\"CANDIDATE\",\"READY\",\"BLOCKED\",\"INCONCLUSIVE\"]"],
  ["policy","owner_can_challenge","challenge:!x.isOwner&&","challenge:true&&"],
  ["policy","challenge_after_deadline","&&x.now<x.reviewDeadline&&x.networkOk","&&true&&x.networkOk"],
  ["policy","challenge_cap_ignored","&&x.challengeCount<MAX_CHALLENGES_PER_GENERATION&&","&&true&&"],
@@ -19,6 +20,7 @@ const mutants=[
  ["workflow","allow_absolute_candidate","/^\\/(?!\\/)/.test(path)","true"],
  ["workflow","allow_parent_segments","&& !path.includes('..')","&& true"],
  ["workflow","allow_query_fragment","&& !/[?#]/.test(path)","&& true"],
+ ["workflow","assessment_blocked_state","if(!['CANDIDATE','INCONCLUSIVE'].includes(state))return false;","if(!['CANDIDATE','BLOCKED','INCONCLUSIVE'].includes(state))return false;"],
  ["workflow","retry_ready","if(currentResult==='READY'||currentResult==='BLOCKED')return false;","if(currentResult==='BLOCKED')return false;"],
  ["workflow","retry_blocked","if(currentResult==='READY'||currentResult==='BLOCKED')return false;","if(currentResult==='READY')return false;"],
  ["workflow","fourth_retry","return attemptCount<MAX_ORDINARY_ATTEMPTS;","return attemptCount<=MAX_ORDINARY_ATTEMPTS;"],
