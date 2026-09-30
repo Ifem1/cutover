@@ -4,7 +4,7 @@ import {useRouter} from "next/navigation";
 import {readCutover,writeCutover} from "@/lib/contract";
 import {isConfigured,NETWORK} from "@/lib/config";
 import {describeError,isWalletSignatureRejection} from "@/lib/errors";
-import {clearPendingTransaction,loadPendingTransaction,savePendingTransaction,TxExecutionError,TxTrackingError,waitForFinality,type PendingCutoverTransaction,type TxPhase} from "@/lib/tx";
+import {clearPendingTransaction,loadPendingTransaction,savePendingTransaction,TxExecutionError,TxExecutionResultUnavailableError,TxTrackingError,waitForFinality,type PendingCutoverTransaction,type TxPhase} from "@/lib/tx";
 import {useWallet} from "./WalletSession";
 
 export function useContractSubmit(){
@@ -22,7 +22,7 @@ export function useContractSubmit(){
     try{
       await waitForFinality(record.hash,p=>{setPhase(p);setMessage(p.replaceAll("_"," "));});
     }catch(error){
-      if(error instanceof TxExecutionError){
+      if(error instanceof TxExecutionError||error instanceof TxExecutionResultUnavailableError){
         const reread=record.migrationId?await readCutover("get_migration",[record.migrationId]):await readCutover("get_stats");
         clearPendingTransaction(record.hash);setPending(null);setConfirmed(reread);router.refresh();
       }else if(!(error instanceof TxTrackingError)){clearPendingTransaction(record.hash);setPending(null);}

@@ -15,6 +15,7 @@ export type TxPhase=
   |"finalized"
   |"execution_success"
   |"execution_failure"
+  |"execution_unavailable"
   |"rpc_error"
   |"timeout";
 
@@ -66,6 +67,29 @@ export class TxExecutionError extends Error{
   constructor(message:string,readonly transaction:GenLayerTransaction){super(message);this.name="TxExecutionError";}
 }
 
+export class TxExecutionResultUnavailableError extends Error{
+  constructor(readonly transaction:GenLayerTransaction){
+    super("GenLayer transaction finalized, but its execution result is unavailable from both normalized SDK and Studio leader receipt data.");
+    this.name="TxExecutionResultUnavailableError";
+  }
+}
+
+export type TxExecutionOutcome="success"|"failure"|"unavailable";
+type StudioLeaderReceipt={execution_result?:unknown};
+
+export function normalizeExecutionOutcome(transaction:GenLayerTransaction):TxExecutionOutcome{
+  if(transaction.txExecutionResultName===ExecutionResult.FINISHED_WITH_RETURN)return "success";
+  if(transaction.txExecutionResultName===ExecutionResult.FINISHED_WITH_ERROR)return "failure";
+
+  const consensus=(transaction as unknown as {consensus_data?:{leader_receipt?:StudioLeaderReceipt|StudioLeaderReceipt[]}}).consensus_data;
+  const rawLeaderReceipt=consensus?.leader_receipt;
+  const leaderReceipt=Array.isArray(rawLeaderReceipt)?rawLeaderReceipt[0]:rawLeaderReceipt;
+  const studioExecution=leaderReceipt?.execution_result;
+  if(studioExecution==="SUCCESS")return "success";
+  if(studioExecution==="ERROR")return "failure";
+  return "unavailable";
+}
+
 type WaitOptions={timeoutMs?:number;pollIntervalMs?:number;sleep?:(ms:number)=>Promise<void>};
 type TransactionReader={getTransaction:(args:{hash:TransactionHash})=>Promise<GenLayerTransaction>};
 
@@ -114,13 +138,14 @@ export async function waitForFinality(
       if(!accepted){accepted=true;emit(onPhase,last,"accepted");}
       emit(onPhase,last,"finalizing");
       emit(onPhase,last,"finalized");
-      if(transaction.txExecutionResultName===ExecutionResult.FINISHED_WITH_ERROR){
+      const executionOutcome=normalizeExecutionOutcome(transaction);
+      if(executionOutcome==="failure"){
         emit(onPhase,last,"execution_failure");
         throw new TxExecutionError("GenLayer transaction finalized, but contract execution failed.",transaction);
       }
-      if(transaction.txExecutionResultName!==ExecutionResult.FINISHED_WITH_RETURN){
-        emit(onPhase,last,"execution_failure");
-        throw new TxExecutionError(`GenLayer transaction finalized without a successful execution result: ${transaction.txExecutionResultName??"UNKNOWN"}`,transaction);
+      if(executionOutcome==="unavailable"){
+        emit(onPhase,last,"execution_unavailable");
+        throw new TxExecutionResultUnavailableError(transaction);
       }
       emit(onPhase,last,"execution_success");
       return transaction;
