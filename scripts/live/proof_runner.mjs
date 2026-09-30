@@ -8,9 +8,6 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import {spawnSync} from "node:child_process";
-import {Wallet} from "ethers";
-import {createAccount,createClient} from "genlayer-js";
-import {studionet} from "genlayer-js/chains";
 
 const args=process.argv.slice(2);const execute=args.includes("--execute");const offlineDryRun=args.includes("--offline-dry-run");const planArg=args.find(x=>x.endsWith(".json"));
 if(!planArg)throw new Error("Usage: node scripts/live/proof_runner.mjs proof/live-plan.json [--execute]");
@@ -41,6 +38,7 @@ let liveClient;
 async function getLiveClient(){
  if(liveClient)return liveClient;
  if(!plan.account_name)throw new Error("SDK writes require plan.account_name for an unlocked local CLI keystore account");
+ const [{Wallet},{createAccount,createClient},{studionet}]=await Promise.all([import("ethers"),import("genlayer-js"),import("genlayer-js/chains")]);
  const exported=path.join(outDir,"temporary-encrypted-account.json");const exportPassword=crypto.randomBytes(32).toString("hex");
  const result=spawnSync(process.execPath,[cliEntry,"account","export","--account",plan.account_name,"--output",exported,"--password",exportPassword],{encoding:"utf8",windowsHide:true});
  try{

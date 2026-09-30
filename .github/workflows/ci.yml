@@ -24,6 +24,8 @@ jobs:
         with: { python-version: "3.12" }
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
+      - name: Install pinned Node toolchain
+        run: npm ci
       - run: python -m compileall -q contracts tests scripts
       - run: python scripts/check_contract_surface.py
       - run: python scripts/repository_integrity.py
