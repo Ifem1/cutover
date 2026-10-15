@@ -10,32 +10,64 @@
   "active_contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
   "historical_live_contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
   "historical_live_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
-  "live_evidence_status": "REVISED_SOURCE_PARTIAL: revised source deployment/source match, positive authorization, fail-closed INCONCLUSIVE cases, and live GitHub gate passed. Production frontend/wallet QA remains pending because the canonical frontend still points to the historical contract. Historical records remain separately preserved.",
+  "live_evidence_status": "REVISED_SOURCE_EVIDENCE_COMPLETE_FOR_VERIFIED_SCOPE: revised deployment/source match, positive authorization, fail-closed INCONCLUSIVE cases, revised live GitHub gate, production revised-contract frontend, and manual injected-wallet QA are recorded. Optional revised-source BLOCKED/prompt-injection and live account-change/refresh-recovery cases remain unclaimed; historical records remain separate.",
   "revised_source_deployment_evidence": "proof/live/revised-deployment.json",
   "revised_source_live_cases": "proof/live/revised-live-cases.json",
   "revised_frontend_url": "https://cutover-kappa.vercel.app/",
-  "revised_frontend_contract_configured": false,
-  "revised_source_final_ci_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36769705489",
-  "revised_source_live_gate_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36769705489/job/110073021673",
-  "revised_frontend_wallet_qa_status": "PENDING_USER_FRONTEND_DEPLOY_AND_REAL_INJECTED_WALLET",
+  "revised_frontend_contract_configured": true,
+  "revised_source_final_ci_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36786339583 (commit 2a7599af90d2533d848e06887c3917681847552a)",
+  "revised_source_live_gate_status": "PASS: final code CI run 36786339583; initial revised live-gate proof run 36769705489/job/110073021673",
+  "revised_frontend_wallet_qa_status": "PASS_MANUAL_WITH_OPTIONAL_GAPS: wrong-network, wallet rejection, disconnect/reconnect and real revised-contract writes exercised; Studio execution-result false negative fixed in 2a7599af90d2533d848e06887c3917681847552a and live-retested. Account-change and pending-refresh recovery not run.",
   "local_validation": {
     "source_sha256": "13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79",
-    "direct_mode": {"status": "PASS", "passed": 111, "total": 111},
-    "contract_mutants": {"status": "PASS", "killed": 73, "total": 73},
-    "frontend_tests": {"status": "PASS", "passed": 73, "total": 73},
-    "frontend_mutants": {"status": "PASS", "killed": 20, "total": 20},
-    "gate_tests": {"status": "PASS", "passed": 7, "total": 7},
+    "direct_mode": {
+      "status": "PASS",
+      "passed": 111,
+      "total": 111
+    },
+    "contract_mutants": {
+      "status": "PASS",
+      "killed": 73,
+      "total": 73
+    },
+    "frontend_tests": {
+      "status": "PASS",
+      "passed": 91,
+      "total": 91
+    },
+    "frontend_mutants": {
+      "status": "PASS",
+      "killed": 24,
+      "total": 24
+    },
+    "gate_tests": {
+      "status": "PASS",
+      "passed": 7,
+      "total": 7
+    },
     "eslint": "PASS",
     "typecheck": "PASS",
-    "builds": {"web": "PASS", "fixtures": "PASS", "gate": "PASS"},
+    "builds": {
+      "web": "PASS",
+      "fixtures": "PASS",
+      "gate": "PASS"
+    },
     "python_compile": "PASS",
     "contract_surface": "PASS",
     "repository_integrity": "PASS",
     "network_discipline": "PASS",
     "genvm_lint_and_validation": "PASS",
-    "package_audit": {"status": "PASS", "archive": "cutover-chatgpt-pro-handoff.zip", "entries": 118},
+    "package_audit": {
+      "status": "PASS",
+      "archive": "cutover-chatgpt-pro-handoff.zip",
+      "entries": 118
+    },
     "ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36753618050 (source commit df47e9e1728a51afe51d8d6a25e0efbd29204741; live-gate job exercised historical deployment only)",
-    "revised_final_ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36769705489"
+    "revised_final_ci": "PASS: https://github.com/Ifem1/cutover/actions/runs/36786339583 (commit 2a7599af90d2533d848e06887c3917681847552a)",
+    "frontend_test_breakdown": {
+      "tx_test": 11,
+      "contract_submit_test": 7
+    }
   },
   "deployment_evidence": "proof/live/revised-deployment.json",
   "historical_deployment_evidence": "proof/live/deployment.json",
@@ -319,7 +351,7 @@
       "planned_live_cases": [
         1
       ],
-      "live_evidence": "REVISED PAIR NOT VERIFIED: the canonical frontend still reads the historical contract, so the new contract address has not been configured there. A current browser visit showed old migration records; see proof/live/revised-browser-qa.json. Historical injected-wallet observations are preserved in proof/live/browser-qa.json. Wrong-network, accountChanged and revised-contract transaction UI checks remain pending."
+      "live_evidence": "REVISED FRONTEND MANUAL PASS/PARTIAL: production targets the revised contract; wrong-network handling, wallet rejection, disconnect/reconnect and real successful writes were exercised. Manual QA exposed a Studio execution-result normalization false negative, fixed in commit 2a7599af90d2533d848e06887c3917681847552a and live-retested as EXECUTION SUCCESS with LATEST_FINAL state reread. Live account-change and pending-transaction refresh recovery were not run; offline tests cover refresh recovery."
     },
     {
       "id": "github-gate-exact-ref",
@@ -339,5 +371,46 @@
       ],
       "live_evidence": "REVISED SOURCE PASS: run 36769705489, live-gate job 110073021673; exact ref c75641176acc263f9a35fab2d9b7c9f9bfb29c19 passed, wrong ref failed at the exact-ref guard, and migration 2 failed at the INCONCLUSIVE state guard. Historical run 36753618050 remains linked in docs/GITHUB_GATE.md."
     }
-  ]
+  ],
+  "revised_browser_qa_evidence": "proof/live/revised-browser-qa.json",
+  "frontend_fix_commit": "2a7599af90d2533d848e06887c3917681847552a",
+  "frontend_fix_vercel_status": "SUCCESS",
+  "production_dependency_audit": {
+    "command": "npm audit --omit=dev --json",
+    "execution": "temporary unmerged GitHub Actions evidence run 36788697287",
+    "status": "FINDINGS",
+    "counts": {
+      "moderate": 2,
+      "high": 2,
+      "critical": 0,
+      "total": 4
+    },
+    "findings": [
+      {
+        "package": "next",
+        "version": "15.5.26",
+        "severity": "moderate",
+        "scope": "direct production dependency of web/fixtures; audit severity propagated through postcss"
+      },
+      {
+        "package": "postcss",
+        "version": "8.4.31",
+        "severity": "high",
+        "scope": "transitive production dependency of next in web/fixtures"
+      },
+      {
+        "package": "@actions/http-client",
+        "version": "2.2.3",
+        "severity": "moderate",
+        "scope": "transitive production dependency of @actions/core in GitHub gate"
+      },
+      {
+        "package": "undici",
+        "version": "5.29.0",
+        "severity": "high",
+        "scope": "transitive production dependency of @actions/http-client in GitHub gate"
+      }
+    ],
+    "remediation": "No automatic fix or SemVer-major upgrade applied in evidence-only cleanup."
+  }
 }

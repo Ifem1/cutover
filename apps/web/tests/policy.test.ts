@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {actionPolicy,canChallengeRoute} from "../lib/policy";
+import {actionPolicy,canChallengeRoute,type MigrationState} from "../lib/policy";
 const base={state:"READY" as const,isOwner:false,routeCount:2,allRoutesFrozen:true,candidateGeneration:2,assessedGeneration:2,challengeOpen:false,challengeCount:0,reviewDeadline:100,now:101,authorized:false,networkOk:true};
 describe("state-aware action policy",()=>{
  it("allows authorization only after deadline",()=>expect(actionPolicy(base).authorize).toBe(true));
@@ -22,5 +22,9 @@ describe("state-aware action policy",()=>{
  it("non-owner cannot register candidate",()=>expect(actionPolicy({...base,state:"BASELINED",isOwner:false}).setCandidate).toBe(false));
  it("non-owner cannot cancel",()=>expect(actionPolicy({...base,state:"CANDIDATE",isOwner:false}).cancel).toBe(false));
  it("challenge reassessment requires CHALLENGED",()=>expect(actionPolicy({...base,state:"CHALLENGED",challengeOpen:true}).reassess).toBe(true));
- it("terminal states cannot derive or cancel",()=>{const p=actionPolicy({...base,state:"AUTHORIZED",authorized:true,isOwner:true});expect(p.derive).toBe(false);expect(p.cancel).toBe(false)});
+ it.each(["CANDIDATE","READY","INCONCLUSIVE"] as MigrationState[])("allows derivation from %s with a candidate generation",state=>expect(actionPolicy({...base,state,candidateGeneration:2}).derive).toBe(true));
+ it("does not offer derivation from BLOCKED because the contract rejects it",()=>expect(actionPolicy({...base,state:"BLOCKED",candidateGeneration:2}).derive).toBe(false));
+ it.each(["CHALLENGED","AUTHORIZED","CANCELLED"] as MigrationState[])("does not offer derivation from %s",state=>expect(actionPolicy({...base,state,candidateGeneration:2,authorized:state==="AUTHORIZED"}).derive).toBe(false));
+ it("does not offer derivation without a candidate generation",()=>expect(actionPolicy({...base,state:"CANDIDATE",candidateGeneration:0}).derive).toBe(false));
+ it("terminal states cannot cancel",()=>{const p=actionPolicy({...base,state:"AUTHORIZED",authorized:true,isOwner:true});expect(p.cancel).toBe(false)});
 });

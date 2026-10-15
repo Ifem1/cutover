@@ -39,6 +39,16 @@ describe("contract submission recovery",()=>{
     expect(sessionStorage.length).toBe(0);
   });
 
+  it("renders structured provider failures instead of object Object",async()=>{
+    writeCutover.mockRejectedValueOnce({code:-32000,message:"Studionet write failed",data:{details:"RPC rejected transaction"}});
+    render(<Harness/>);
+    fireEvent.click(screen.getByRole("button",{name:"Submit"}));
+    await waitFor(()=>expect(screen.getByTestId("phase").textContent).toBe("submission_error"));
+    expect(screen.getByText(/Studionet write failed/)).toBeTruthy();
+    expect(screen.queryByText("[object Object]")).toBeNull();
+    expect(sessionStorage.length).toBe(0);
+  });
+
   it("restores an RPC-interrupted hash after refresh, resumes polling, and re-reads final state",async()=>{
     writeCutover.mockResolvedValueOnce(HASH);
     getTransaction.mockRejectedValueOnce(new Error("RPC offline"));
@@ -62,9 +72,32 @@ describe("contract submission recovery",()=>{
     expect(refresh).toHaveBeenCalledOnce();
   });
 
-  it("rereads contract state after a finalized execution failure",async()=>{
+  it("treats a production-shaped Studio FINALIZED/SUCCESS transaction as successful without txExecutionResultName",async()=>{
     writeCutover.mockResolvedValueOnce(HASH);
-    getTransaction.mockResolvedValueOnce({statusName:TransactionStatus.FINALIZED,txExecutionResultName:ExecutionResult.FINISHED_WITH_ERROR});
+    getTransaction.mockResolvedValueOnce({
+      statusName:TransactionStatus.FINALIZED,
+      consensus_data:{leader_receipt:[{execution_result:"SUCCESS"}]},
+    });
+    readCutover.mockResolvedValueOnce({id:3,state:"CANDIDATE"});
+
+    render(<Harness/>);
+    fireEvent.click(screen.getByRole("button",{name:"Submit"}));
+
+    await waitFor(()=>expect(screen.getByTestId("phase").textContent).toBe("execution_success"));
+    expect(readCutover).toHaveBeenCalledWith("get_migration",[3]);
+    expect(screen.getByText("Finalized successfully; contract state re-read from LATEST_FINAL.")).toBeTruthy();
+    expect(screen.queryByText("EXECUTION FAILURE")).toBeNull();
+    expect(screen.queryByText(/UNKNOWN/)).toBeNull();
+    expect(sessionStorage.getItem("cutover.pendingTransaction.v1")).toBeNull();
+    expect(refresh).toHaveBeenCalledOnce();
+  });
+
+  it("rereads contract state after a Studio finalized execution ERROR",async()=>{
+    writeCutover.mockResolvedValueOnce(HASH);
+    getTransaction.mockResolvedValueOnce({
+      statusName:TransactionStatus.FINALIZED,
+      consensus_data:{leader_receipt:[{execution_result:"ERROR"}]},
+    });
     readCutover.mockResolvedValueOnce({id:3,state:"CANDIDATE"});
     render(<Harness/>);
     fireEvent.click(screen.getByRole("button",{name:"Submit"}));
@@ -72,6 +105,31 @@ describe("contract submission recovery",()=>{
     expect(readCutover).toHaveBeenCalledWith("get_migration",[3]);
     expect(screen.getByText(/"state": "CANDIDATE"/)).toBeTruthy();
     expect(sessionStorage.getItem("cutover.pendingTransaction.v1")).toBeNull();
+    expect(refresh).toHaveBeenCalledOnce();
+  });
+
+  it("keeps normalized FINISHED_WITH_ERROR failure handling",async()=>{
+    writeCutover.mockResolvedValueOnce(HASH);
+    getTransaction.mockResolvedValueOnce({statusName:TransactionStatus.FINALIZED,txExecutionResultName:ExecutionResult.FINISHED_WITH_ERROR});
+    readCutover.mockResolvedValueOnce({id:3,state:"CANDIDATE"});
+    render(<Harness/>);
+    fireEvent.click(screen.getByRole("button",{name:"Submit"}));
+    await waitFor(()=>expect(screen.getByTestId("phase").textContent).toBe("execution_failure"));
+    expect(readCutover).toHaveBeenCalledWith("get_migration",[3]);
+  });
+
+  it("labels genuinely unavailable execution evidence accurately and still rereads finalized state",async()=>{
+    writeCutover.mockResolvedValueOnce(HASH);
+    getTransaction.mockResolvedValueOnce({statusName:TransactionStatus.FINALIZED});
+    readCutover.mockResolvedValueOnce({id:3,state:"CANDIDATE"});
+    render(<Harness/>);
+    fireEvent.click(screen.getByRole("button",{name:"Submit"}));
+    await waitFor(()=>expect(screen.getByTestId("phase").textContent).toBe("execution_unavailable"));
+    expect(screen.getByText("GenLayer transaction finalized, but its execution result is unavailable from both normalized SDK and Studio leader receipt data.")).toBeTruthy();
+    expect(screen.queryByText("EXECUTION FAILURE")).toBeNull();
+    expect(screen.queryByText(/UNKNOWN/)).toBeNull();
+    expect(readCutover).toHaveBeenCalledWith("get_migration",[3]);
+    expect(screen.getByText(/"state": "CANDIDATE"/)).toBeTruthy();
     expect(refresh).toHaveBeenCalledOnce();
   });
 });

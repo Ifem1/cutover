@@ -21,7 +21,7 @@ export function actionPolicy(x:PolicyInput){return{
   freezeRoute:x.isOwner&&x.state==="DRAFT"&&x.routeCount>0,
   sealBaseline:x.isOwner&&x.state==="DRAFT"&&x.routeCount>0&&x.allRoutesFrozen,
   setCandidate:x.isOwner&&["BASELINED","CANDIDATE","READY","BLOCKED","INCONCLUSIVE","CHALLENGED"].includes(x.state),
-  derive:x.candidateGeneration>0&&["CANDIDATE","READY","BLOCKED","INCONCLUSIVE"].includes(x.state),
+  derive:x.candidateGeneration>0&&["CANDIDATE","READY","INCONCLUSIVE"].includes(x.state),
   challenge:!x.isOwner&&x.state==="READY"&&!x.challengeOpen&&x.challengeCount<MAX_CHALLENGES_PER_GENERATION&&x.now<x.reviewDeadline&&x.networkOk,
   reassess:x.state==="CHALLENGED"&&x.challengeOpen&&x.networkOk,
   authorize:x.state==="READY"&&!x.challengeOpen&&x.assessedGeneration===x.candidateGeneration&&x.now>=x.reviewDeadline&&!x.authorized&&x.networkOk,

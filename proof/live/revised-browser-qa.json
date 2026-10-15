@@ -1,44 +1,72 @@
 {
-  "schema_version": "cutover.live-browser-qa.v1",
-  "recorded_date": "2026-09-30",
-  "status": "BLOCKED_ON_PRODUCTION_FRONTEND_CONFIGURATION",
+  "schema_version": "cutover.live-browser-qa.v2",
+  "recorded_date": "2026-10-01",
+  "manual_qa_date": "2026-09-30",
+  "status": "COMPLETED_MANUAL_QA_WITH_OPTIONAL_GAPS",
   "frontend_url": "https://cutover-kappa.vercel.app/",
-  "expected_contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
-  "expected_chain_id": 61999,
-  "observed_contract_pair": "historical frontend configuration; it does not yet target the revised contract",
-  "browser": "Chrome via Codex browser control",
+  "contract_address": "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3",
+  "chain_id": 61999,
+  "frontend_fix_commit": "2a7599af90d2533d848e06887c3917681847552a",
+  "vercel_status_for_fix_commit": "SUCCESS",
+  "browser": "Chrome with a real injected wallet; manual production QA",
   "observations": {
-    "canonical_frontend_load": {
-      "result": "PASS_FOR_PAGE_LOAD_ONLY",
-      "detail": "The canonical /migrations page rendered. Its migration records were the historical dataset (including historical migration 3 AUTHORIZED and migration 4 BLOCKED), not the newly deployed contract's migrations 1-4."
+    "canonical_frontend_and_revised_contract": {
+      "result": "PASS",
+      "detail": "The production frontend was redeployed against the revised Studionet contract and used chain 61999."
     },
-    "historical_migration_3_page": {
-      "result": "PASS_HISTORICAL_VIEW_ONLY",
-      "url": "https://cutover-kappa.vercel.app/migrations/3",
-      "observed_state": "AUTHORIZED",
-      "observed_routes": ["exact READY", "cosmetic READY"],
-      "observed_contract": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
+    "wrong_network_handling": {
+      "result": "PASS_MANUAL",
+      "detail": "Wrong-network handling was exercised manually on the production frontend before returning to Studionet 61999."
     },
-    "historical_migration_4_page": {
-      "result": "PASS_HISTORICAL_VIEW_ONLY",
-      "url": "https://cutover-kappa.vercel.app/migrations/4",
-      "observed_state": "BLOCKED",
-      "observed_routes": ["pricing BLOCKED", "legal BLOCKED", "signup BLOCKED", "injection BLOCKED", "unrelated NOT ASSESSED"],
-      "observed_contract": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237"
+    "wallet_signature_rejection": {
+      "result": "PASS_MANUAL",
+      "detail": "A wallet transaction was deliberately rejected. The rejection path was exercised without claiming a submitted/finalized transaction."
     },
-    "wallet_ui_toggle": {
-      "result": "UI_ONLY_NOT_INJECTED_PROVIDER_VERIFIED",
-      "detail": "The navbar exposed connected/disconnected states and a wallet menu in the current session. A page-context inspection did not expose window.ethereum, so this does not establish a real injected-wallet connect, account, signature or event lifecycle for the revised contract."
+    "disconnect_reconnect": {
+      "result": "PASS_MANUAL",
+      "detail": "Disconnect and reconnect behavior was exercised with the injected wallet."
     },
-    "revised_contract_migration_views": {
+    "create_migration_live_write": {
+      "result": "PASS_ON_CHAIN_UI_FALSE_NEGATIVE_DISCOVERED",
+      "migration_id": 5,
+      "transaction_hash": "transaction hash observed manually but not yet recorded in repository evidence",
+      "detail": "A real create_migration write finalized successfully on Studionet. Explorer showed FINALIZED, Accepted consensus, GenVM SUCCESS, result code Return, and create_migration returned migration 5. The old frontend incorrectly displayed EXECUTION FAILURE because txExecutionResultName was absent."
+    },
+    "add_route_live_write": {
+      "result": "PASS_ON_CHAIN_UI_FALSE_NEGATIVE_DISCOVERED",
+      "transaction_hash": "transaction hash observed manually but not yet recorded in repository evidence",
+      "detail": "A subsequent real add_route write also finalized successfully on Studionet. The same pre-fix frontend transaction-result interpretation path could report a false execution failure."
+    },
+    "transaction_result_normalization_bug": {
+      "result": "FIXED_AND_LIVE_RETESTED",
+      "old_frontend_message": "EXECUTION FAILURE — GenLayer transaction finalized without a successful execution result: UNKNOWN",
+      "root_cause": "On Studionet Studio, genlayer-js 1.1.8 can expose finalized execution success in consensus_data.leader_receipt.execution_result while txExecutionResultName is absent. The old frontend treated the missing normalized field as a proven execution failure.",
+      "fix_commit": "2a7599af90d2533d848e06887c3917681847552a",
+      "fix_detail": "The frontend now normalizes FINISHED_WITH_RETURN/FINISHED_WITH_ERROR and Studio leader receipt SUCCESS/ERROR separately, and reports genuinely missing execution evidence as unavailable rather than contract failure.",
+      "regression_evidence": {
+        "frontend_tests": "91/91",
+        "tx_test": "11",
+        "contract_submit_test": "7",
+        "frontend_mutation_sweep": "24/24"
+      },
+      "post_fix_live_confirmation": "After Vercel deployed the fix commit, another real Studionet frontend write finalized successfully and the production UI displayed EXECUTION SUCCESS and 'Finalized successfully; contract state re-read from LATEST_FINAL.'.",
+      "post_fix_transaction_hash": "transaction hash observed manually but not yet recorded in repository evidence"
+    },
+    "account_change": {
       "result": "NOT RUN",
-      "detail": "The production frontend has not yet been redeployed/configured with NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3."
+      "detail": "No live account-change QA is claimed."
     },
-    "account_change_wrong_network_switch_refresh_and_transaction_lifecycle": {
-      "result": "NOT VERIFIED",
-      "detail": "Requires the revised production frontend and an accessible real injected-wallet provider. No browser state or transaction result was fabricated."
+    "pending_transaction_refresh_recovery": {
+      "result": "NOT RUN",
+      "detail": "No live pending-transaction refresh/recovery QA is claimed. Offline regression coverage exists, but it is not promoted to manual browser evidence."
     }
   },
-  "required_follow_up": "Set NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS to the expected address on the canonical Vercel project, deploy the frontend, then rerun the human/browser wallet runbook.",
-  "historical_record": "proof/live/browser-qa.json"
+  "remaining_optional_evidence_gaps": [
+    "live account-change QA",
+    "live pending-transaction refresh recovery",
+    "revised-source live BLOCKED case",
+    "revised-source live prompt-injection case"
+  ],
+  "historical_record": "proof/live/browser-qa.json",
+  "historical_separation": "Historical browser and contract evidence remains preserved separately and is not presented as revised-source evidence."
 }

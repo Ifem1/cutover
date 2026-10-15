@@ -26,7 +26,7 @@ The GenLayer Python pins are in `requirements.txt`; JavaScript versions are in w
 - Local Direct Mode default: `http://127.0.0.1:4000/api` (`gltest.config.yaml`)
 - Live proof may set `GENLAYER_RPC`; scripts default it to the Studionet RPC and reject any chain other than 61999.
 - Wallet signing uses the locally unlocked GenLayer CLI keystore. Do not place private keys in an environment variable, proof plan, or repository file.
-- Vercel frontend variable: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3` (set on the canonical frontend project and redeploy to use the revised source-matched contract).
+- Vercel frontend variable: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3` (set on the canonical production frontend; the current Vercel deployment targets the revised source-matched contract).
 - Vercel proof-fixture variable: `CUTOVER_CANDIDATE_MANIFEST_JSON` (fixture project only).
 - GitHub gate variables: `CUTOVER_CONTRACT_ADDRESS` and `CUTOVER_MIGRATION_ID`.
 
@@ -53,9 +53,10 @@ npm run test:web
 npm run mutation:web
 npm run test:gate
 npm run build
+npm audit --omit=dev
 ```
 
-The CI workflow additionally runs live-proof schema/offline checks, verifies committed generated gate bundles, builds each workspace, and runs the handoff packaging job. `npm run build` builds the web app, fixture app, and gate. Exact test/mutant counts must be taken from the completed command output or a specific CI run.
+The CI workflow additionally runs live-proof schema/offline checks, verifies committed generated gate bundles, builds each workspace, and runs the handoff packaging job. `npm run build` builds the web app, fixture app, and gate. Exact test/mutant counts must be taken from completed command output or a specific CI run. A separate production-only dependency evidence run of `npm audit --omit=dev --json` reported 4 findings (2 moderate, 2 high, 0 critical); no automatic upgrade was applied. See `docs/FINAL_AUDIT.md`.
 
 ## Deployment and source verification
 

@@ -15,7 +15,7 @@ export function reviewProgress(now:number,readyAt:number,deadline:number){
 }
 
 export function assessmentCanRun(state:string,currentResult:string|undefined,attemptCount:number){
-  if(!['CANDIDATE','BLOCKED','INCONCLUSIVE'].includes(state))return false;
+  if(!['CANDIDATE','INCONCLUSIVE'].includes(state))return false;
   if(currentResult==='READY'||currentResult==='BLOCKED')return false;
   return attemptCount<MAX_ORDINARY_ATTEMPTS;
 }
@@ -23,7 +23,7 @@ export function assessmentCanRun(state:string,currentResult:string|undefined,att
 function sortValue(value:unknown):unknown{
   if(Array.isArray(value))return value.map(sortValue);
   if(value&&typeof value==='object'){
-    const out:Record<string,unknown>={};
+    const out:Record<string,unknown>={}; 
     for(const key of Object.keys(value as Record<string,unknown>).sort())out[key]=sortValue((value as Record<string,unknown>)[key]);
     return out;
   }
