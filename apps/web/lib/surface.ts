@@ -5,7 +5,7 @@ export const WRITE_EXAMPLES:Record<string,unknown[]>={
   freeze_route:[1,"pricing","https://proof.example/baseline.json","{}","0".repeat(64)],
   seal_baseline:[1],
   set_candidate:[1,"https://candidate.example.com","https://candidate.example.com/.well-known/cutover.json","0".repeat(64)],
-  assess_route:[1,"pricing"],derive_candidate:[1],open_challenge:[1,"pricing","https://proof.example/challenge.json"],reassess_challenge:[1],authorize:[1],cancel_migration:[1],
+  assess_route:[1,"pricing"],derive_candidate:[1],open_challenge:[1,"pricing","https://proof.example/challenge.json"],reassess_challenge:[1],authorize:[1],begin_assurance:[1,300],submit_assurance_checkpoint:[1,"pricing",1,"https://candidate.example.com/pricing"],finalize_assurance:[1],cancel_migration:[1],
 };
 export const WRITE_METHODS=Object.keys(surface.writes);
 export function writeArityIsValid(name:string,args:unknown[]){const expected=(surface.writes as Record<string,string[]>)[name];return Array.isArray(expected)&&args.length===expected.length;}

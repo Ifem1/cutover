@@ -10,6 +10,9 @@
     "open_challenge": ["migration_id", "route_id", "evidence_url"],
     "reassess_challenge": ["migration_id"],
     "authorize": ["migration_id"],
+    "begin_assurance": ["migration_id", "window_seconds"],
+    "submit_assurance_checkpoint": ["migration_id", "route_id", "checkpoint_version", "evidence_url"],
+    "finalize_assurance": ["migration_id"],
     "cancel_migration": ["migration_id"]
   },
   "views": {
@@ -24,6 +27,9 @@
     "get_challenge": ["migration_id"],
     "get_challenges": ["migration_id", "generation", "offset", "limit"],
     "get_authorization": ["migration_id"],
+    "get_assurance": ["migration_id"],
+    "get_assurance_checkpoint": ["migration_id", "route_id", "checkpoint_version"],
+    "get_assurance_checkpoints": ["migration_id", "offset", "limit"],
     "get_events": ["offset", "limit"]
   }
 }

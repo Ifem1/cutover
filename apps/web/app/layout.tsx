@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./assurance.css";
 import {WalletSessionProvider} from "@/components/WalletSession";
 import {GlobalNavbar} from "@/components/GlobalNavbar";
 export const metadata={title:"CUTOVER",description:"GenLayer-backed migration acceptance protocol"};
