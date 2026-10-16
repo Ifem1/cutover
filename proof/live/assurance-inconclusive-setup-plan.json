@@ -1,0 +1,16 @@
+{
+  "chain_id": 61999,
+  "rpc": "https://studio.genlayer.com/api",
+  "git_commit": "c1f49b0b6f29df0f32e801ce8c29c9c2d290a31d",
+  "contract_address": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4",
+  "deployer_address": "0xD6423aE82a975d55C6CeaC222827A727325e0459",
+  "account_name": "stargaze-deployer",
+  "steps": [
+    {"name":"add pricing route","kind":"write","method":"add_route","args":[4,"pricing","https://fixtures-bice.vercel.app/baseline/preserved","/cases/preserved","[{\"id\":\"price\",\"question\":\"Does the candidate preserve the advertised Acme Pro price and signup flow?\",\"allowed_changes\":\"Cosmetic presentation changes are allowed when the price and signup function remain.\"}]"]},
+    {"name":"freeze pricing baseline","kind":"write","method":"freeze_route","args":[4,"pricing","https://fixtures-bice.vercel.app/api/snapshot/preserved?route_id=pricing&captured_at=2026-10-16T00:00:00.000Z","{\"schema_version\":\"cutover.baseline.v1\",\"route_id\":\"pricing\",\"source_url\":\"https://fixtures-bice.vercel.app/baseline/preserved\",\"captured_at\":\"2026-10-16T00:00:00.000Z\",\"title\":\"\",\"canonical_url\":\"\",\"headings\":[\"Acme Pro\",\"$49/month\"],\"visible_text\":\"CUTOVER PUBLIC PROOF FIXTURE Acme Pro $49/month Cancel any time with 30 days notice. Email Start trial\",\"important_links\":[],\"forms\":[\"POST /api/signup\"],\"claims\":[\"$49/month\",\"Cancel any time with 30 days notice.\"]}","64513945390111f844e9cc41b768056214ba7d0447f6df5940df5b58ab919145"]},
+    {"name":"seal baseline","kind":"write","method":"seal_baseline","args":[4]},
+    {"name":"set preserved candidate","kind":"write","method":"set_candidate","args":[4,"https://fixtures-bice.vercel.app","https://fixtures-bice.vercel.app/.well-known/cutover.json","037633d0cc420a9caebcd892d67e042bbbd9ae98174a1aa80d84e2030d0023c9"]},
+    {"name":"assess pricing route","kind":"write","method":"assess_route","args":[4,"pricing"]},
+    {"name":"derive ready candidate","kind":"write","method":"derive_candidate","args":[4]}
+  ]
+}

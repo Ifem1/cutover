@@ -2,11 +2,11 @@
 
 ## Active assurance milestone audit (2026-10-16)
 
-The active source is `96556e826bd5b35ea369a84cd3c338762712c37a`, SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. The deployment receipt finalized with majority agreement and leader success, and retrieved source bytes match exactly. Migration 1 has a real terminal `VERIFIED` assurance checkpoint with matching manifest and body digests; evidence is in [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json).
+The active source is audited at `c1f49b0b6f29df0f32e801ce8c29c9c2d290a31d`, with contract SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. The deployment receipt finalized with majority agreement and leader success, and retrieved source bytes match exactly. Migration 1 has a real terminal `VERIFIED` assurance checkpoint with matching manifest and body digests; migrations 3 and 4 independently finalized `DEVIATED` and `INCONCLUSIVE`. Evidence is in [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json) and [`proof/live/assurance-negative-live-cases.json`](../proof/live/assurance-negative-live-cases.json).
 
-The audit found these genuine remaining gaps: final-source `DEVIATED` and `INCONCLUSIVE` assurance terminals were not run; the canonical Vercel frontend was not redeployed with `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`; and active-source injected-wallet browser QA was not performed. The active GitHub gate passed in [run 38899780957](https://github.com/Ifem1/cutover/actions/runs/38899780957), with exact-ref PASS, wrong-ref FAIL and DRAFT-state FAIL. Prior-source HTTP 503, manifest mismatch, body-SHA mismatch and unresolved-authorization receipts remain explicitly historical.
+The active-source negative lifecycles are complete. The production frontend deployment `dpl_621cwHSb1pn3bknUGwGQs1WxQ4pe` is aliased at [`https://cutover-kappa.vercel.app/`](https://cutover-kappa.vercel.app/) and was built with `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`; the live migrations page rendered the active on-chain records. The available Chrome context had no injected `window.ethereum`, so wallet connection, network-switch, account-change and browser-wallet write QA remain a genuine limitation. The active-source gate baseline passed in [run 38901682370](https://github.com/Ifem1/cutover/actions/runs/38901682370), with [live-gate job 116975585789](https://github.com/Ifem1/cutover/actions/runs/38901682370/job/116975585789) recording exact-ref PASS, wrong-ref FAIL and DRAFT-state FAIL. Prior-source mismatch and unresolved-authorization receipts remain explicitly historical.
 
-Therefore this milestone is **not submission-ready**. The verified assurance path is real and source-matched, but the stated live-proof scope is incomplete.
+The assurance proof scope is complete for VERIFIED, DEVIATED and INCONCLUSIVE. Submission remains conditional on the final CI rerun for this documentation commit and on the stated lack of injected-wallet browser access.
 
 Audit scope: revised-source deployment/live evidence, production frontend/wallet evidence, final CI, dependency-audit findings, and preservation of the historical/revised evidence boundary.
 
@@ -39,9 +39,15 @@ The tracked record [`revised-live-cases.json`](../proof/live/revised-live-cases.
 - The revised-source live GitHub gate passed exact-ref, wrong-ref, and non-AUTHORIZED-state assertions.
 - These revised runs do **not** establish a revised-source `BLOCKED` case or revised-source prompt-injection case. Historical cases remain explicitly separate.
 
-## Production frontend and manual wallet QA
+## Active production frontend QA
 
-The following browser record is historical evidence for the earlier revised contract. The canonical frontend is `https://cutover-kappa.vercel.app/`; it has not been redeployed for the active assurance address.
+The active frontend deployment is `dpl_621cwHSb1pn3bknUGwGQs1WxQ4pe`, aliased at [`https://cutover-kappa.vercel.app/`](https://cutover-kappa.vercel.app/), with `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`. Read-only browser QA on `/migrations` and `/migrations/1` and `/migrations/3` confirmed Studionet 61999, the active contract address, the preserved `VERIFIED` assurance record and the active migration 3 control room. The production page also exposed the route matrix, checkpoint/finalization status and explorer links from finalized on-chain state.
+
+The controlled Chrome context had no injected `window.ethereum` (`ethereum: false`, no providers, no selected account). Therefore connect, disconnect, wrong-network switch, account-change, refresh-recovery and milestone-specific browser-wallet writes were not exercised and are not claimed. CLI-wallet transactions are recorded separately as contract evidence and are not presented as browser-wallet QA.
+
+## Historical production frontend and manual wallet QA
+
+The following browser record is historical evidence for the earlier revised contract and is kept separate from the active production deployment.
 
 Manual production QA with a real injected wallet verified:
 
@@ -106,4 +112,4 @@ Historical evidence remains clearly separated from revised-source evidence.
 
 ## Release decision for the active assurance milestone
 
-**Not submission-ready.** The active source has a source-matched terminal `VERIFIED` assurance and a passing active GitHub gate, but active-source negative assurance cases and injected-wallet QA against the active frontend/contract pair remain incomplete. Historical evidence is retained and labeled as historical rather than promoted.
+**Assurance milestone complete with one documented environment limitation.** The active source has source-matched `VERIFIED`, `DEVIATED` and `INCONCLUSIVE` terminal assurances, a production frontend pointed at the active contract, and a passing active GitHub gate. The controlled browser had no injected EIP-1193 provider, so wallet-interaction QA could not be performed; this is recorded as a limitation rather than inferred from CLI-wallet evidence. Historical evidence remains clearly separated.

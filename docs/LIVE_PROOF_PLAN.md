@@ -1,6 +1,6 @@
 # Live proof plan and results
 
-This document separates active assurance proof from retained historical deployments. The active contract is `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet (`61999`), with source SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`. Deployment and source retrieval match are documented in [`proof/live/assurance-deployment.json`](../proof/live/assurance-deployment.json). The canonical frontend is [https://cutover-kappa.vercel.app/](https://cutover-kappa.vercel.app/); this run records the required Vercel build environment but did not redeploy it.
+This document separates active assurance proof from retained historical deployments. The active contract is `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet (`61999`), with source SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`. Deployment and source retrieval match, plus the production Vercel deployment, are documented in [`proof/live/assurance-deployment.json`](../proof/live/assurance-deployment.json). The canonical frontend is [https://cutover-kappa.vercel.app/](https://cutover-kappa.vercel.app/) and is configured for the active address.
 
 ## Active assurance live evidence
 
@@ -12,7 +12,7 @@ The active deployment was exercised using a funded Studionet test wallet. Transa
 | 1 | Bounded post-authorization checkpoint for `pricing` | `VERIFIED` |
 | 1 | Assurance finalization after the 300-second window | terminal `VERIFIED` |
 
-All active transaction hashes, final states, digests and checkpoint evidence are in [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json). The failed checkpoint attempts on earlier assurance deployments are preserved there as no-state-change adversarial receipts. Active-source DEVIATED and INCONCLUSIVE terminals are not claimed.
+All active transaction hashes, final states, digests and checkpoint evidence are in [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json) and [`proof/live/assurance-negative-live-cases.json`](../proof/live/assurance-negative-live-cases.json). The active source has independent VERIFIED, DEVIATED and INCONCLUSIVE terminal assurances. Failed checkpoint attempts on earlier deployments remain preserved as no-state-change historical receipts.
 
 ## Active-source GitHub gate
 
@@ -34,7 +34,7 @@ NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4
 
 Then redeploy the frontend and run [`docs/MANUAL_QA_RUNBOOK.md`](MANUAL_QA_RUNBOOK.md) with a real injected wallet. Active migration 1 is `AUTHORIZED` with a terminal `VERIFIED` assurance. The historical browser reports remain separate.
 
-Do not call the release submission-ready until the active-source GitHub live gate passes, the production frontend is redeployed, and injected-wallet QA is complete.
+The active-source GitHub live gate and production frontend deployment are complete. Injected-wallet QA is recorded as unavailable because the controlled Chrome context exposed no EIP-1193 provider; do not infer browser-wallet success from CLI-wallet evidence.
 
 ## Historical deployment
 

@@ -30,5 +30,6 @@
     "same_source_retry_after_window": {"contract_address": "0x7CAcDc4D191878e1647f369eF9CFC5932c1d35c0", "tx": "0xe3e44956f7d0b96c494ee216701654208ee843166c194f22525119bc4fff4edf", "result": "MAJORITY_AGREE", "leader_execution": "ERROR", "rollback": "assurance window closed", "state_change": "none"}
   },
   "gate_fixture_migration": {"migration_id": 2, "create_migration": "0xa5cf51e1b1a5a66b3411b70840b9d4af6193ad71a869fd4cf43f88e5c1b88a5b", "state": "DRAFT", "purpose": "active-source non-AUTHORIZED negative case for the committed GitHub gate"},
-  "scope_limits": ["This final-source live record proves the verified assurance path. Final-source DEVIATED and final-source INCONCLUSIVE terminal assurances were not run in this session. Prior source live records for HTTP 503, manifest identity mismatch, body SHA mismatch and unresolved authorization remain in proof/live/revised-live-cases.json and are not relabeled as evidence for this contract address."]
+  "active_source_negative_cases": "proof/live/assurance-negative-live-cases.json",
+  "scope_limits": ["Case A is the source-matched VERIFIED lifecycle. Cases B and C in assurance-negative-live-cases.json are independent active-source DEVIATED and INCONCLUSIVE assurance lifecycles. The fixture was restored to its preserved deployment after the immutable checkpoints were finalized. Historical prior-source mismatch and unresolved-challenge records remain historical and are not relabeled for this contract address."]
 }

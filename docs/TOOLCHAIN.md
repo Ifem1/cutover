@@ -26,7 +26,7 @@ The GenLayer Python pins are in `requirements.txt`; JavaScript versions are in w
 - Local Direct Mode default: `http://127.0.0.1:4000/api` (`gltest.config.yaml`)
 - Live proof may set `GENLAYER_RPC`; scripts default it to the Studionet RPC and reject any chain other than 61999.
 - Wallet signing uses the locally unlocked GenLayer CLI keystore. Do not place private keys in an environment variable, proof plan, or repository file.
-- Vercel frontend variable: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` (required for the canonical production frontend; this run records the value but did not redeploy Vercel).
+- Vercel frontend variable: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` (required for the canonical production frontend; production deployment evidence is in [`proof/live/assurance-deployment.json`](../proof/live/assurance-deployment.json)).
 - Vercel proof-fixture variable: `CUTOVER_CANDIDATE_MANIFEST_JSON` (fixture project only).
 - GitHub gate variables: `CUTOVER_CONTRACT_ADDRESS` and `CUTOVER_MIGRATION_ID`.
 

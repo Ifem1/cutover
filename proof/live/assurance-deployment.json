@@ -11,5 +11,7 @@
   "interface_verification": {"get_config": {"network": "studionet", "chain_id": 61999, "min_assurance_window": 60, "max_assurance_window": 86400, "max_assurance_checkpoints": 8}, "assurance_writes": ["begin_assurance", "submit_assurance_checkpoint", "finalize_assurance"], "assurance_views": ["get_assurance", "get_assurance_checkpoint", "get_assurance_checkpoints"]},
   "fixture_origin": "https://fixtures-bice.vercel.app",
   "frontend_required_build_env": {"NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4", "canonical_url": "https://cutover-kappa.vercel.app/"},
-  "limitations": ["Canonical Vercel frontend deployment was not performed by this run because the existing handoff says the owner deploys the frontend; the exact public build environment value is recorded above."]
+  "frontend_production_deployment": {"status": "READY", "deployment_id": "dpl_621cwHSb1pn3bknUGwGQs1WxQ4pe", "deployment_url": "https://cutover-nxxstu7xb-ifem1s-projects.vercel.app", "canonical_url": "https://cutover-kappa.vercel.app/", "project": "ifem1s-projects/cutover", "effective_contract_read": "migrations page rendered active migration 1 AUTHORIZED and migration 3 READY from 0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4 on Studionet 61999"},
+  "fixture_deployments": {"deviated_body": "dpl_Dh9Pz21Uu4DMCccqiq7AX47TMWLc", "unavailable_manifest": "dpl_GTQCbTRiXcmkRpbD8DPgRbKHLGir", "restored_preserved": "dpl_GQZeKVEgHt6JVnwZ6kTTTYnYTVTT"},
+  "limitations": ["The available Chrome context had no injected window.ethereum provider, so wallet connection, signature, account-change, network-switch and browser-wallet write flows could not be exercised honestly. Read-only production browser QA was completed."]
 }

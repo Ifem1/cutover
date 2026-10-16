@@ -1,0 +1,59 @@
+{
+  "schema_version": "cutover.assurance-negative-live-cases.v1",
+  "recorded_at": "2026-10-16T14:52:00Z",
+  "network": {"name": "studionet", "chain_id": 61999, "rpc": "https://studio.genlayer.com/api"},
+  "contract_address": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4",
+  "source_commit": "c1f49b0b6f29df0f32e801ce8c29c9c2d290a31d",
+  "contract_source_sha256": "ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f",
+  "fixture_origin": "https://fixtures-bice.vercel.app",
+  "candidate_binding": {
+    "release_ref": "assurance-fixture-preserved-20261015",
+    "manifest_sha256": "037633d0cc420a9caebcd892d67e042bbbd9ae98174a1aa80d84e2030d0023c9",
+    "route_id": "pricing",
+    "authorized_body_sha256": "482c908cc3426a79e1f1afb0622b0f6c6823da1385b4e018f1b9b10e1d01b1dd",
+    "baseline_digest": "64513945390111f844e9cc41b768056214ba7d0447f6df5940df5b58ab919145"
+  },
+  "receipt_rule": "Every listed successful write finalized with FINALIZED, MAJORITY_AGREE and leader execution SUCCESS. The proof runner recorded ACCEPTED and FINALIZED receipts separately.",
+  "case_B_deviated": {
+    "migration_id": 3,
+    "title": "Assurance active DEVIATED",
+    "fixture_deployment": "dpl_Dh9Pz21Uu4DMCccqiq7AX47TMWLc",
+    "fixture_mutation": "same-origin manifest retained the authorized release and body commitment while /cases/preserved changed from $49/month to $89/month",
+    "transactions": {
+      "add_route": "0x452cd2b27a76ef8427b4e7dd41f1850dad849e3827a5a1aa4772268a9b8f1659",
+      "freeze_route": "0x30fa1bb16a3702e45bdc7573f576ce2a8426d86a5f13fe60ba83ccee9448c6c2",
+      "seal_baseline": "0xceb123c6ec6be86b540c7042acce85b32b140b84fc776174f9babcf8e11b63c6",
+      "set_candidate": "0xb4a85d9103a3ccd55ee44f3fb9ef9237872897f167fde50a3b5fe0da777faf08",
+      "assess_route": "0xfdac08a53961e215ccf5cb5d65cbc7baebe4461e5affcd8017e6a52609530017",
+      "derive_candidate": "0x802ce242c7bab933df023ed11034de93b35f3f339a1dae81eeea9581b94b85a9",
+      "authorize": "0x7362d4e82dc196ad363f7313768fd0def77036bbeec59b6e2d9dfe3683e24901",
+      "begin_assurance": "0xb153f403037475dbe9b1a960fb03c95190a1b937387a43efef8c1178d3e02120",
+      "submit_assurance_checkpoint": "0x50524e7ee8cad74817e856419f86134b0293112c2107e5ed39e479ae1196f0cc",
+      "finalize_assurance": "0xbc37dccc08f2e2a0ad9c2d1c21ee0f8447258e048081994ba78c1a890ec43eb2"
+    },
+    "checkpoint": {"version": 1, "checkpoint_digest": "e3e3c38633fbbbe0fa11ef1cd2b513ad11bea952a4cf2b4ede750166c8f68e99", "candidate_probe_digest": "491dd04d7eb1334cc418cbf6c820dc8c7882e84e1c19198be8405be786fd680f", "observed_body_sha256": "ca74d430c720c4125302e63f3fec06b68be74c14b105ce07de4e894e905c12f9", "manifest_match": true, "content_match": false, "source_match": true, "evidence_available": true, "finding": {"rule_id": "price", "status": "MATERIAL_CHANGE"}, "route_result": "DEVIATED"},
+    "terminal": {"status": "DEVIATED", "final_result": "DEVIATED", "checkpoint_count": 1, "authorization_digest": "7a0a427195ee4380f992ee696a1baf0d739c063645fc63d1d0d4b537fcec1fdf"}
+  },
+  "case_C_inconclusive": {
+    "migration_id": 4,
+    "title": "Assurance active INCONCLUSIVE",
+    "fixture_deployment": "dpl_GTQCbTRiXcmkRpbD8DPgRbKHLGir",
+    "fixture_mutation": "same-origin /.well-known/cutover.json returned HTTP 500 from invalid manifest configuration; candidate route remained HTTP 200",
+    "transactions": {
+      "create_migration": "0x404aa890edc11a558f08cffb4140f82f437bb7fbb525725cd7165cf86e891d6a",
+      "add_route": "0xadaf8a602e02125e392b1ceae82d2f761d860014eec37882079fabc3771c58b9",
+      "freeze_route": "0x04ec0bc5cb63c4db86d4dbf29713a8361ed02bf96472da35e5e9ab93693cd4e6",
+      "seal_baseline": "0x3f156e0b4124ae624dc2f9aba66ce6543a2f8fd925e32e737f2c5ef57260a0b5",
+      "set_candidate": "0x4b001479c9b48d5c77f33dc0d4988eab939531b043713466a1973799902b18f6",
+      "assess_route": "0x695c66d34c365e57f9bbd3a681c6df6e48e4e7c65f8c279b71714e06dfda6337",
+      "derive_candidate": "0x1dc4b0d78e02d5414fe9db06015c5ee25fb6a8c4d3f867e8e904447657a76ba1",
+      "authorize": "0x938f037e9e751e83860f7a7079d9553477e02d99a34ec2a5512d9cbc6268f8fc",
+      "begin_assurance": "0xd36084d02a34fbbf1d59a046f7ea2a7377652903757fe5ac9a8e36e79e204992",
+      "submit_assurance_checkpoint": "0x02a4630845baf4b2fb1d0a9fcd8aa73496745db0831b89bee88329b6488b3877",
+      "finalize_assurance": "0x1efffdf92c15c28e56aa3cb90740762aacb548c18abeced24641ae904aac57cb"
+    },
+    "checkpoint": {"version": 1, "checkpoint_digest": "a36c0b6eb329cc277938f989125eb1e9979ddbdd37ab3061cc8cc2bdf8ad6d38", "candidate_probe_digest": "c712b5bc44fed1541a13f44af2f81f607a5f74b978d3d88514cfbcf6f127657c", "observed_body_sha256": "482c908cc3426a79e1f1afb0622b0f6c6823da1385b4e018f1b9b10e1d01b1dd", "manifest_match": false, "content_match": false, "source_match": true, "evidence_available": true, "live_manifest_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a", "live_release_ref": "", "route_result": "INCONCLUSIVE"},
+    "terminal": {"status": "INCONCLUSIVE", "final_result": "INCONCLUSIVE", "checkpoint_count": 1, "authorization_digest": "fbd82bebac8d1b68927de1be9917b0ad1d7b80c454aafa269eb54f32f364e95c"}
+  },
+  "restored_fixture_deployment": "dpl_GQZeKVEgHt6JVnwZ6kTTTYnYTVTT"
+}

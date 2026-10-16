@@ -4,21 +4,23 @@
     "name": "studionet",
     "chain_id": 61999
   },
-  "active_source_commit": "96556e826bd5b35ea369a84cd3c338762712c37a",
+  "active_source_commit": "c1f49b0b6f29df0f32e801ce8c29c9c2d290a31d",
   "active_contract_source_sha256": "ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f",
   "active_source_deployment_status": "DEPLOYED_AND_SOURCE_VERIFIED",
   "active_contract_address": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4",
   "historical_live_contract_address": "0xB8B2157c9d4f19c66e241178A63A89B13EAB3237",
   "historical_live_source_sha256": "34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834",
-  "live_evidence_status": "ASSURANCE_SOURCE_EVIDENCE_COMPLETE_FOR_VERIFIED_AND_GATE_SCOPE: final source deployment/source match, terminal VERIFIED assurance, and active-source exact-ref/wrong-ref/DRAFT live gate assertions are recorded. Final-source DEVIATED and INCONCLUSIVE assurance terminals and final frontend redeployment remain unclaimed; prior-source fail-closed cases remain explicitly historical.",
-  "active_source_final_ci_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/38899780957 (commit bc46bf28b9123f689254712ebf790d3e31814a00)",
-  "active_source_live_gate_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/38899780957/job/116969196725 (exact ref PASS; wrong ref FAIL; non-AUTHORIZED DRAFT FAIL)",
+  "live_evidence_status": "ASSURANCE_SOURCE_EVIDENCE_COMPLETE: active-source VERIFIED (migration 1), DEVIATED (migration 3) and INCONCLUSIVE (migration 4) terminal assurances are recorded with immutable checkpoints; active-source gate assertions and production deployment are recorded.",
+  "active_source_final_ci_status": "PASS_PENDING_FINAL_DOC_COMMIT: prior green baseline https://github.com/Ifem1/cutover/actions/runs/38901682370; rerun required for this evidence commit",
+  "active_source_live_gate_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/38901682370 (live-gate job 116975585789; exact ref PASS; wrong ref FAIL; non-AUTHORIZED DRAFT FAIL)",
   "assurance_source_deployment_evidence": "proof/live/assurance-deployment.json",
   "assurance_source_live_cases": "proof/live/assurance-live-cases.json",
   "revised_source_deployment_evidence": "proof/live/revised-deployment.json",
   "revised_source_live_cases": "proof/live/revised-live-cases.json",
   "revised_frontend_url": "https://cutover-kappa.vercel.app/",
-  "revised_frontend_contract_configured": false,
+  "revised_frontend_contract_configured": true,
+  "active_frontend_deployment_evidence": "proof/live/assurance-deployment.json",
+  "active_negative_assurance_evidence": "proof/live/assurance-negative-live-cases.json",
   "revised_source_final_ci_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36786339583 (commit 2a7599af90d2533d848e06887c3917681847552a)",
   "revised_source_live_gate_status": "PASS: final code CI run 36786339583; initial revised live-gate proof run 36769705489/job/110073021673",
   "revised_frontend_wallet_qa_status": "PASS_MANUAL_WITH_OPTIONAL_GAPS: wrong-network, wallet rejection, disconnect/reconnect and real revised-contract writes exercised; Studio execution-result false negative fixed in 2a7599af90d2533d848e06887c3917681847552a and live-retested. Account-change and pending-refresh recovery not run.",
@@ -73,7 +75,7 @@
       "contract_submit_test": 7
     }
   },
-  "deployment_evidence": "proof/live/revised-deployment.json",
+  "deployment_evidence": "proof/live/assurance-deployment.json",
   "historical_deployment_evidence": "proof/live/deployment.json",
   "invariants": [
     {
@@ -132,7 +134,7 @@
         1,
         13
       ],
-      "live_evidence": "REVISED SOURCE PASS: migration 3 live release-ref mismatch (manifest_match=false, content_match=true) and migration 4 wrong body SHA (manifest_match=true, content_match=false) both finalized INCONCLUSIVE; see proof/live/revised-live-cases.json. Historical cases remain in proof/live/adversarial-cases.json."
+      "live_evidence": "ACTIVE SOURCE PASS: migration 3 assurance checkpoint retained manifest_match=true with an independently observed body SHA mismatch; migration 4 retained manifest_match=false after the same-origin manifest returned HTTP 500. Both terminal records and digests are in proof/live/assurance-negative-live-cases.json."
     },
     {
       "id": "route-verdicts",
@@ -167,7 +169,7 @@
         6,
         7
       ],
-      "live_evidence": "REVISED SOURCE PARTIAL: source HTTP 503 on migration 2 and manifest/content mismatches on migrations 3/4 produced INCONCLUSIVE. The definite BLOCKED outcomes and disagreement case remain historical-only in proof/live/adversarial-cases.json; a revised-source BLOCKED case is not claimed."
+      "live_evidence": "ACTIVE SOURCE PASS: migration 3 finalized DEVIATED from a consensus-bound MATERIAL_CHANGE finding; migration 4 finalized INCONCLUSIVE from unavailable manifest evidence. Historical BLOCKED and disagreement cases remain labeled historical in proof/live/adversarial-cases.json."
     },
     {
       "id": "retry-griefing",
@@ -263,7 +265,7 @@
         11,
         13
       ],
-      "live_evidence": "REVISED SOURCE PASS: migration 1 owner authorize while challenge unresolved finalized MAJORITY_AGREE with execution ERROR/rollback 'challenge unresolved'; no authorization was granted. A first reassess attempt was CANCELED/NO_MAJORITY without state change; retry then resolved the challenge. See proof/live/revised-live-cases.json. The prior 'candidate not ready' record remains historical."
+      "live_evidence": "Historical only: the unresolved-challenge refusal is preserved in proof/live/revised-live-cases.json and is not relabeled as active-contract evidence. Active migrations 3 and 4 had no unresolved challenge at authorization."
     },
     {
       "id": "review-window-authorization",
@@ -294,7 +296,7 @@
         11,
         12
       ],
-      "live_evidence": "REVISED SOURCE PASS: migration 1 authorized after the review deadline; finalized authorization digest/evidence root are recorded in proof/live/revised-live-cases.json."
+      "live_evidence": "ACTIVE SOURCE PASS: migrations 3 and 4 each authorized only after their finalized five-minute review deadlines; authorization digests and exact approved commitments are in proof/live/assurance-negative-live-cases.json."
     },
     {
       "id": "consensus-agreement",
@@ -355,7 +357,7 @@
       "planned_live_cases": [
         1
       ],
-      "live_evidence": "REVISED FRONTEND MANUAL PASS/PARTIAL: production targets the revised contract; wrong-network handling, wallet rejection, disconnect/reconnect and real successful writes were exercised. Manual QA exposed a Studio execution-result normalization false negative, fixed in commit 2a7599af90d2533d848e06887c3917681847552a and live-retested as EXECUTION SUCCESS with LATEST_FINAL state reread. Live account-change and pending-transaction refresh recovery were not run; offline tests cover refresh recovery."
+      "live_evidence": "READ-ONLY PRODUCTION QA PASS/PARTIAL: https://cutover-kappa.vercel.app/ rendered active migration 1 AUTHORIZED and migration 3 READY on Studionet 61999; the available Chrome context had no injected window.ethereum, so wallet connect, network switching, account-change and browser-wallet write flows remain unexercised. Offline lifecycle tests remain the only evidence for refresh recovery."
     },
     {
       "id": "github-gate-exact-ref",
@@ -373,7 +375,7 @@
         12,
         13
       ],
-      "live_evidence": "REVISED SOURCE PASS: run 36769705489, live-gate job 110073021673; exact ref c75641176acc263f9a35fab2d9b7c9f9bfb29c19 passed, wrong ref failed at the exact-ref guard, and migration 2 failed at the INCONCLUSIVE state guard. Historical run 36753618050 remains linked in docs/GITHUB_GATE.md."
+      "live_evidence": "ACTIVE SOURCE PASS: https://github.com/Ifem1/cutover/actions/runs/38901682370, live-gate job 116975585789; exact ref passed, wrong ref failed at the exact-ref guard, and migration 2 failed at the non-AUTHORIZED state guard."
     }
   ],
   "revised_browser_qa_evidence": "proof/live/revised-browser-qa.json",

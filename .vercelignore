@@ -1,0 +1,7 @@
+.pytest_cache
+artifacts
+node_modules
+apps/*/node_modules
+.next
+apps/*/.next
+*.zip
