@@ -106,4 +106,4 @@ Historical evidence remains clearly separated from revised-source evidence.
 
 ## Release decision for the active assurance milestone
 
-**Not submission-ready.** The active source has a source-matched terminal `VERIFIED` assurance, but active-source negative assurance cases, the active GitHub gate run, and injected-wallet QA against the active frontend/contract pair remain incomplete. Historical evidence is retained and labeled as historical rather than promoted.
+**Not submission-ready.** The active source has a source-matched terminal `VERIFIED` assurance and a passing active GitHub gate, but active-source negative assurance cases and injected-wallet QA against the active frontend/contract pair remain incomplete. Historical evidence is retained and labeled as historical rather than promoted.
