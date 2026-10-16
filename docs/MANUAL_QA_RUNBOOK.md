@@ -6,14 +6,14 @@ Run these checks against the revised contract after it has been deployed, source
 
 - Frontend: <https://cutover-kappa.vercel.app/>
 - Expected network: Studionet, chain ID `61999`
-- Expected contract: `0x2A19548ae8A86a6d678890095f9F25eddeC16DD3` (not the previous `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237` address)
+- Expected contract: `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` (not the prior deployment addresses)
 - Wallet: injected wallet with an account intended for the specific test; do not paste or record private keys.
-- Vercel environment: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x2A19548ae8A86a6d678890095f9F25eddeC16DD3`; deploy the frontend after setting it.
+- Vercel environment: `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`; deploy the frontend after setting it.
 - Use the browser at 100% zoom and record browser size/device. Test only after the canonical frontend points at the revised contract.
 
 ## Tests
 
-1. **Load the production frontend.** Open the URL above. Confirm the app renders, shows contract `0x2A19548ae8A86a6d678890095f9F25eddeC16DD3`, and identifies Studionet / `61999`. Confirm migration 1 is `AUTHORIZED` and migrations 2–4 are `INCONCLUSIVE` for this deployment. Confirm no fabricated migration appears when the address is unset or a chain read fails. The earlier deployment's migration 3 `AUTHORIZED` and migration 4 `BLOCKED` do not apply to this new address.
+1. **Load the production frontend.** Open the URL above. Confirm the app renders, shows contract `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`, and identifies Studionet / `61999`. The canonical frontend has not yet been redeployed with this address, so this row remains NOT RUN until that deployment is available. Do not infer active migration states from the historical browser record.
 
 2. **Connect wallet.** Select Connect wallet. Confirm the injected wallet prompt names the expected account and the navbar shows the connected shortened address. Open the wallet menu, verify the full shortened address, copy-address action, network label, explorer/account link where applicable, and Disconnect.
 

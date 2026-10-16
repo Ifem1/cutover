@@ -1,0 +1,34 @@
+{
+  "schema_version": "cutover.assurance-live-cases.v1",
+  "recorded_at": "2026-10-16T12:12:00Z",
+  "network": {"name": "studionet", "chain_id": 61999, "rpc": "https://studio.genlayer.com/api"},
+  "contract_address": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4",
+  "source_sha256": "ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f",
+  "fixture_origin": "https://fixtures-bice.vercel.app",
+  "candidate": {"release_ref": "assurance-fixture-preserved-20261015", "manifest_sha256": "037633d0cc420a9caebcd892d67e042bbbd9ae98174a1aa80d84e2030d0023c9", "route_id": "pricing", "body_sha256": "482c908cc3426a79e1f1afb0622b0f6c6823da1385b4e018f1b9b10e1d01b1dd", "baseline_digest": "64513945390111f844e9cc41b768056214ba7d0447f6df5940df5b58ab919145"},
+  "case_A_verified": {
+    "migration_id": 1,
+    "state": "AUTHORIZED",
+    "transactions": {
+      "create_migration": "0xcd7244529f57472618186ebbe4648a643b18c7bfbe95fe0c948043d50b81db22",
+      "add_route": "0xcb455fa5fce305562af5111be2f49a09c5a0426a5528a0ad9415875d55aefa55",
+      "freeze_route": "0x1e270df1ae4af492b452924385703e2fa8d575d1a0de27442d3c6d4a949ec0a8",
+      "seal_baseline": "0xea3d561c1863c9866584dc34d67f9c75665c5f03d4cf96b4861b2775b32615f6",
+      "set_candidate": "0x9b758de04911cd900508af074cdf368de9f402b25d8df27d0f3d36579a32cc91",
+      "assess_route": "0x55a0cd03590fbc053b30165e0563e80fbdbb37dae134676a71ddf3da64c9f510",
+      "derive_candidate": "0x2fabb4ae496f3cd74dbe2ed3a36f19a93977555bf97d6835f952af3dc72c2cdc",
+      "authorize": "0xac27f91b7afc030fa96b4cd68367990754a4c46c329acf676eb26226822c685b",
+      "begin_assurance": "0x4fb898a59fed62b6ceab3383aef5056a0db6df23255cc41df2f723aa5dc78d3b",
+      "submit_assurance_checkpoint": "0x8fb564cdf25f82f373d5141f5f2d9c123a7a1eccea998971eccfd0463a75f7b1",
+      "finalize_assurance": "0x49d52785d6e1626e95f34e9757da85f7a96121fe0b22c47f3ed44e3b1358609a"
+    },
+    "receipts": "Every listed write finalized with MAJORITY_AGREE and leader execution SUCCESS.",
+    "assurance": {"window_seconds": 300, "checkpoint_version": 1, "route_result": "VERIFIED", "final_result": "VERIFIED", "manifest_match": true, "content_match": true, "source_match": true, "evidence_available": true, "finding": {"rule_id": "price", "status": "PRESERVED"}, "checkpoint_digest": "ff20c957403160e33b1f7f44f736a56e431ba2efe613521261c151cfeb74a744"}
+  },
+  "adversarial_receipts": {
+    "same_source_first_checkpoint_attempt": {"contract_address": "0x7CAcDc4D191878e1647f369eF9CFC5932c1d35c0", "tx": "0x8b58e28b134bbd19307188b0544f0efeff79bcfb22e50557688b5017ef3ef6aa", "result": "MAJORITY_DISAGREE", "leader_execution": "SUCCESS", "state_change": "none"},
+    "same_source_retry_after_window": {"contract_address": "0x7CAcDc4D191878e1647f369eF9CFC5932c1d35c0", "tx": "0xe3e44956f7d0b96c494ee216701654208ee843166c194f22525119bc4fff4edf", "result": "MAJORITY_AGREE", "leader_execution": "ERROR", "rollback": "assurance window closed", "state_change": "none"}
+  },
+  "gate_fixture_migration": {"migration_id": 2, "create_migration": "0xa5cf51e1b1a5a66b3411b70840b9d4af6193ad71a869fd4cf43f88e5c1b88a5b", "state": "DRAFT", "purpose": "active-source non-AUTHORIZED negative case for the committed GitHub gate"},
+  "scope_limits": ["This final-source live record proves the verified assurance path. Final-source DEVIATED and final-source INCONCLUSIVE terminal assurances were not run in this session. Prior source live records for HTTP 503, manifest identity mismatch, body SHA mismatch and unresolved authorization remain in proof/live/revised-live-cases.json and are not relabeled as evidence for this contract address."]
+}

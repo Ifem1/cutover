@@ -1,0 +1,9 @@
+{
+  "chain_id": 61999,
+  "rpc": "https://studio.genlayer.com/api",
+  "git_commit": "ac0ac58",
+  "contract_address": "0x7CAcDc4D191878e1647f369eF9CFC5932c1d35c0",
+  "deployer_address": "0xD6423aE82a975d55C6CeaC222827A727325e0459",
+  "account_name": "stargaze-deployer",
+  "steps": [{"name":"retry verified pricing checkpoint","kind":"write","method":"submit_assurance_checkpoint","args":[1,"pricing",1,"https://fixtures-bice.vercel.app/cases/preserved"]}]
+}

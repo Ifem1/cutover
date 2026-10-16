@@ -1,7 +1,11 @@
 export type Fixture={title:string;price:string;legal:string;form:boolean;canonical?:string;style:"plain"|"redesign"};
 
+const preservedFixture:Fixture=process.env.CUTOVER_FIXTURE_MODE==="pricing-change"
+  ?{title:"Acme Pro",price:"$89/month",legal:"Cancel any time with 30 days notice.",form:true,style:"plain"}
+  :{title:"Acme Pro",price:"$49/month",legal:"Cancel any time with 30 days notice.",form:true,style:"plain"};
+
 export const fixtures:Record<string,Fixture>={
-  preserved:{title:"Acme Pro",price:"$49/month",legal:"Cancel any time with 30 days notice.",form:true,style:"plain"},
+  preserved:preservedFixture,
   cosmetic:{title:"Acme Pro — redesigned",price:"$49/month",legal:"You may cancel at any time with 30 days notice.",form:true,style:"redesign"},
   "pricing-change":{title:"Acme Pro",price:"$89/month",legal:"Cancel any time with 30 days notice.",form:true,style:"plain"},
   "wrong-destination":{title:"Careers",price:"",legal:"Open roles and company culture.",form:false,canonical:"/careers",style:"plain"},

@@ -136,6 +136,14 @@ def _findings_valid(findings,rules):
 
 def _finding_signature(findings): return _dumps([{"rule_id":x["rule_id"],"status":x["status"]} for x in findings])
 def _consensus_findings(findings): return [{"rule_id":x["rule_id"],"status":x["status"]} for x in findings]
+def _consensus_findings_valid(items,rules):
+    if not isinstance(items,list) or len(items)!=len(rules): return False
+    expected=sorted(x["id"] for x in rules); got=[]
+    for item in items:
+        if not isinstance(item,dict) or set(item)!={"rule_id","status"}: return False
+        if item.get("rule_id") not in expected or item.get("status") not in RULE_STATUSES: return False
+        got.append(item["rule_id"])
+    return sorted(got)==expected
 def _leader_explanations(findings): return [{"rule_id":x["rule_id"],"text":x["reason"]} for x in findings]
 def _payload_matches(p,v,ignored=()):
     if not isinstance(p,dict) or not isinstance(v,dict) or set(p)!=set(v): return False
@@ -641,10 +649,18 @@ class Cutover(gl.Contract):
             if not isinstance(leader_result,gl.vm.Return): return False
             v=self._assurance_context(a,m,r,evidence_url); v["checkpoint_version"]=version
             p=leader_result.calldata
-            if not _payload_matches(p,v,()) and not _payload_matches(p,{**v,"findings":p.get("findings"),"leader_explanations":p.get("leader_explanations"),"route_result":p.get("route_result")},("findings","leader_explanations","route_result")): return False
+            # Rendered text and structural HTML can vary across independent
+            # validators even when the authenticated response bytes and
+            # manifest identity are identical. Bind the stable provenance
+            # fields here, then validate the semantic findings separately.
+            stable=("migration_id","route_id","candidate_generation","candidate_ref",
+                    "candidate_manifest_digest","live_manifest_digest","live_release_ref",
+                    "evidence_url","expected_body_sha256","manifest_match","content_match",
+                    "source_match","evidence_available","checkpoint_version")
+            if any(_dumps(p.get(key))!=_dumps(v.get(key)) for key in stable): return False
             if not (v["evidence_available"] and v["manifest_match"] and v["source_match"]):
                 return p.get("route_result")=="INCONCLUSIVE" and p.get("findings")==[]
-            return _findings_valid(p.get("findings"),r["rules"]) and _leader_explanations_valid(p.get("leader_explanations"),r["rules"])
+            return _consensus_findings_valid(p.get("findings"),r["rules"]) and _leader_explanations_valid(p.get("leader_explanations"),r["rules"])
         return gl.vm.run_nondet_unsafe(leader_fn,validator_fn)
 
     @gl.public.write

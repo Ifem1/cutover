@@ -1,8 +1,16 @@
 # Proof matrix
 
-`proof/matrix.json` is the machine-readable source of truth. Revised-source deployment and case records are kept separately at [`proof/live/revised-deployment.json`](../proof/live/revised-deployment.json), [`proof/live/revised-live-cases.json`](../proof/live/revised-live-cases.json), and [`proof/live/revised-browser-qa.json`](../proof/live/revised-browser-qa.json). The earlier deployment and its cycles remain historical in the original files. Offline tests do not count as live proof, and optional live cases are not promoted from historical evidence.
+`proof/matrix.json` is the machine-readable source of truth. The active assurance deployment and terminal record are kept separately at [`proof/live/assurance-deployment.json`](../proof/live/assurance-deployment.json) and [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json). Prior deployments and their cycles remain historical. Offline tests do not count as live proof, and prior-source cases are not promoted to active-source evidence.
 
-For revised contract SHA-256 `13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79`, final code CI passed **111/111 Direct Mode tests**, killed **73/73 actual-contract mutants**, passed **91/91 frontend tests** (including **11** `tx.test.ts` and **7** `ContractSubmit.test.tsx` tests), killed **24/24 frontend mutants**, and passed **7/7 gate tests**. ESLint, TypeScript, web/fixture/gate builds, repository integrity, contract surface, network discipline, GenVM lint/validation, revised live gate and package handoff passed in [run 36786339583](https://github.com/Ifem1/cutover/actions/runs/36786339583) for commit `2a7599af90d2533d848e06887c3917681847552a`. The earlier [run 36753618050](https://github.com/Ifem1/cutover/actions/runs/36753618050) remains historical; the first revised live-gate proof was [run 36769705489](https://github.com/Ifem1/cutover/actions/runs/36769705489).
+## Active assurance deployment
+
+The active source is commit `ac0ac58` with SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. Deployment transaction `0xd9c484f17619f4dbd513755174edc3b27c569f34e63d832071882e540f792aeb` finalized with majority agreement and leader success; retrieved source bytes match exactly.
+
+Migration 1 completed the active source lifecycle through `AUTHORIZED`, entered a 300-second assurance window, committed a `VERIFIED` checkpoint for route `pricing`, and finalized `VERIFIED`. The live transaction hashes, manifest digest, baseline digest, body SHA, finding and checkpoint digest are in [`assurance live cases`](../proof/live/assurance-live-cases.json).
+
+Active-source limitations: DEVIATED and INCONCLUSIVE assurance terminals, active-source GitHub gate runs, and frontend redeployment/browser QA are not claimed. The canonical frontend build must use `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`.
+
+The remainder of this document preserves the earlier revised-source matrix as historical context. It does not certify the active assurance source. For that historical source SHA-256 `13bfc90c1c2aad4ae09c591dbc72af1c063f43e0c71640e70c521b66ed867c79`, final code CI passed **111/111 Direct Mode tests**, killed **73/73 actual-contract mutants**, passed **91/91 frontend tests**, killed **24/24 frontend mutants**, and passed **7/7 gate tests** in [run 36786339583](https://github.com/Ifem1/cutover/actions/runs/36786339583).
 
 | Invariant | Current Direct Mode tests | Actual-contract mutant(s) | Frontend/gate test(s) | Live case(s) | Live evidence |
 |---|---|---|---|---:|---|

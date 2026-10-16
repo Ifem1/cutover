@@ -113,20 +113,20 @@ jobs:
         with: { node-version: "22" }
       - name: Install pinned Node dependencies
         run: npm ci
-      - name: PASS exact authorized revised-source migration 1 candidate ref
+      - name: PASS exact authorized assurance-source migration 1 candidate ref
         id: exact-ref
         uses: ./packages/gate
         with:
-          contract-address: "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3"
+          contract-address: "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4"
           migration-id: "1"
-          expected-candidate-ref: c75641176acc263f9a35fab2d9b7c9f9bfb29c19
+          expected-candidate-ref: assurance-fixture-preserved-20261015
           chain-id: "61999"
       - name: FAIL a mismatched candidate ref
         id: wrong-ref
         continue-on-error: true
         uses: ./packages/gate
         with:
-          contract-address: "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3"
+          contract-address: "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4"
           migration-id: "1"
           expected-candidate-ref: cutover-live-proof-wrong-ref
           chain-id: "61999"
@@ -138,23 +138,23 @@ jobs:
         run: |
           test "$ACTION_OUTCOME" = "failure"
           [[ "$GATE_ERROR" == *"does not equal expected cutover-live-proof-wrong-ref"* ]]
-      - name: FAIL a non-AUTHORIZED INCONCLUSIVE migration
+      - name: FAIL a non-AUTHORIZED DRAFT migration
         id: blocked-state
         continue-on-error: true
         uses: ./packages/gate
         with:
-          contract-address: "0x2A19548ae8A86a6d678890095f9F25eddeC16DD3"
+          contract-address: "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4"
           migration-id: "2"
-          expected-candidate-ref: c75641176acc263f9a35fab2d9b7c9f9bfb29c19
+          expected-candidate-ref: assurance-fixture-preserved-20261015
           chain-id: "61999"
-      - name: Assert the INCONCLUSIVE-state failure came from the state guard
+      - name: Assert the DRAFT-state failure came from the state guard
         if: always()
         env:
           ACTION_OUTCOME: ${{ steps.blocked-state.outcome }}
           GATE_ERROR: ${{ steps.blocked-state.outputs.gate-error }}
         run: |
           test "$ACTION_OUTCOME" = "failure"
-          [[ "$GATE_ERROR" == *"CUTOVER state is INCONCLUSIVE, expected AUTHORIZED"* ]]
+          [[ "$GATE_ERROR" == *"CUTOVER state is DRAFT, expected AUTHORIZED"* ]]
 
   generated-artifacts:
     name: Verify lockfile + action bundle
