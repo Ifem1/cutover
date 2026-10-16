@@ -27,7 +27,7 @@ The repository commits both generated action runtime files and the lockfile. CI 
     expected-candidate-ref: ${{ github.sha }}
 ```
 
-The active source-verified contract is `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. Migration 1 is `AUTHORIZED` for exact candidate ref `assurance-fixture-preserved-20261015`; migration 2 is `DRAFT` for the non-AUTHORIZED negative case. The workflow is configured with these values, but an active-source gate run is not claimable until the pushed workflow completes successfully. Prior gate runs are historical evidence only.
+The active source-verified contract is `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. Migration 1 is `AUTHORIZED` for exact candidate ref `assurance-fixture-preserved-20261015`; migration 2 is `DRAFT` for the non-AUTHORIZED negative case. The active assertions passed in [run 38899780957](https://github.com/Ifem1/cutover/actions/runs/38899780957), [live-gate job 116969196725](https://github.com/Ifem1/cutover/actions/runs/38899780957/job/116969196725). Prior gate runs are historical evidence only.
 
 Historical gate evidence is retained: [run 36735999116](https://github.com/Ifem1/cutover/actions/runs/36735999116) and [run 36753618050](https://github.com/Ifem1/cutover/actions/runs/36753618050) checked the prior deployment at `0xB8B2157c9d4f19c66e241178A63A89B13EAB3237`, source SHA-256 `34018863567489cea352be045f16f6308b0a5c0ef8af668ad84551e10cf75834`. Their successful gate assertions do not count as revised-source gate evidence.
 

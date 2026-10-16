@@ -22,7 +22,7 @@ The committed CI workflow is now configured for the active deployment. Its inten
 2. migration 1 with an incorrect expected ref fails at the exact-ref guard;
 3. a non-`AUTHORIZED` migration fails at the authorization-state guard.
 
-The active-source gate will become claimable only after this workflow completes successfully on the pushed commit. Prior-source gate runs remain historical and are not active-source evidence.
+The active-source gate passed in [CI run 38899780957](https://github.com/Ifem1/cutover/actions/runs/38899780957), with the [live-gate job](https://github.com/Ifem1/cutover/actions/runs/38899780957/job/116969196725) showing exact-ref PASS, wrong-ref FAIL and DRAFT-state FAIL. Prior-source gate runs remain historical and are not active-source evidence.
 
 ## Production frontend and wallet QA
 
