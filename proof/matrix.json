@@ -20,6 +20,7 @@
   "revised_frontend_url": "https://cutover-kappa.vercel.app/",
   "revised_frontend_contract_configured": true,
   "active_frontend_deployment_evidence": "proof/live/assurance-deployment.json",
+  "active_frontend_status": "PASS: production frontend is deployed at https://cutover-kappa.vercel.app/ with the active contract address and renders finalized on-chain assurance records; injected-wallet signing QA remains environment-limited.",
   "active_negative_assurance_evidence": "proof/live/assurance-negative-live-cases.json",
   "revised_source_final_ci_status": "PASS: https://github.com/Ifem1/cutover/actions/runs/36786339583 (commit 2a7599af90d2533d848e06887c3917681847552a)",
   "revised_source_live_gate_status": "PASS: final code CI run 36786339583; initial revised live-gate proof run 36769705489/job/110073021673",
