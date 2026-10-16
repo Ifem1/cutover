@@ -4,7 +4,7 @@
 
 ## Active assurance deployment
 
-The active source is commit `ac0ac58` with SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. Deployment transaction `0xd9c484f17619f4dbd513755174edc3b27c569f34e63d832071882e540f792aeb` finalized with majority agreement and leader success; retrieved source bytes match exactly.
+The active source is commit `96556e826bd5b35ea369a84cd3c338762712c37a` with SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. Deployment transaction `0xd9c484f17619f4dbd513755174edc3b27c569f34e63d832071882e540f792aeb` finalized with majority agreement and leader success; retrieved source bytes match exactly.
 
 Migration 1 completed the active source lifecycle through `AUTHORIZED`, entered a 300-second assurance window, committed a `VERIFIED` checkpoint for route `pricing`, and finalized `VERIFIED`. The live transaction hashes, manifest digest, baseline digest, body SHA, finding and checkpoint digest are in [`assurance live cases`](../proof/live/assurance-live-cases.json).
 

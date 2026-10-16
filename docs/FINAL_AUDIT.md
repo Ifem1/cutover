@@ -2,7 +2,7 @@
 
 ## Active assurance milestone audit (2026-10-16)
 
-The active source is `ac0ac58`, SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. The deployment receipt finalized with majority agreement and leader success, and retrieved source bytes match exactly. Migration 1 has a real terminal `VERIFIED` assurance checkpoint with matching manifest and body digests; evidence is in [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json).
+The active source is `96556e826bd5b35ea369a84cd3c338762712c37a`, SHA-256 `ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f`, deployed at `0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4` on Studionet 61999. The deployment receipt finalized with majority agreement and leader success, and retrieved source bytes match exactly. Migration 1 has a real terminal `VERIFIED` assurance checkpoint with matching manifest and body digests; evidence is in [`proof/live/assurance-live-cases.json`](../proof/live/assurance-live-cases.json).
 
 The audit found these genuine remaining gaps: final-source `DEVIATED` and `INCONCLUSIVE` assurance terminals were not run; the committed GitHub live gate still points at the prior deployment and has not been rerun against this address; the canonical Vercel frontend was not redeployed with `NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4`; and active-source injected-wallet browser QA was not performed. Prior-source HTTP 503, manifest mismatch, body-SHA mismatch and unresolved-authorization receipts remain explicitly historical.
 

@@ -4,7 +4,7 @@
     "name": "studionet",
     "chain_id": 61999
   },
-  "active_source_commit": "ac0ac58",
+  "active_source_commit": "96556e826bd5b35ea369a84cd3c338762712c37a",
   "active_contract_source_sha256": "ea9d62b76d5009a67ed0aa60237fd2ad9846a5e6fe0944eead78235cca29bd3f",
   "active_source_deployment_status": "DEPLOYED_AND_SOURCE_VERIFIED",
   "active_contract_address": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4",
