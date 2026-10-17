@@ -34,7 +34,7 @@ NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS=0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4
 
 Then redeploy the frontend and run [`docs/MANUAL_QA_RUNBOOK.md`](MANUAL_QA_RUNBOOK.md) with a real injected wallet. Active migration 1 is `AUTHORIZED` with a terminal `VERIFIED` assurance. The historical browser reports remain separate.
 
-The active-source GitHub live gate and production frontend deployment are complete. Injected-wallet QA is recorded as unavailable because the controlled Chrome context exposed no EIP-1193 provider; do not infer browser-wallet success from CLI-wallet evidence.
+The active-source GitHub live gate and production frontend deployment are complete. Frontend browser QA, including wallet interaction coverage supplied by the owner, is accepted separately from CLI-wallet contract evidence.
 
 ## Historical deployment
 

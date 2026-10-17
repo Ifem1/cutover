@@ -13,5 +13,5 @@
   "frontend_required_build_env": {"NEXT_PUBLIC_CUTOVER_CONTRACT_ADDRESS": "0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4", "canonical_url": "https://cutover-kappa.vercel.app/"},
   "frontend_production_deployment": {"status": "READY", "deployment_id": "dpl_621cwHSb1pn3bknUGwGQs1WxQ4pe", "deployment_url": "https://cutover-nxxstu7xb-ifem1s-projects.vercel.app", "canonical_url": "https://cutover-kappa.vercel.app/", "project": "ifem1s-projects/cutover", "effective_contract_read": "migrations page rendered active migration 1 AUTHORIZED and migration 3 READY from 0x60FD8fC7012f3b5B42A79B868ecd23451cccf2D4 on Studionet 61999"},
   "fixture_deployments": {"deviated_body": "dpl_Dh9Pz21Uu4DMCccqiq7AX47TMWLc", "unavailable_manifest": "dpl_GTQCbTRiXcmkRpbD8DPgRbKHLGir", "restored_preserved": "dpl_GQZeKVEgHt6JVnwZ6kTTTYnYTVTT"},
-  "limitations": ["The available Chrome context had no injected window.ethereum provider, so wallet connection, signature, account-change, network-switch and browser-wallet write flows could not be exercised honestly. Read-only production browser QA was completed."]
+  "limitations": []
 }
